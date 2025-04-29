@@ -1,32 +1,27 @@
 # 📊 Microservices System - Analysis and Design
 
-This document outlines the **analysis** and **design** process for your microservices-based system assignment. Use it to explain your thinking and architecture decisions.
+Tài liệu **phân tích** và **thiết kế** cho hệ thống quản lý yêu cầu bảo hành sản phẩm dựa trên kiến trúc microservices.
 
 ---
 
 ## 1. 🎯 Problem Statement
 
-_Describe the problem your system is solving._
+Hệ thống giải quyết vấn đề quản lý các yêu cầu bảo hành sản phẩm từ khi tiếp nhận đến khi hoàn thành.
 
-- Who are the users?
-- What are the main goals?
-- What kind of data is processed?
+- **Người dùng**: - Khách hàng cần dịch vụ bảo hành cho sản phẩm - Nhân viên dịch vụ khách hàng xử lý yêu cầu bảo hành - Kỹ thuật viên kiểm tra và sửa chữa sản phẩm
 
-> Example: A course management system that allows students to register for courses and teachers to manage class rosters.
-
----
+- **Mục tiêu chính**: - Tối ưu hóa quy trình yêu cầu bảo hành từ khi gửi đến khi hoàn thành - Xác thực điều kiện bảo hành một cách tự động và nhất quán - Cập nhật tiến độ sửa chữa theo thời gian - Thông báo cho khách hàng ở mỗi giai đoạn của quy trình
+- **Dữ liệu được xử lý**: - Thông tin khách hàng (thông tin cá nhân, thông tin liên hệ) - Thông tin sản phẩm (số serial, ngày mua, thời hạn bảo hành) - Yêu cầu bảo hành (mô tả vấn đề, hình ảnh, thời gian) - Chi tiết sửa chữa
 
 ## 2. 🧩 Identified Microservices
 
-List the microservices in your system and their responsibilities.
-
-| Service Name  | Responsibility                                | Tech Stack   |
-|---------------|------------------------------------------------|--------------|
-| service-a     | Handles user authentication and authorization | Python Flask |
-| service-b     | Manages course registration and class data    | Python Flask |
-| gateway       | Routes requests to services                   | Nginx / Flask|
-
----
+| Service Name         | Responsibility                                    | Tech Stack         |
+| -------------------- | ------------------------------------------------- | ------------------ |
+| Customer Service     | Quản lý thông tin khách hàng                      | Spring Boot, MySQL |
+| Product Service      | Quản lý catalog sản phẩm và thông tin kỹ thuật    | Spring Boot, MySQL |
+| Warranty Service     | Xử lý việc đăng ký và xác thực điều kiện bảo hành | Spring Boot, MySQL |
+| Repair Service       | Quản lý quá trình sửa chữa và bảo trì             | Spring Boot, MySQL |
+| Notification Service | Gửi thông báo cho khách hàng và nhân viên         | Spring Boot, Redis |
 
 ## 3. 🔄 Service Communication
 
@@ -57,7 +52,6 @@ Use diagrams if possible (DB schema, ERD, etc.)
 
 ---
 
-
 ## 6. 📦 Deployment Plan
 
 - Use `docker-compose` to manage local environment
@@ -68,7 +62,7 @@ Use diagrams if possible (DB schema, ERD, etc.)
 
 ## 7. 🎨 Architecture Diagram
 
-> *(You can add an image or ASCII diagram below)*
+> _(You can add an image or ASCII diagram below)_
 
 ```
 +---------+        +--------------+
@@ -89,13 +83,11 @@ Use diagrams if possible (DB schema, ERD, etc.)
 
 Summarize why this architecture is suitable for your use case, how it scales, and how it supports independent development and deployment.
 
-
-
 ## Author
 
 This template was created by Hung Dang.
+
 - Email: hungdn@ptit.edu.vn
 - GitHub: hungdn1701
-
 
 Good luck! 💪🚀
