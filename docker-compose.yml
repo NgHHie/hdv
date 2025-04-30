@@ -1,16 +1,49 @@
-version: '3.8'
+version: "3.8"
+
 services:
-  service-a:
-    build: ./services/service-a
+  # Customer Service Application
+  service-customer:
+    build:
+      context: ./services/service-customer # <<== Cập nhật đúng path
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: service-customer
     ports:
-      - "5001:5000"
+      - "8081:8081"
+    environment:
+      - MYSQL_HOST=customer-db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=customers
+      - MYSQL_USER=customer_user
+      - MYSQL_PASSWORD=customer_pass
+    networks:
+      - customer-network
+    depends_on:
+      - customer-db
+    restart: unless-stopped
 
-  service-b:
-    build: ./services/service-b
+  # Customer Database
+  customer-db:
+    image: mysql:8.0
+    container_name: customer-db
     ports:
-      - "5002:5000"
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=customers
+      - MYSQL_USER=customer_user
+      - MYSQL_PASSWORD=customer_pass
+      - MYSQL_ROOT_PASSWORD=root_password
+    volumes:
+      - customer-db-data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - customer-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
 
-  gateway:
-    build: ./gateway
-    ports:
-      - "8080:8000"
+volumes:
+  customer-db-data:
+
+networks:
+  customer-network:
+    driver: bridge
