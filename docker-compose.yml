@@ -4,7 +4,7 @@ services:
   # Customer Service Application
   service-customer:
     build:
-      context: ./services/service-customer # <<== Cập nhật đúng path
+      context: ./services/service-customer
       dockerfile: Dockerfile
       no_cache: true
     container_name: service-customer

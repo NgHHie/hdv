@@ -1,0 +1,23 @@
+đối với kiến trúc microservice, mỗi một svc sẽ sử dụng một db riêng -> mỗi một svc sẽ ứng với một container db riêng
+một svc là customer-service có db riêng chạy trên container đã được định nghĩa ở trong file docker-compose
+để thực hiên chạy cần thao tác: 
++ cd services
++ mvn clean install -DskipTests: Thực hiện build toàn bộ các svc có trong services
++ cd ..
++ docker-compose up --build
++ url: http://localhost:8081/api/v1/customers
+ nếu dữ liệu trả về là danh sách rỗng thì cần thực hiện: 
++ docker ps : hiển thi các container đang chạy -> lấy container_name
++ docker exec -it <container_name> bash
++ mysql -u customer_user -p   : thực hiện đăng nhập vào mysql bằng user customer_user
++ nhập pass là : "customer_pass"
++ USE customers;
++ DESCRIBE tên_bảng;
++ 
+    INSERT INTO customer (first_name, last_name, email, phone_number, address) VALUES 
+    ('John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St'),
+    ('Jane', 'Smith', 'jane.smith@example.com', '0987654321', '456 Oak Ave'),
+    ('Michael', 'Johnson', 'michael.johnson@example.com', '5551234567', '789 Pine St');
+ + select * from customer; 
+
+-> cuối cùng test lại trên postman or url
