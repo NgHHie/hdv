@@ -1,13 +1,13 @@
-package com.example.service_customer;
+package com.example.service_order;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ServiceCustomerApplication {
+public class ServiceOrderApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ServiceCustomerApplication.class, args);
+		SpringApplication.run(ServiceOrderApplication.class, args);
 	}
 
 }
