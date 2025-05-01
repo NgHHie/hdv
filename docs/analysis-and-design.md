@@ -15,13 +15,14 @@ Hệ thống giải quyết vấn đề quản lý các yêu cầu bảo hành s
 
 ## 2. 🧩 Identified Microservices
 
-| Service Name         | Responsibility                                    | Tech Stack         |
-| -------------------- | ------------------------------------------------- | ------------------ |
-| Customer Service     | Quản lý thông tin khách hàng                      | Spring Boot, MySQL |
-| Product Service      | Quản lý catalog sản phẩm và thông tin kỹ thuật    | Spring Boot, MySQL |
-| Warranty Service     | Xử lý việc đăng ký và xác thực điều kiện bảo hành | Spring Boot, MySQL |
-| Repair Service       | Quản lý quá trình sửa chữa và bảo trì             | Spring Boot, MySQL |
-| Notification Service | Gửi thông báo cho khách hàng và nhân viên         | Spring Boot, Redis |
+| Service Name         | Type Service    | Responsibility                                    | Tech Stack         |
+| -------------------- | --------------- | ------------------------------------------------- | ------------------ |
+| Customer Service     | Entity Service  | Quản lý thông tin khách hàng                      | Spring Boot, MySQL |
+| Product Service      | Entity Service  | Quản lý sản phẩm                                  | Spring Boot, MySQL |
+| Order Service        | Entity Service  | Quản lý sản phẩm                                  | Spring Boot, MySQL |
+| Warranty Service     | Task Service    | Xử lý việc đăng ký và xác thực điều kiện bảo hành | Spring Boot, MySQL |
+| Repair Service       | Micro Service   | Quản lý quá trình sửa chữa và bảo trì             | Spring Boot, MySQL |
+| Notification Service | Utility Service | Gửi thông báo cho khách hàng và nhân viên         | Spring Boot, Redis |
 
 ## 3. 🔄 Service Communication
 

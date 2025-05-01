@@ -1,0 +1,181 @@
+openapi: 3.0.3
+info:
+  title: Customer Service API
+  description: API để quản lý thông tin khách hàng
+  version: 1.0.0
+servers:
+  - url: "http://localhost:8081"
+    description: Development Server
+
+tags:
+  - name: customers
+    description: Quản lý thông tin khách hàng
+
+paths:
+  /api/v1/customers:
+    get:
+      summary: Lấy danh sách tất cả khách hàng
+      description: Trả về danh sách tất cả khách hàng trong hệ thống
+      tags: [customers]
+      responses:
+        "200":
+          description: Danh sách khách hàng
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+    post:
+      summary: Tạo mới khách hàng
+      description: Tạo mới thông tin khách hàng trong hệ thống
+      tags: [customers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "201":
+          description: Khách hàng được tạo thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/customers/{id}:
+    get:
+      summary: Lấy thông tin khách hàng theo ID
+      description: Trả về thông tin chi tiết của khách hàng theo ID cung cấp
+      tags: [customers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Thông tin khách hàng
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Không tìm thấy khách hàng với ID cung cấp
+    put:
+      summary: Cập nhật thông tin khách hàng
+      description: Cập nhật thông tin của khách hàng theo ID cung cấp
+      tags: [customers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "200":
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Dữ liệu không hợp lệ
+        "404":
+          description: Không tìm thấy khách hàng với ID cung cấp
+    delete:
+      summary: Xóa khách hàng
+      description: Xóa thông tin khách hàng theo ID cung cấp
+      tags: [customers]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "204":
+          description: Xóa thành công
+        "404":
+          description: Không tìm thấy khách hàng với ID cung cấp
+
+  /api/v1/customers/email/{email}:
+    get:
+      summary: Lấy thông tin khách hàng theo email
+      description: Trả về thông tin chi tiết của khách hàng theo email cung cấp
+      tags: [customers]
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+            format: email
+      responses:
+        "200":
+          description: Thông tin khách hàng
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Không tìm thấy khách hàng với email cung cấp
+
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          readOnly: true
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        address:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+
+    Error:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
