@@ -19,6 +19,7 @@
 		<module>service-warranty</module>
 		<module>service-repair</module>
 		<module>service-notification</module>
+		<module>service-order</module>
 	</modules>
 	<name>services</name>
 	<description>Demo project for Spring Boot</description>
