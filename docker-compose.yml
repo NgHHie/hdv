@@ -13,7 +13,7 @@ services:
     environment:
       - MYSQL_HOST=customer-db
       - MYSQL_PORT=3306
-      - MYSQL_DATABASE=customers
+      - MYSQL_DATABASE=service_customer
       - MYSQL_USER=customer_user
       - MYSQL_PASSWORD=customer_pass
     networks:
@@ -27,7 +27,7 @@ services:
     image: mysql:8.0
     container_name: customer-db
     environment:
-      - MYSQL_DATABASE=customers
+      - MYSQL_DATABASE=service_customer
       - MYSQL_USER=customer_user
       - MYSQL_PASSWORD=customer_pass
       - MYSQL_ROOT_PASSWORD=root_password
@@ -49,7 +49,7 @@ services:
     environment:
       - MYSQL_HOST=product-db
       - MYSQL_PORT=3306
-      - MYSQL_DATABASE=products
+      - MYSQL_DATABASE=service_product
       - MYSQL_USERNAME=product_user
       - MYSQL_PASSWORD=product_pass
     depends_on:
@@ -62,7 +62,7 @@ services:
     image: mysql:8.0
     container_name: product-db
     environment:
-      - MYSQL_DATABASE=products
+      - MYSQL_DATABASE=service_product
       - MYSQL_USER=product_user
       - MYSQL_PASSWORD=product_pass
       - MYSQL_ROOT_PASSWORD=rootpassword
@@ -72,13 +72,49 @@ services:
     networks:
       - product-network
     restart: unless-stopped
+  service-order:
+    build:
+      context: ./services/service-order
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: service-order
+    ports:
+      - "8082:8082"
+    environment:
+      - MYSQL_HOST=order-db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=service_order
+      - MYSQL_USERNAME=order_user
+      - MYSQL_PASSWORD=order_pass
+    depends_on:
+      - order-db
+    networks:
+      - order-network
+    restart: unless-stopped
+  order-db:
+    image: mysql:8.0
+    container_name: order-db
+    environment:
+      - MYSQL_DATABASE=service_order
+      - MYSQL_USER=order_user
+      - MYSQL_PASSWORD=order_pass
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - order-db-data:/var/lib/mysql
+      - ./services/service-order/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - order-network
+    restart: unless-stopped
 
 volumes:
   customer-db-data:
   product-db-data:
+  order-db-data:
 
 networks:
   customer-network:
     driver: bridge
   product-network:
+    driver: bridge
+  order-network:
     driver: bridge

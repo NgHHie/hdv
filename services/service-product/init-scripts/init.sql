@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS products ;
+CREATE DATABASE IF NOT EXISTS service_product; ;
 
-USE products;
+USE service_product;
 
 
 CREATE TABLE IF NOT EXISTS `products` (
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `products` (
 );
 
 
-GRANT ALL PRIVILEGES ON customers.* TO 'product_user'@'%';
+GRANT ALL PRIVILEGES ON service_product.* TO 'product_user'@'%';
 FLUSH PRIVILEGES;
 
 INSERT INTO products (name, description, price, quantity, category, created_at, updated_at) VALUES 

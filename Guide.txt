@@ -21,3 +21,9 @@ một svc là customer-service có db riêng chạy trên container đã đượ
  + select * from customer; 
 
 -> cuối cùng test lại trên postman or url
+
+
+
+svc customer: 8081
+svc order: 8082 
+svc product: 8083

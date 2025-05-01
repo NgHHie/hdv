@@ -1,7 +1,7 @@
-CREATE DATABASE IF NOT EXISTS customers ;
+CREATE DATABASE IF NOT EXISTS service_customer;
 
 
-USE customers;
+USE service_customer;
 
 
 CREATE TABLE IF NOT EXISTS customer (
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS customer (
 );
 
 
-GRANT ALL PRIVILEGES ON customers.* TO 'customer_user'@'%';
+GRANT ALL PRIVILEGES ON service_customer.* TO 'customer_user'@'%';
 FLUSH PRIVILEGES;
 
 
