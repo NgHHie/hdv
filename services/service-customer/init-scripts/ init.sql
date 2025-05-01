@@ -18,7 +18,7 @@ GRANT ALL PRIVILEGES ON customers.* TO 'customer_user'@'%';
 FLUSH PRIVILEGES;
 
 
-    INSERT INTO customer (first_name, last_name, email, phone_number, address) VALUES 
+INSERT INTO customer (first_name, last_name, email, phone_number, address) VALUES 
     ('John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St'),
     ('Jane', 'Smith', 'jane.smith@example.com', '0987654321', '456 Oak Ave'),
     ('Michael', 'Johnson', 'michael.johnson@example.com', '5551234567', '789 Pine St');

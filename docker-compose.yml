@@ -26,8 +26,6 @@ services:
   customer-db:
     image: mysql:8.0
     container_name: customer-db
-    ports:
-      - "3307:3306"
     environment:
       - MYSQL_DATABASE=customers
       - MYSQL_USER=customer_user
@@ -35,10 +33,9 @@ services:
       - MYSQL_ROOT_PASSWORD=root_password
     volumes:
       - customer-db-data:/var/lib/mysql
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./services/service-customer/init-scripts:/docker-entrypoint-initdb.d
     networks:
       - customer-network
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
 
 volumes:
