@@ -37,7 +37,7 @@ services:
     networks:
       - customer-network
     restart: unless-stopped
-    
+
   service-product:
     build:
       context: ./services/service-product
@@ -61,8 +61,6 @@ services:
   product-db:
     image: mysql:8.0
     container_name: product-db
-    ports:
-      - "3308:3309"
     environment:
       - MYSQL_DATABASE=products
       - MYSQL_USER=product_user
@@ -70,12 +68,10 @@ services:
       - MYSQL_ROOT_PASSWORD=rootpassword
     volumes:
       - product-db-data:/var/lib/mysql
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./services/service-product/init-scripts:/docker-entrypoint-initdb.d
     networks:
       - product-network
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: unless-stopped
-
 
 volumes:
   customer-db-data:
