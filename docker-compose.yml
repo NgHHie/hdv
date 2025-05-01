@@ -37,10 +37,52 @@ services:
     networks:
       - customer-network
     restart: unless-stopped
+    
+  service-product:
+    build:
+      context: ./services/service-product
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: service-product
+    ports:
+      - "8083:8083"
+    environment:
+      - MYSQL_HOST=product-db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=products
+      - MYSQL_USERNAME=product_user
+      - MYSQL_PASSWORD=product_pass
+    depends_on:
+      - product-db
+    networks:
+      - product-network
+    restart: unless-stopped
+
+  product-db:
+    image: mysql:8.0
+    container_name: product-db
+    ports:
+      - "3308:3309"
+    environment:
+      - MYSQL_DATABASE=products
+      - MYSQL_USER=product_user
+      - MYSQL_PASSWORD=product_pass
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - product-db-data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - product-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
+
 
 volumes:
   customer-db-data:
+  product-db-data:
 
 networks:
   customer-network:
+    driver: bridge
+  product-network:
     driver: bridge
