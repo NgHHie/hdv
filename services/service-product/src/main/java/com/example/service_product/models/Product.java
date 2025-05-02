@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -36,6 +37,9 @@ public class Product {
     private Integer quantity;
     
     private String category;
+    
+    @Column(name = "warranty_expiration")
+    private LocalDate warrantyExpiration;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
