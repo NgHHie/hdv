@@ -10,25 +10,37 @@
   	</parent>
 
 	<groupId>com.example</groupId>
-	<artifactId>services</artifactId>
+	<artifactId>mid-project-031343691</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>service-customer</module>
-		<module>service-product</module>
-		<module>service-warranty</module>
-		<module>service-repair</module>
-		<module>service-notification</module>
-		<module>service-order</module>
+		<module>services/service-customer</module>
+		<module>services/service-product</module>
+		<module>services/service-warranty</module>
+		<module>services/service-repair</module>
+		<module>services/service-notification</module>
+		<module>services/service-order</module>
 		<module>discovery-server</module>
 		<module>test</module>
 	</modules>
-	<name>services</name>
+	<name>mid-project-031343691</name>
 	<description>Demo project for Spring Boot</description>
 	
 	<properties>
 		<java.version>21</java.version>
+		<spring-cloud.version>2024.0.1</spring-cloud.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	
 	<build>
 		<plugins>

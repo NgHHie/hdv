@@ -5,8 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
           <groupId>com.example</groupId>
-          <artifactId>services</artifactId>
+          <artifactId>mid-project-031343691</artifactId>
           <version>0.0.1-SNAPSHOT</version>
+          <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <groupId>com.example</groupId>
@@ -68,19 +69,5 @@
 
 
     </dependencies>
-
-
-
-<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-dependencies</artifactId>
-				<version>${spring-cloud.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 </project>
