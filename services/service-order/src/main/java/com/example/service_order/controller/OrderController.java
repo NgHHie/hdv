@@ -28,9 +28,15 @@ public class OrderController {
         return ResponseEntity.ok(items);
     }
 
-    @GetMapping("/{orderId}/items/with-warranty")
+    @GetMapping("/items/with-warranty/order/{orderId}")
     public ResponseEntity<List<OrderItemDTO>> getOrderItemsWithNotNullWarrantyByOrderId(@PathVariable Long orderId) {
         List<OrderItemDTO> items = orderService.getOrderItemsWithNotNullWarrantyByOrderId(orderId);
         return ResponseEntity.ok(items);
     }
+     // New endpoint to get order items with warranty by user ID
+     @GetMapping("/items/with-warranty/user/{userId}")
+     public ResponseEntity<List<OrderItemDTO>> getOrderItemsWithNotNullWarrantyByUserId(@PathVariable Long userId) {
+         List<OrderItemDTO> items = orderService.getOrderItemsWithNotNullWarrantyByUserId(userId);
+         return ResponseEntity.ok(items);
+     }
 }
