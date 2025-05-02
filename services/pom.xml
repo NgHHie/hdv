@@ -20,6 +20,8 @@
 		<module>service-repair</module>
 		<module>service-notification</module>
 		<module>service-order</module>
+		<module>discovery-server</module>
+		<module>test</module>
 	</modules>
 	<name>services</name>
 	<description>Demo project for Spring Boot</description>
