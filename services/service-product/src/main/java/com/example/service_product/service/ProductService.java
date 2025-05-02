@@ -24,6 +24,7 @@ public class ProductService {
                 .price(productRequest.getPrice())
                 .quantity(productRequest.getQuantity())
                 .category(productRequest.getCategory())
+                .warrantyExpiration(productRequest.getWarrantyExpiration())
                 .build();
         
         Product savedProduct = productRepository.save(product);
@@ -63,6 +64,7 @@ public class ProductService {
         product.setPrice(productRequest.getPrice());
         product.setQuantity(productRequest.getQuantity());
         product.setCategory(productRequest.getCategory());
+        product.setWarrantyExpiration(productRequest.getWarrantyExpiration());
         
         Product updatedProduct = productRepository.save(product);
         return mapToProductResponse(updatedProduct);
@@ -82,6 +84,7 @@ public class ProductService {
                 .price(product.getPrice())
                 .quantity(product.getQuantity())
                 .category(product.getCategory())
+                .warrantyExpiration(product.getWarrantyExpiration())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
