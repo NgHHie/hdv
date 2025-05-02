@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -28,4 +29,6 @@ public class ProductRequest {
     private Integer quantity;
     
     private String category;
+    
+    private LocalDate warrantyExpiration;
 }

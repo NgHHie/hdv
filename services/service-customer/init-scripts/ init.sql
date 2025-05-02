@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS customer (
     address VARCHAR(255)
 );
 
-
+CREATE USER IF NOT EXISTS 'customer_user'@'%' IDENTIFIED BY 'customer_pass';
 GRANT ALL PRIVILEGES ON service_customer.* TO 'customer_user'@'%';
 FLUSH PRIVILEGES;
 
