@@ -1,0 +1,257 @@
+openapi: 3.0.3
+info:
+  title: Product Service API
+  description: API để quản lý thông tin sản phẩm
+  version: 1.0.0
+servers:
+  - url: "http://localhost:8083"
+    description: Development Server
+
+tags:
+  - name: products
+    description: Quản lý thông tin sản phẩm
+
+paths:
+  /api/v1/products:
+    get:
+      summary: Lấy danh sách tất cả sản phẩm
+      description: Trả về danh sách tất cả sản phẩm trong hệ thống
+      tags: [products]
+      responses:
+        "200":
+          description: Danh sách sản phẩm
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductResponse"
+    post:
+      summary: Tạo mới sản phẩm
+      description: Tạo mới thông tin sản phẩm trong hệ thống
+      tags: [products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequest"
+      responses:
+        "201":
+          description: Sản phẩm được tạo thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "400":
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/products/{id}:
+    get:
+      summary: Lấy thông tin sản phẩm theo ID
+      description: Trả về thông tin chi tiết của sản phẩm theo ID cung cấp
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Thông tin sản phẩm
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "404":
+          description: Không tìm thấy sản phẩm với ID cung cấp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Cập nhật thông tin sản phẩm
+      description: Cập nhật thông tin của sản phẩm theo ID cung cấp
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequest"
+      responses:
+        "200":
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "400":
+          description: Dữ liệu không hợp lệ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Không tìm thấy sản phẩm với ID cung cấp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Xóa sản phẩm
+      description: Xóa thông tin sản phẩm theo ID cung cấp
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Xóa thành công
+        "404":
+          description: Không tìm thấy sản phẩm với ID cung cấp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/products/category/{category}:
+    get:
+      summary: Lấy danh sách sản phẩm theo danh mục
+      description: Trả về danh sách sản phẩm theo danh mục cung cấp
+      tags: [products]
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Danh sách sản phẩm
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductResponse"
+
+  /api/v1/products/search:
+    get:
+      summary: Tìm kiếm sản phẩm
+      description: Tìm kiếm sản phẩm theo từ khóa
+      tags: [products]
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Danh sách sản phẩm
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductResponse"
+
+components:
+  schemas:
+    ProductRequest:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          description: Tên của sản phẩm
+        description:
+          type: string
+          description: Mô tả chi tiết về sản phẩm
+        price:
+          type: number
+          format: decimal
+          description: Giá của sản phẩm
+        quantity:
+          type: integer
+          description: Số lượng sản phẩm trong kho
+        category:
+          type: string
+          description: Danh mục của sản phẩm
+        warrantyExpiration:
+          type: string
+          format: date
+          description: Ngày hết hạn bảo hành
+
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          description: ID của sản phẩm
+        name:
+          type: string
+          description: Tên của sản phẩm
+        description:
+          type: string
+          description: Mô tả chi tiết về sản phẩm
+        price:
+          type: number
+          format: decimal
+          description: Giá của sản phẩm
+        quantity:
+          type: integer
+          description: Số lượng sản phẩm trong kho
+        category:
+          type: string
+          description: Danh mục của sản phẩm
+        warrantyExpiration:
+          type: string
+          format: date
+          description: Ngày hết hạn bảo hành
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Thời gian tạo sản phẩm
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Thời gian cập nhật sản phẩm gần nhất
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Mã trạng thái HTTP
+        message:
+          type: string
+          description: Thông điệp lỗi
+        timestamp:
+          type: string
+          format: date-time
+          description: Thời gian xảy ra lỗi
