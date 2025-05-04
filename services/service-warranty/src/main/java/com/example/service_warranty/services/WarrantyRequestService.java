@@ -82,15 +82,15 @@ public class WarrantyRequestService {
         WarrantyRequest savedRequest = warrantyRequestRepository.save(warrantyRequest);
         
         // Create initial history entry
-        WarrantyHistory history = WarrantyHistory.builder()
-                .warrantyRequestId(savedRequest.getId())
-                .status("PENDING")
-                .notes("Warranty request submitted")
-                .performedBy("SYSTEM")
-                .performedAt(LocalDateTime.now())
-                .build();
+        // WarrantyHistory history = WarrantyHistory.builder()
+        //         .warrantyRequestId(savedRequest.getId())
+        //         .status("PENDING")
+        //         .notes("Warranty request submitted")
+        //         .performedBy("SYSTEM")
+        //         .performedAt(LocalDateTime.now())
+        //         .build();
         
-        warrantyHistoryRepository.save(history);
+        // warrantyHistoryRepository.save(history);
         
         return mapToWarrantyRequestDto(savedRequest);
     }
@@ -342,19 +342,19 @@ public class WarrantyRequestService {
         }
         
         // Get history
-        List<WarrantyHistory> historyList = 
-                warrantyHistoryRepository.findByWarrantyRequestIdOrderByPerformedAtDesc(request.getId());
+        // List<WarrantyHistory> historyList = 
+        //         warrantyHistoryRepository.findByWarrantyRequestIdOrderByPerformedAtDesc(request.getId());
         
-        List<WarrantyHistoryDto> historyDtos = historyList.stream()
-                .map(history -> WarrantyHistoryDto.builder()
-                        .id(history.getId())
-                        .warrantyRequestId(history.getWarrantyRequestId())
-                        .status(history.getStatus())
-                        .notes(history.getNotes())
-                        .performedBy(history.getPerformedBy())
-                        .performedAt(history.getPerformedAt())
-                        .build())
-                .collect(Collectors.toList());
+        // List<WarrantyHistoryDto> historyDtos = historyList.stream()
+        //         .map(history -> WarrantyHistoryDto.builder()
+        //                 .id(history.getId())
+        //                 .warrantyRequestId(history.getWarrantyRequestId())
+        //                 .status(history.getStatus())
+        //                 .notes(history.getNotes())
+        //                 .performedBy(history.getPerformedBy())
+        //                 .performedAt(history.getPerformedAt())
+        //                 .build())
+        //         .collect(Collectors.toList());
         
         return WarrantyRequestDto.builder()
                 .id(request.getId())
@@ -369,7 +369,6 @@ public class WarrantyRequestService {
                 .expirationDate(request.getExpirationDate())
                 .validationNotes(request.getValidationNotes())
                 .repairId(request.getRepairId())
-                .history(historyDtos)
                 .build();
     }
 }
