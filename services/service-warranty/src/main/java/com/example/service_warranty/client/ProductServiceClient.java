@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @Slf4j
 public class ProductServiceClient {
     
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
     
     @Value("${service.product.url}")
     private String productServiceUrl;
@@ -23,12 +24,15 @@ public class ProductServiceClient {
      * Get product details to check warranty information
      */
     public ProductResponse getProductDetails(Long productId) {
-        String url = productServiceUrl + "/api/v1/products/" + productId;
+        String url = "/api/v1/products/" + productId;
         log.info("Getting product details: {}", productId);
         
         try {
-            ResponseEntity<ProductResponse> response = restTemplate.getForEntity(url, ProductResponse.class);
-            return response.getBody();
+            return webClientBuilder.build().get()
+                    .uri(productServiceUrl + url)
+                    .retrieve()
+                    .bodyToMono(ProductResponse.class)
+                    .block(); // Blocking call for synchronous behavior
         } catch (Exception e) {
             log.error("Failed to get product details: {}", e.getMessage());
             return null;

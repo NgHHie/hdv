@@ -42,9 +42,10 @@ public class WarrantyRequestService {
     
     /**
      * Create a new warranty request
+     * @throws JsonProcessingException 
      */
     @Transactional
-    public WarrantyRequestDto createWarrantyRequest(WarrantyRequestCreateDto requestDto) {
+    public WarrantyRequestDto createWarrantyRequest(WarrantyRequestCreateDto requestDto) throws JsonProcessingException {
         log.info("Creating new warranty request for product: {}, customer: {}", 
                 requestDto.getProductId(), requestDto.getCustomerId());
         
@@ -66,13 +67,13 @@ public class WarrantyRequestService {
                 expirationDate = product.getWarrantyExpiration();
             }
         }
-        
+        String imageUrlsJson = objectMapper.writeValueAsString(requestDto.getImageUrls());
         WarrantyRequest warrantyRequest = WarrantyRequest.builder()
                 .customerId(requestDto.getCustomerId())
                 .productId(requestDto.getProductId())
                 .serialNumber(requestDto.getSerialNumber())
                 .issueDescription(requestDto.getIssueDescription())
-                .imageUrls(requestDto.getImageUrls())
+                .imageUrls(imageUrlsJson)
                 .status("PENDING")
                 .submissionDate(LocalDateTime.now())
                 .expirationDate(expirationDate)

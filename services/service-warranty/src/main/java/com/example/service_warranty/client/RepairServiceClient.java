@@ -3,16 +3,16 @@ package com.example.service_warranty.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RepairServiceClient {
     
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
     
     @Value("${service.repair.url}")
     private String repairServiceUrl;
@@ -21,23 +21,30 @@ public class RepairServiceClient {
      * Create a repair request
      */
     public Long createRepairRequest(Long customerId, Long productId, Long warrantyId, 
-                                  String issueDescription, String imageUrls) {
-        String url = repairServiceUrl + "/api/v1/repairs";
+        String issueDescription, String imageUrls) {
+        String url = "/api/v1/repairs";
         log.info("Creating repair request for customer: {}, product: {}", customerId, productId);
-        
+
         RepairRequestDto request = new RepairRequestDto();
         request.setCustomerId(customerId);
         request.setProductId(productId);
         request.setWarrantyId(warrantyId);
         request.setIssueDescription(issueDescription);
         request.setImageUrls(imageUrls);
-        
+
         try {
-            ResponseEntity<RepairResponseDto> response = 
-                    restTemplate.postForEntity(url, request, RepairResponseDto.class);
-            
-            if (response.getBody() != null) {
-                return response.getBody().getId();
+            RepairResponseDto response = webClientBuilder.baseUrl(repairServiceUrl)
+            .build()
+            .post()
+            .uri(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(RepairResponseDto.class)
+            .block(); // Blocking call to get synchronous behavior
+
+            if (response != null) {
+                return response.getId();
             }
             return null;
         } catch (Exception e) {
@@ -45,27 +52,7 @@ public class RepairServiceClient {
             return null;
         }
     }
-    
-    /**
-     * Check repair status
-     */
-    public String getRepairStatus(Long repairId) {
-        String url = repairServiceUrl + "/api/v1/repairs/" + repairId;
-        log.info("Checking repair status for repair: {}", repairId);
         
-        try {
-            ResponseEntity<RepairResponseDto> response = 
-                    restTemplate.getForEntity(url, RepairResponseDto.class);
-            
-            if (response.getBody() != null) {
-                return response.getBody().getStatus();
-            }
-            return null;
-        } catch (Exception e) {
-            log.error("Failed to check repair status: {}", e.getMessage());
-            return null;
-        }
-    }
     
     // DTO for repair request
     public static class RepairRequestDto {

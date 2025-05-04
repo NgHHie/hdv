@@ -5,6 +5,8 @@ import com.example.service_warranty.dto.WarrantyRequestDto;
 import com.example.service_warranty.dto.WarrantyValidationDto;
 import com.example.service_warranty.exception.WarrantyRequestNotFoundException;
 import com.example.service_warranty.services.WarrantyRequestService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,7 +27,7 @@ public class WarrantyRequestController {
    
    @PostMapping
    public ResponseEntity<WarrantyRequestDto> createWarrantyRequest(
-           @RequestBody WarrantyRequestCreateDto requestDto) {
+           @RequestBody WarrantyRequestCreateDto requestDto) throws JsonProcessingException {
        log.info("REST request to create Warranty Request : {}", requestDto);
        WarrantyRequestDto createdRequest = warrantyRequestService.createWarrantyRequest(requestDto);
        return new ResponseEntity<>(createdRequest, HttpStatus.CREATED);
