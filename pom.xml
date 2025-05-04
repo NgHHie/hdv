@@ -14,14 +14,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>services/service-customer</module>
-		<module>services/service-product</module>
-		<module>services/service-warranty</module>
-		<module>services/service-repair</module>
-		<module>services/service-notification</module>
-		
-		<module>services/service-technician</module>
 		<module>discovery-server</module>
+		<module>services</module>
 	</modules>
 	<name>mid-project-031343691</name>
 	<description>Demo project for Spring Boot</description>
