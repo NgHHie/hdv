@@ -1,4 +1,4 @@
-package com.example.service_product.controllers;
+package com.example.service_technician.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
