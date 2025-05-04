@@ -2,6 +2,9 @@ package com.example.service_repair.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -54,7 +57,7 @@ public class ProductServiceClient {
         private String name;
         private String description;
         private String category;
-        private String warrantyExpiration;
+        private LocalDate warrantyExpiration;
         
         // Getters and setters
         public Long getId() { return id; }
@@ -69,7 +72,7 @@ public class ProductServiceClient {
         public String getCategory() { return category; }
         public void setCategory(String category) { this.category = category; }
         
-        public String getWarrantyExpiration() { return warrantyExpiration; }
-        public void setWarrantyExpiration(String warrantyExpiration) { this.warrantyExpiration = warrantyExpiration; }
+        public LocalDate getWarrantyExpiration() { return warrantyExpiration; }
+        public void setWarrantyExpiration(LocalDate warrantyExpiration) { this.warrantyExpiration = warrantyExpiration; }
     }
 }
