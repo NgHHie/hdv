@@ -25,5 +25,5 @@ một svc là customer-service có db riêng chạy trên container đã đượ
 
 
 svc customer: 8081
-svc order: 8082 
 svc product: 8083
+svc notification : 8888
