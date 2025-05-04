@@ -27,5 +27,4 @@ public class WarrantyRequestDto {
     private LocalDate expirationDate;
     private String validationNotes;
     private Long repairId;
-    private List<WarrantyHistoryDto> history;
 }
