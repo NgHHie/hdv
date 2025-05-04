@@ -7,14 +7,15 @@ import com.example.service_customer.model.PurchaseItem;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+
 public class PurchaseItemMapper {
     
    
-    public PurchaseItemDTO toDTO(PurchaseItem item) {
+    public static PurchaseItemDTO toDTO(PurchaseItem item) {
         if (item == null) {
             return null;
         }
@@ -24,38 +25,32 @@ public class PurchaseItemMapper {
                 .productId(item.getProductId())
                 .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())
-                .warrantyExpirationDate(item.getWarrantyExpirationDate())
                 .build();
         
         if (item.getPurchase() != null) {
             dto.setPurchaseId(item.getPurchase().getId());
+
             
-            if (item.getPurchase().getCustomer() != null) {
-                dto.setCustomerId(item.getPurchase().getCustomer().getId());
-                dto.setCustomerName(
-                        item.getPurchase().getCustomer().getFirstName() + " " + 
-                        item.getPurchase().getCustomer().getLastName());
-            }
+
         }
+
         
      
         
         return dto;
     }
 
-    
-    public List<PurchaseItemDTO> toDTOList(List<PurchaseItem> items) {
-        if (items == null) {
-            return null;
+    public  static  List<PurchaseItemDTO> toDTO(List<PurchaseItem> items) {
+        List<PurchaseItemDTO> purchaseItemDTOS = new ArrayList<>();
+        for(PurchaseItem item : items){
+            purchaseItemDTOS.add(toDTO(item));
         }
-        
-        return items.stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        return  purchaseItemDTOS;
     }
 
+
     
-    public PurchaseItem toEntity(PurchaseItemDTO dto) {
+    public static  PurchaseItem toEntity(PurchaseItemDTO dto) {
         if (dto == null) {
             return null;
         }
@@ -65,7 +60,7 @@ public class PurchaseItemMapper {
                 .productId(dto.getProductId())
                 .quantity(dto.getQuantity())
                 .unitPrice(dto.getUnitPrice())
-                .warrantyExpirationDate(dto.getWarrantyExpirationDate())
+
                 .build();
     }
 }

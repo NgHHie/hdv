@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.service_customer.model.Purchase;
 
-public interface PurchaseRepository  extends JpaRepository<Purchase, Long> {
+public interface PurchaseRepository  extends JpaRepository<Purchase, Integer> {
    
     List<Purchase> findByCustomerId(Integer customerId);
 

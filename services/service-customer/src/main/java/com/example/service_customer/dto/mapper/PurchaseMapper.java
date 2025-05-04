@@ -9,21 +9,18 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
+
 public class PurchaseMapper {
     
-    private final PurchaseItemMapper purchaseItemMapper;
+    private  PurchaseItemMapper purchaseItemMapper;
     
-    @Autowired
-    public PurchaseMapper(PurchaseItemMapper purchaseItemMapper) {
-        this.purchaseItemMapper = purchaseItemMapper;
-    }
-    
+
   
-    public PurchaseDTO toDTO(Purchase purchase) {
+    public static PurchaseDTO toDTO(Purchase purchase) {
         if (purchase == null) {
             return null;
         }
@@ -43,25 +40,26 @@ public class PurchaseMapper {
         }
         
         if (purchase.getItems() != null) {
-            dto.setItems(purchaseItemMapper.toDTOList(purchase.getItems()));
+            dto.setItems(PurchaseItemMapper.toDTO(purchase.getItems()));
         }
         
         return dto;
     }
 
     
-    public List<PurchaseDTO> toDTOList(List<Purchase> purchases) {
+    public static  List<PurchaseDTO> toListDTO(List<Purchase> purchases) {
         if (purchases == null) {
             return null;
         }
-        
-        return purchases.stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        List<PurchaseDTO> purchaseDTOList = new ArrayList<>();
+        for(Purchase purchase : purchases) {
+            purchaseDTOList.add(PurchaseMapper.toDTO(purchase));
+        }
+        return  purchaseDTOList;
     }
 
   
-    public Purchase toEntity(PurchaseDTO dto) {
+    public static Purchase toEntity(PurchaseDTO dto) {
         if (dto == null) {
             return null;
         }

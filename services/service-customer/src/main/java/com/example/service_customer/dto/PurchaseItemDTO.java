@@ -2,6 +2,7 @@ package com.example.service_customer.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,13 +14,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseItemDTO {
-    private Long id;
-    private Long purchaseId;
-    private Integer customerId;
-    private Long productId;
+    private Integer id;
+    private Integer purchaseId;
+
+    private Integer productId;
     private Integer quantity;
     private BigDecimal unitPrice;
-    private LocalDate warrantyExpirationDate;
-    private String productName; 
-    private String customerName; 
+
+
+
 }

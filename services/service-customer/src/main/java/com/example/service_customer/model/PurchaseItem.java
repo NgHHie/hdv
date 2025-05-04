@@ -19,14 +19,14 @@ public class PurchaseItem {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @ManyToOne
     @JoinColumn(name = "purchase_id", nullable = false)
     private Purchase purchase;
     
     @Column(name = "product_id", nullable = false)
-    private Long productId;
+    private Integer productId;
     
     @Column(nullable = false)
     private Integer quantity;
@@ -34,6 +34,6 @@ public class PurchaseItem {
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
     
-    @Column(name = "warranty_expiration_date")
-    private LocalDate warrantyExpirationDate;
+    
+    
 }
