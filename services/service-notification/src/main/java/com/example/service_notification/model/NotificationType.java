@@ -1,0 +1,14 @@
+package com.example.service_notification.model;
+
+public enum NotificationType {
+    REPAIR_CREATED,
+    REPAIR_REJECTED,
+    REPAIR_APPROVED,
+    PRODUCT_RECEIVED,
+    DIAGNOSIS_STARTED,
+    REPAIR_IN_PROGRESS,
+    REPAIR_COMPLETED,
+    PRODUCT_SHIPPING,
+    PRODUCT_DELIVERED,
+    FEEDBACK_REQUEST
+}
