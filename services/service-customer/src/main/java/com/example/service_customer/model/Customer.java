@@ -2,6 +2,8 @@ package com.example.service_customer.model;
 
 
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -39,4 +41,8 @@ public class Customer {
 
     @Column
     private String address;
+
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<Purchase> purchases;
 }
