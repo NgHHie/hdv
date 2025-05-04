@@ -1,6 +1,4 @@
-package com.example.service_order.dto;
-
-
+package com.example.service_customer.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,13 +12,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItemDTO {
+public class PurchaseItemDTO {
     private Long id;
-    private Long orderId; 
+    private Long purchaseId;
+    private Integer customerId;
     private Long productId;
-    private String productName;  
-    private String productCategory; 
-    private BigDecimal price;
     private Integer quantity;
-    private LocalDate warrantyExpiration; 
+    private BigDecimal unitPrice;
+    private LocalDate warrantyExpirationDate;
+    private String productName; 
+    private String customerName; 
 }
