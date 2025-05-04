@@ -1,7 +1,6 @@
 package com.example.service_customer.controllers;
 
-import com.example.service_customer.dto.CustomerDTO;
-import com.example.service_customer.dto.PurchaseItemDTO;
+import com.example.service_customer.dto.PurchaseDTO;
 import com.example.service_customer.model.Customer;
 import com.example.service_customer.service.CustomerService;
 import com.example.service_customer.service.PurchaseService;
@@ -25,47 +24,25 @@ public class CustomerController {
     private final PurchaseService purchaseService;
 
     @PostMapping
-    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody Customer customer) {
+    public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         log.info("REST request to create Customer : {}", customer);
-        CustomerDTO createdCustomer = customerService.createCustomerDTO(customer);
+        Customer createdCustomer = customerService.createCustomer(customer);
         return new ResponseEntity<>(createdCustomer, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Integer id) {
-        log.info("REST request to get Customer by ID : {}", id);
-        CustomerDTO customer = customerService.getCustomerDTOById(id);
-        if (customer == null) {
-            log.error("Customer not found with ID: {}", id);
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(customer);
-    }
-
-    @GetMapping("/email/{email}")
-    public ResponseEntity<CustomerDTO> getCustomerByEmail(@PathVariable String email) {
-        log.info("REST request to get Customer by email : {}", email);
-        CustomerDTO customer = customerService.getCustomerDTOByEmail(email);
-        if (customer == null) {
-            log.error("Customer not found with email: {}", email);
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(customer);
-    }
-
     @GetMapping
-    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+    public ResponseEntity<List<Customer>> getAllCustomers() {
         log.info("REST request to get all Customers");
-        List<CustomerDTO> customers = customerService.getAllCustomerDTOs();
+        List<Customer> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CustomerDTO> updateCustomer(
+    public ResponseEntity<Customer> updateCustomer(
             @PathVariable Integer id,
             @RequestBody Customer customer) {
         log.info("REST request to update Customer : {}", customer);
-        CustomerDTO updatedCustomer = customerService.updateCustomerDTO(id, customer);
+        Customer updatedCustomer = customerService.updateCustomer(id, customer);
         if (updatedCustomer == null) {
             log.error("Error updating customer with ID: {}", id);
             return ResponseEntity.badRequest().build();
@@ -80,24 +57,42 @@ public class CustomerController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/purchases/items/with-warranty")
-    public ResponseEntity<List<PurchaseItemDTO>> getAllPurchaseItemsWithWarranty() {
-        log.info("REST request to get all purchase items with warranty");
-        List<PurchaseItemDTO> items = purchaseService.getAllPurchaseItemsWithWarranty();
-        return ResponseEntity.ok(items);
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Customer> getCustomerById(@PathVariable Integer id) {
+        log.info("REST request to get Customer by ID : {}", id);
+        Customer customer = customerService.getCustomerById(id);
+        if (customer == null) {
+            log.error("Customer not found with ID: {}", id);
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(customer);
     }
 
-    @GetMapping("/purchases/{purchaseId}/items/with-warranty")
-    public ResponseEntity<List<PurchaseItemDTO>> getPurchaseItemsWithWarrantyByPurchaseId(@PathVariable Long purchaseId) {
-        log.info("REST request to get purchase items with warranty by purchase ID: {}", purchaseId);
-        List<PurchaseItemDTO> items = purchaseService.getPurchaseItemsWithWarrantyByPurchaseId(purchaseId);
-        return ResponseEntity.ok(items);
+    @GetMapping("/email")
+    public ResponseEntity<Customer> getCustomerByEmail(@RequestParam String email) {
+        log.info("REST request to get Customer by email : {}", email);
+        Customer customer = customerService.getCustomerByEmail(email);
+        if (customer == null) {
+            log.error("Customer not found with email: {}", email);
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(customer);
     }
 
-    @GetMapping("/{customerId}/purchases/items/with-warranty")
-    public ResponseEntity<List<PurchaseItemDTO>> getPurchaseItemsWithWarrantyByCustomerId(@PathVariable Integer customerId) {
-        log.info("REST request to get purchase items with warranty by customer ID: {}", customerId);
-        List<PurchaseItemDTO> items = purchaseService.getPurchaseItemsWithWarrantyByCustomerId(customerId);
-        return ResponseEntity.ok(items);
+
+
+
+    @GetMapping("/{customerId}/purchase")
+    public List<PurchaseDTO> getAllPurchasesWithCustomerId(@PathVariable Integer customerId) {
+        log.info("request to get all purchase of customer  : {}", customerId);
+        return purchaseService.getPurchasesByCustomerId(customerId);
     }
+
+    @GetMapping("/{customerId}/purchase/{purchaseId}")
+    public PurchaseDTO getPurchaseById(@PathVariable Integer purchaseId) {
+            return purchaseService.getPurchase(purchaseId);
+    }
+
+
 }

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseDTO {
-    private Long id;
+    private Integer id;
     private String purchaseDate;
     private String invoiceNumber;
     private Double totalAmount;

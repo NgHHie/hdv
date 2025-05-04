@@ -4,6 +4,7 @@ package com.example.service_customer.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -43,6 +44,7 @@ public class Customer {
     private String address;
 
 
+    @JsonIgnore
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Purchase> purchases;
 }

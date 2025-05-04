@@ -20,7 +20,7 @@ public class Purchase {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
