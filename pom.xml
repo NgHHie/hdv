@@ -19,7 +19,8 @@
 		<module>services/service-warranty</module>
 		<module>services/service-repair</module>
 		<module>services/service-notification</module>
-		<module>services/service-order</module>
+		
+		<module>services/service-technician</module>
 		<module>discovery-server</module>
 	</modules>
 	<name>mid-project-031343691</name>
