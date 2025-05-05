@@ -38,8 +38,8 @@ public class Product {
     
     private String category;
     
-    @Column(name = "warranty_expiration")
-    private LocalDate warrantyExpiration;
+    @Column(name = "warranty_duration")
+    private Float warrantyDuration;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;

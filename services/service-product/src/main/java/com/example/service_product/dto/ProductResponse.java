@@ -20,7 +20,7 @@ public class ProductResponse {
     private BigDecimal price;
     private Integer quantity;
     private String category;
-    private LocalDate warrantyExpiration;
+    private Float warrantyDuration;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

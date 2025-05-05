@@ -5,6 +5,8 @@ import com.example.service_warranty.client.RepairServiceClient;
 import com.example.service_warranty.dto.*;
 import com.example.service_warranty.exception.WarrantyRequestNotFoundException;
 import com.example.service_warranty.models.Warranty;
+import com.example.service_warranty.models.WarrantyCondition;
+import com.example.service_warranty.models.WarrantyConditionResult;
 import com.example.service_warranty.models.WarrantyHistory;
 import com.example.service_warranty.models.WarrantyRequest;
 import com.example.service_warranty.models.WarrantyValidation;
@@ -145,16 +147,30 @@ public class WarrantyRequestService {
             throw new IllegalStateException("Cannot validate warranty request with status: " + request.getStatus());
         }
         
-        // Create validation record
-        WarrantyValidation validation = WarrantyValidation.builder()
-                .warrantyRequestId(id)
-                .isValid(validationDto.getIsValid())
-                .validationReason(validationDto.getValidationReason())
-                .validatedBy(validationDto.getValidatedBy())
-                .validatedAt(LocalDateTime.now())
-                .build();
+        // Process condition results
+        if (validationDto.getConditionResults() != null && !validationDto.getConditionResults().isEmpty()) {
+            for (WarrantyValidationDto.ConditionResultDto resultDto : validationDto.getConditionResults()) {
+                WarrantyCondition condition = warrantyConditionRepository.findById(resultDto.getConditionId())
+                        .orElseThrow(() -> new IllegalArgumentException("Warranty condition not found: " + resultDto.getConditionId()));
+                
+                WarrantyConditionResult result = WarrantyConditionResult.builder()
+                        .warrantyRequest(request)
+                        .condition(condition)
+                        .passed(resultDto.getPassed())
+                        .notes(resultDto.getNotes())
+                        .evaluatedBy(validationDto.getValidatedBy())
+                        .evaluatedAt(LocalDateTime.now())
+                        .build();
+                
+                warrantyConditionResultRepository.save(result);
+            }
+        }
         
-        warrantyValidationRepository.save(validation);
+        // If any condition failed, the whole request is invalid
+        boolean allConditionsPassed = validationDto.getConditionResults().stream()
+                .allMatch(WarrantyValidationDto.ConditionResultDto::getPassed);
+        
+        validationDto.setIsValid(allConditionsPassed);
         
         // Update request
         request.setValidationNotes(validationDto.getValidationReason());
@@ -176,9 +192,25 @@ public class WarrantyRequestService {
         
         warrantyHistoryRepository.save(history);
         
+        // Send notification to customer
+        if (validationDto.getIsValid()) {
+            // Send approval notification
+            notificationServiceClient.sendWarrantyApprovedNotification(
+                    request.getCustomerId(),
+                    request.getId(),
+                    "Your warranty request has been approved. Please bring your product to our service center or call 123-456-7890 to arrange pickup."
+            );
+        } else {
+            // Send rejection notification
+            notificationServiceClient.sendWarrantyRejectedNotification(
+                    request.getCustomerId(),
+                    request.getId(),
+                    "Your warranty request has been rejected. Reason: " + validationDto.getValidationReason()
+            );
+        }
+        
         return mapToWarrantyRequestDto(updatedRequest);
     }
-    
     /**
      * Reject warranty request - step 4 in workflow
      */

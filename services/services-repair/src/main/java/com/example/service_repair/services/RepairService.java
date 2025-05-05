@@ -165,6 +165,13 @@ public class RepairService {
         
         // Send notification based on the new status
         sendStatusChangeNotification(updatedRequest);
+
+        if (updatedRequest.getStatus() == RepairStatus.COMPLETED) {
+            updateWarrantyServiceStatus(repairId, "REPAIRED");
+        } else if (updatedRequest.getStatus() == RepairStatus.DELIVERED) {
+            updateWarrantyServiceStatus(repairId, "DELIVERED");
+        }
+        
         
         return convertToResponseDto(updatedRequest);
     }
@@ -693,6 +700,24 @@ public class RepairService {
         return dto;
     }
     
+    @Transactional
+    public void updateWarrantyServiceStatus(Long repairId, String status) {
+        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
+        
+        if (repairRequest.getWarrantyId() != null) {
+            try {
+                // Call warranty service to update status
+                warrantyServiceClient.updateWarrantyStatus(
+                    repairRequest.getWarrantyId(), 
+                    status, 
+                    "Status updated from repair service: " + status
+                );
+            } catch (Exception e) {
+                log.error("Failed to update warranty service: {}", e.getMessage());
+                // Continue with repair process even if warranty update fails
+            }
+        }
+    }
     /**
      * Send appropriate notification based on status change
      */
