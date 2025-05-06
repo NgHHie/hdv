@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/survey-analytics")
+@RequestMapping("/api/v1/surveys/survey-analytics")
 @RequiredArgsConstructor
 @Slf4j
 public class SurveyAnalyticsController {

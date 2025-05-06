@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/survey-responses")
+@RequestMapping("/api/v1/surveys/survey-responses")
 @RequiredArgsConstructor
 @Slf4j
 public class SurveyResponseController {
