@@ -62,7 +62,7 @@ public class NotificationService {
 
         // Process content with message from request
 
-        notification.setContent(content);
+        notification.setContent(requestDto.getMessage());
         notification.setStatus(NotificationStatus.PENDING);
         notification.setCreatedAt(LocalDateTime.now());
 

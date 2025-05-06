@@ -16,6 +16,7 @@ public class WarrantyNotificationEvent {
     private Long warrantyRequestId;
     private String email;
     private String productName;
+    private Long customerId;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;

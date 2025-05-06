@@ -30,5 +30,6 @@ public class ProductRequest {
     
     private String category;
     
-    private LocalDate warrantyExpiration;
+    private Float warrantyDuration;
+    private String serialNumber;
 }

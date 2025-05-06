@@ -14,8 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WarrantyNotificationEvent {
     private Long warrantyRequestId;
-    private Long customerId;
+    private String email;
     private String productName;
+    private Long customerId;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;

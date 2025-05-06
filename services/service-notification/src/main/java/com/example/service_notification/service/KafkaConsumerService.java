@@ -3,6 +3,7 @@ package com.example.service_notification.service;
 import com.example.service_notification.client.response.CustomerResponse;
 import com.example.service_notification.client.service.CustomerClient;
 import com.example.service_notification.event.WarrantyNotificationEvent;
+import com.example.service_notification.model.NotificationType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -55,13 +56,13 @@ public class KafkaConsumerService {
 
             log.info("Consumed warranty notification event: {}", event);
 
+            System.out.println(event);
 
-            CustomerResponse customerResponse = customerClient.getCustomer(event.getCustomerId());
             NotificationRequestDto notificationRequest = new NotificationRequestDto();
-            notificationRequest.setCustomerId(customerResponse.getId());
+            notificationRequest.setCustomerId(Math.toIntExact(event.getCustomerId()));
             notificationRequest.setType(event.getType());
-            notificationRequest.setRelatedEntityId(event.getWarrantyRequestId().intValue());
-            notificationRequest.setEmail(customerResponse.getEmail());
+            notificationRequest.setRelatedEntityId(Math.toIntExact(event.getWarrantyRequestId()));
+            notificationRequest.setEmail(event.getEmail());
             notificationRequest.setMessage(event.getMessage());
             notificationService.sendNotification(notificationRequest);
         } catch (Exception e) {

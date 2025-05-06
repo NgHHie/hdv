@@ -24,7 +24,8 @@ public class ProductService {
                 .price(productRequest.getPrice())
                 .quantity(productRequest.getQuantity())
                 .category(productRequest.getCategory())
-                .warrantyExpiration(productRequest.getWarrantyExpiration())
+                .warrantyDuration(productRequest.getWarrantyDuration())
+                .serialNumber(productRequest.getSerialNumber())
                 .build();
         
         Product savedProduct = productRepository.save(product);
@@ -64,7 +65,7 @@ public class ProductService {
         product.setPrice(productRequest.getPrice());
         product.setQuantity(productRequest.getQuantity());
         product.setCategory(productRequest.getCategory());
-        product.setWarrantyExpiration(productRequest.getWarrantyExpiration());
+        product.setWarrantyDuration(productRequest.getWarrantyDuration());
         
         Product updatedProduct = productRepository.save(product);
         return mapToProductResponse(updatedProduct);
@@ -84,9 +85,16 @@ public class ProductService {
                 .price(product.getPrice())
                 .quantity(product.getQuantity())
                 .category(product.getCategory())
-                .warrantyExpiration(product.getWarrantyExpiration())
+                .warrantyDuration(product.getWarrantyDuration())
+                .serialNumber(product.getSerialNumber())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
+    }
+
+    public ProductResponse getProductBySerial(String serial) {
+        Product product = productRepository.findBySerialNumber(serial)
+            .orElseThrow(() -> new ResourceNotFoundException("Product not found with serial number: " + serial));
+        return mapToProductResponse(product);
     }
 }

@@ -17,7 +17,7 @@ public class KafkaProducerService {
 
     private static final String NOTIFICATIONTOPIC = "warranty-notifications";
 
-    public void sendWarrantyCreatedEvent(WarrantyNotificationEvent event) {
+    public void sendWarrantyEvent(WarrantyNotificationEvent event) {
         log.info("Sending warranty notification event to Kafka: {}", event);
         kafkaTemplate.send(NOTIFICATIONTOPIC, event);
     }
