@@ -6,6 +6,7 @@ import com.example.service_notification.dto.mapper.NotificationMapper;
 import com.example.service_notification.model.Notification;
 import com.example.service_notification.model.NotificationStatus;
 import com.example.service_notification.model.NotificationTemplate;
+import com.example.service_notification.model.NotificationType;
 import com.example.service_notification.repository.NotificationRepository;
 import com.example.service_notification.repository.NotificationTemplateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,9 +61,8 @@ public class NotificationService {
         notification.setSubject(template.getSubject());
 
         // Process content with message from request
-        String content = template.getContentTemplate().replace("{{message}}", requestDto.getMessage());
-        notification.setContent(content);
 
+        notification.setContent(requestDto.getMessage());
         notification.setStatus(NotificationStatus.PENDING);
         notification.setCreatedAt(LocalDateTime.now());
 

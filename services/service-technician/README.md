@@ -1,74 +1,74 @@
-# Các Điểm Cuối API Dịch Vụ Kỹ Thuật Viên
+# Technician API Endpoints
 
-URL cơ sở: `/api/v1/technicians`
+Base URL: `/api/v1/technicians`
 
-## Danh sách các điểm cuối:
+## List of endpoints:
 
-### 1. Tạo kỹ thuật viên mới
+### 1. Create a new technician
 
-- **Phương thức:** POST
-- **Điểm cuối:** `/api/v1/technicians`
-- **Thân yêu cầu:** Đối tượng `TechnicianRequest` ở định dạng JSON.
-
----
-
-### 2. Lấy kỹ thuật viên theo ID
-
-- **Phương thức:** GET
-- **Điểm cuối:** `/api/v1/technicians/{id}`
-- **Biến đường dẫn:** `id` (Long)
+- **Method:** POST
+- **Endpoint:** `/api/v1/technicians`
+- **Request Body:** `TechnicianRequest` object in JSON format.
 
 ---
 
-### 3. Lấy kỹ thuật viên theo email
+### 2. Get technician by ID
 
-- **Phương thức:** GET
-- **Điểm cuối:** `/api/v1/technicians/email/{email}`
-- **Biến đường dẫn:** `email` (String)
-
----
-
-### 4. Lấy tất cả kỹ thuật viên
-
-- **Phương thức:** GET
-- **Điểm cuối:** `/api/v1/technicians`
+- **Method:** GET
+- **Endpoint:** `/api/v1/technicians/{id}`
+- **Path Variable:** `id` (Long)
 
 ---
 
-### 5. Lấy tất cả kỹ thuật viên đang hoạt động
+### 3. Get technician by email
 
-- **Phương thức:** GET
-- **Điểm cuối:** `/api/v1/technicians/active`
-
----
-
-### 6. Lấy kỹ thuật viên theo chuyên môn
-
-- **Phương thức:** GET
-- **Điểm cuối:** `/api/v1/technicians/specialization/{specialization}`
-- **Biến đường dẫn:** `specialization` (String)
+- **Method:** GET
+- **Endpoint:** `/api/v1/technicians/email/{email}`
+- **Path Variable:** `email` (String)
 
 ---
 
-### 7. Cập nhật kỹ thuật viên
+### 4. Get all technicians
 
-- **Phương thức:** PUT
-- **Điểm cuối:** `/api/v1/technicians/{id}`
-- **Biến đường dẫn:** `id` (Long)
-- **Thân yêu cầu:** Đối tượng `TechnicianRequest` ở định dạng JSON.
+- **Method:** GET
+- **Endpoint:** `/api/v1/technicians`
 
 ---
 
-### 8. Xóa kỹ thuật viên
+### 5. Get all active technicians
 
-- **Phương thức:** DELETE
-- **Điểm cuối:** `/api/v1/technicians/{id}`
-- **Biến đường dẫn:** `id` (Long)
+- **Method:** GET
+- **Endpoint:** `/api/v1/technicians/active`
 
 ---
 
-### 9. Chuyển đổi trạng thái hoạt động của kỹ thuật viên
+### 6. Get technicians by specialization
 
-- **Phương thức:** PATCH
-- **Điểm cuối:** `/api/v1/technicians/{id}/toggle-status`
-- **Biến đường dẫn:** `id` (Long)
+- **Method:** GET
+- **Endpoint:** `/api/v1/technicians/specialization/{specialization}`
+- **Path Variable:** `specialization` (String)
+
+---
+
+### 7. Update technician
+
+- **Method:** PUT
+- **Endpoint:** `/api/v1/technicians/{id}`
+- **Path Variable:** `id` (Long)
+- **Request Body:** `TechnicianRequest` object in JSON format.
+
+---
+
+### 8. Delete technician
+
+- **Method:** DELETE
+- **Endpoint:** `/api/v1/technicians/{id}`
+- **Path Variable:** `id` (Long)
+
+---
+
+### 9. Toggle technician active status
+
+- **Method:** PATCH
+- **Endpoint:** `/api/v1/technicians/{id}/toggle-status`
+- **Path Variable:** `id` (Long)

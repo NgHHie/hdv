@@ -21,6 +21,7 @@ public class ProductResponse {
     private Integer quantity;
     private String category;
     private Float warrantyDuration;
+    private String serialNumber;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

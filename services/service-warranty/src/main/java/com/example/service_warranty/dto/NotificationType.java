@@ -1,4 +1,4 @@
-package com.example.service_notification.model;
+package com.example.service_warranty.dto;
 
 public enum NotificationType {
     WARRANTY_CREATE,

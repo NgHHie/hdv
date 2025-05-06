@@ -12,11 +12,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyValidationDto {
+    private Long warrantyRequestId;
     private Boolean isValid;
     private String validationReason;
     private String validatedBy;
     private List<ConditionResultDto> conditionResults;
-    
+
     @Data
     @Builder
     @NoArgsConstructor

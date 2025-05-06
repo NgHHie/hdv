@@ -35,19 +35,19 @@ public class NotificationController {
     
     @PostMapping("/repair-created")
     public ResponseEntity<NotificationResponseDto> sendRepairCreatedNotification(@RequestBody NotificationRequestDto requestDto) {
-        requestDto.setType(NotificationType.REPAIR_CREATED);
+        requestDto.setType(NotificationType.WARRANTY_CREATE);
         return sendNotification(requestDto);
     }
     
     @PostMapping("/repair-rejected")
     public ResponseEntity<NotificationResponseDto> sendRepairRejectedNotification(@RequestBody NotificationRequestDto requestDto) {
-        requestDto.setType(NotificationType.REPAIR_REJECTED);
+        requestDto.setType(NotificationType.WARRANTY_REJECT);
         return sendNotification(requestDto);
     }
     
     @PostMapping("/repair-approved")
     public ResponseEntity<NotificationResponseDto> sendRepairApprovedNotification(@RequestBody NotificationRequestDto requestDto) {
-        requestDto.setType(NotificationType.REPAIR_APPROVED);
+        requestDto.setType(NotificationType.WARRANTY_APPROVED);
         return sendNotification(requestDto);
     }
     

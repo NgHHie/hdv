@@ -48,6 +48,9 @@ public class WarrantyClaim {
         if (claimDate == null) {
             claimDate = LocalDateTime.now();
         }
+        if (status == null) {
+            status = "REGISTERED";
+        }
     }
     
     @PreUpdate

@@ -25,6 +25,7 @@ public class ProductService {
                 .quantity(productRequest.getQuantity())
                 .category(productRequest.getCategory())
                 .warrantyDuration(productRequest.getWarrantyDuration())
+                .serialNumber(productRequest.getSerialNumber())
                 .build();
         
         Product savedProduct = productRepository.save(product);
@@ -85,8 +86,15 @@ public class ProductService {
                 .quantity(product.getQuantity())
                 .category(product.getCategory())
                 .warrantyDuration(product.getWarrantyDuration())
+                .serialNumber(product.getSerialNumber())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
+    }
+
+    public ProductResponse getProductBySerial(String serial) {
+        Product product = productRepository.findBySerialNumber(serial)
+            .orElseThrow(() -> new ResourceNotFoundException("Product not found with serial number: " + serial));
+        return mapToProductResponse(product);
     }
 }
