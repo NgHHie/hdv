@@ -62,6 +62,30 @@ public class CustomerServiceClient {
             return null;
         }
     }
+
+    public CustomerResponse getCustomerById(Long customerId) {
+        String url = "/api/v1/customers/" + customerId;
+        log.info("Getting customer from: {}{}", customerServiceUrl, url);
+        
+        try {
+            CustomerResponse customer = webClientBuilder.build()
+                    .get()
+                    .uri(customerServiceUrl + url)
+                    .retrieve()
+                    .bodyToMono(CustomerResponse.class)
+                    .block();
+            
+            if (customer != null) {
+                return customer;
+            }
+            
+            log.warn("No customer found for customerId {}", customerId);
+            return null;
+        } catch (Exception e) {
+            log.error("Failed to get customer: {}", e.getMessage());
+            return null;
+        }
+    }
     
     // Response models
     public static class PurchaseResponse {
@@ -138,5 +162,13 @@ public class CustomerServiceClient {
         
         public Float getWarrantyDuration() { return warrantyDuration; }
         public void setWarrantyDuration(Float warrantyDuration) { this.warrantyDuration = warrantyDuration; }
+    }
+
+    public static class CustomerResponse {
+        private Long id;
+        private String email;
+
+        public Long getId() { return id; }
+        public String getEmail() { return email; }
     }
 }

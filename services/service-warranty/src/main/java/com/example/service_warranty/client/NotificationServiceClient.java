@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.service_warranty.dto.NotificationRequestDto;
+
 import reactor.core.publisher.Mono;
 
 @Service
@@ -21,15 +24,10 @@ public class NotificationServiceClient {
     /**
      * Send warranty created (registration) notification
      */
-    public void sendRepairCreatedNotification(Long customerId, Long warrantyRequestId, String message) {
-        log.info("Sending warranty registration notification to customer: {}", customerId);
+    public void sendRepairCreatedNotification(NotificationRequestDto request) {
+        log.info("Sending warranty registration notification to customer: {}", request.getCustomerId());
         
-        try {
-            NotificationRequest request = new NotificationRequest();
-            request.setCustomerId(customerId);
-            request.setRelatedEntityId(warrantyRequestId);
-            request.setMessage(message);
-            
+        try {     
             webClientBuilder.build()
                 .post()
                 .uri(notificationServiceUrl + "/api/v1/notifications/repair-created")
@@ -43,7 +41,7 @@ public class NotificationServiceClient {
                 })
                 .subscribe();
             
-            log.info("Repair created notification sent successfully to customer: {}", customerId);
+            log.info("Repair created notification sent successfully to customer: {}", request.getCustomerId());
         } catch (Exception e) {
             log.error("Error sending repair created notification: {}", e.getMessage());
         }
@@ -52,15 +50,10 @@ public class NotificationServiceClient {
     /**
      * Send warranty rejected notification
      */
-    public void sendWarrantyRejectedNotification(Long customerId, Long warrantyRequestId, String message) {
-        log.info("Sending warranty rejected notification to customer: {}", customerId);
+    public void sendWarrantyRejectedNotification(NotificationRequestDto request) {
+        log.info("Sending warranty rejected notification to customer: {}", request.getCustomerId());
         
         try {
-            NotificationRequest request = new NotificationRequest();
-            request.setCustomerId(customerId);
-            request.setRelatedEntityId(warrantyRequestId);
-            request.setMessage(message);
-            
             webClientBuilder.build()
                 .post()
                 .uri(notificationServiceUrl + "/api/v1/notifications/repair-rejected")
@@ -74,7 +67,7 @@ public class NotificationServiceClient {
                 })
                 .subscribe();
             
-            log.info("Repair rejected notification sent successfully to customer: {}", customerId);
+            log.info("Repair rejected notification sent successfully to customer: {}", request.getCustomerId());
         } catch (Exception e) {
             log.error("Error sending repair rejected notification: {}", e.getMessage());
         }

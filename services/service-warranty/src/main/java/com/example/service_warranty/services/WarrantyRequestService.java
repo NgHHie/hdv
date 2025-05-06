@@ -48,9 +48,9 @@ public class WarrantyRequestService {
         Float warrantyDuration = null;
         LocalDate purchaseDate = null;
         
-        // 1. Get product information
         ProductServiceClient.ProductResponse product = 
                 productServiceClient.getProductDetailsBySerial(requestDto.getSerialNumber());
+        CustomerServiceClient.CustomerResponse customer = customerServiceClient.getCustomerById(requestDto.getCustomerId());
         
         if (product != null) {
             warrantyDuration = product.getWarrantyDuration();
@@ -111,11 +111,14 @@ public class WarrantyRequestService {
             warrantyHistoryRepository.save(history);
             
             // Send confirmation notification
-            notificationServiceClient.sendRepairCreatedNotification(
-                    requestDto.getCustomerId(),
-                    savedRequest.getId(),
-                    "Your warranty request for " + productName + " has been received and is being processed."
-            );
+            NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
+                    .warrantyResponseId(savedRequest.getId())
+                    .customerId(customer.getId())
+                    .email(customer.getEmail())
+                    .type(NotificationType.WARRANTY_RECEIVED)
+                    .message("Your warranty request for " + productName + " has been received and is being processed.")
+                    .build();
+            notificationServiceClient.sendRepairCreatedNotification(notificationRequestDto);
             
             return mapToWarrantyRequestDto(savedRequest);
         } else {
@@ -137,12 +140,15 @@ public class WarrantyRequestService {
             
             warrantyHistoryRepository.save(history);
             
+            NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
+                    .warrantyResponseId(savedRequest.getId())
+                    .customerId(customer.getId())
+                    .email(customer.getEmail())
+                    .type(NotificationType.WARRANTY_REJECTED)
+                    .message("Your warranty request for " + productName + " has been rejected because the product is out of warranty period.")
+                    .build();
             // Send rejection notification
-            notificationServiceClient.sendWarrantyRejectedNotification(
-                    requestDto.getCustomerId(),
-                    savedRequest.getId(),
-                    "Your warranty request for " + productName + " has been rejected because the product is out of warranty period."
-            );
+            notificationServiceClient.sendWarrantyRejectedNotification(notificationRequestDto);
             
             return mapToWarrantyRequestDto(savedRequest);
         }
@@ -195,94 +201,94 @@ public class WarrantyRequestService {
     /**
      * Validate warranty request
      */
-    @Transactional
-    public WarrantyRequestDto validateWarrantyRequest(Long id, WarrantyValidationDto validationDto) {
-        log.info("Validating warranty request: {}", id);
+    // @Transactional
+    // public WarrantyRequestDto validateWarrantyRequest(Long id, WarrantyValidationDto validationDto) {
+    //     log.info("Validating warranty request: {}", id);
         
-        WarrantyRequest request = warrantyRequestRepository.findById(id)
-                .orElseThrow(() -> new WarrantyRequestNotFoundException("Warranty request not found with id: " + id));
+    //     WarrantyRequest request = warrantyRequestRepository.findById(id)
+    //             .orElseThrow(() -> new WarrantyRequestNotFoundException("Warranty request not found with id: " + id));
         
-        if (!"PENDING".equals(request.getStatus())) {
-            throw new IllegalStateException("Cannot validate warranty request with status: " + request.getStatus());
-        }
+    //     if (!"PENDING".equals(request.getStatus())) {
+    //         throw new IllegalStateException("Cannot validate warranty request with status: " + request.getStatus());
+    //     }
         
-        // Update request with validation result
-        String newStatus = validationDto.getIsValid() ? "APPROVED" : "REJECTED";
-        request.setStatus(newStatus);
-        request.setValidationNotes(validationDto.getValidationReason());
+    //     // Update request with validation result
+    //     String newStatus = validationDto.getIsValid() ? "APPROVED" : "REJECTED";
+    //     request.setStatus(newStatus);
+    //     request.setValidationNotes(validationDto.getValidationReason());
         
-        WarrantyRequest updatedRequest = warrantyRequestRepository.save(request);
+    //     WarrantyRequest updatedRequest = warrantyRequestRepository.save(request);
         
-        // Add history entry
-        WarrantyHistory history = WarrantyHistory.builder()
-                .warrantyRequestId(id)
-                .status(newStatus)
-                .notes(validationDto.getValidationReason())
-                .performedBy(validationDto.getValidatedBy())
-                .performedAt(LocalDateTime.now())
-                .build();
+    //     // Add history entry
+    //     WarrantyHistory history = WarrantyHistory.builder()
+    //             .warrantyRequestId(id)
+    //             .status(newStatus)
+    //             .notes(validationDto.getValidationReason())
+    //             .performedBy(validationDto.getValidatedBy())
+    //             .performedAt(LocalDateTime.now())
+    //             .build();
         
-        warrantyHistoryRepository.save(history);
+    //     warrantyHistoryRepository.save(history);
         
-        // Send notification to customer
-        if (validationDto.getIsValid()) {
-            // Send approval notification
-            notificationServiceClient.sendWarrantyApprovedNotification(
-                    request.getCustomerId(),
-                    request.getId(),
-                    "Your warranty request has been approved. Please send your product to our service center."
-            );
-        } else {
-            // Send rejection notification
-            notificationServiceClient.sendWarrantyRejectedNotification(
-                    request.getCustomerId(),
-                    request.getId(),
-                    "Your warranty request has been rejected. Reason: " + validationDto.getValidationReason()
-            );
-        }
+    //     // Send notification to customer
+    //     if (validationDto.getIsValid()) {
+    //         // Send approval notification
+    //         notificationServiceClient.sendWarrantyApprovedNotification(
+    //                 request.getCustomerId(),
+    //                 request.getId(),
+    //                 "Your warranty request has been approved. Please send your product to our service center."
+    //         );
+    //     } else {
+    //         // Send rejection notification
+    //         notificationServiceClient.sendWarrantyRejectedNotification(
+    //                 request.getCustomerId(),
+    //                 request.getId(),
+    //                 "Your warranty request has been rejected. Reason: " + validationDto.getValidationReason()
+    //         );
+    //     }
         
-        return mapToWarrantyRequestDto(updatedRequest);
-    }
+    //     return mapToWarrantyRequestDto(updatedRequest);
+    // }
     
     /**
      * Reject warranty request
      */
-    @Transactional
-    public WarrantyRequestDto rejectWarrantyRequest(Long id, String reason, String performedBy) {
-        log.info("Rejecting warranty request: {}", id);
+    // @Transactional
+    // public WarrantyRequestDto rejectWarrantyRequest(Long id, String reason, String performedBy) {
+    //     log.info("Rejecting warranty request: {}", id);
         
-        WarrantyRequest request = warrantyRequestRepository.findById(id)
-                .orElseThrow(() -> new WarrantyRequestNotFoundException("Warranty request not found with id: " + id));
+    //     WarrantyRequest request = warrantyRequestRepository.findById(id)
+    //             .orElseThrow(() -> new WarrantyRequestNotFoundException("Warranty request not found with id: " + id));
         
-        if (!"PENDING".equals(request.getStatus()) && !"APPROVED".equals(request.getStatus())) {
-            throw new IllegalStateException("Cannot reject warranty request with status: " + request.getStatus());
-        }
+    //     if (!"PENDING".equals(request.getStatus()) && !"APPROVED".equals(request.getStatus())) {
+    //         throw new IllegalStateException("Cannot reject warranty request with status: " + request.getStatus());
+    //     }
         
-        request.setStatus("REJECTED");
-        request.setValidationNotes(reason);
+    //     request.setStatus("REJECTED");
+    //     request.setValidationNotes(reason);
         
-        WarrantyRequest updatedRequest = warrantyRequestRepository.save(request);
+    //     WarrantyRequest updatedRequest = warrantyRequestRepository.save(request);
         
-        // Add history entry
-        WarrantyHistory history = WarrantyHistory.builder()
-                .warrantyRequestId(id)
-                .status("REJECTED")
-                .notes(reason)
-                .performedBy(performedBy)
-                .performedAt(LocalDateTime.now())
-                .build();
+    //     // Add history entry
+    //     WarrantyHistory history = WarrantyHistory.builder()
+    //             .warrantyRequestId(id)
+    //             .status("REJECTED")
+    //             .notes(reason)
+    //             .performedBy(performedBy)
+    //             .performedAt(LocalDateTime.now())
+    //             .build();
         
-        warrantyHistoryRepository.save(history);
+    //     warrantyHistoryRepository.save(history);
         
-        // Send notification
-        notificationServiceClient.sendWarrantyRejectedNotification(
-                request.getCustomerId(),
-                request.getId(),
-                "Your warranty request has been rejected. Reason: " + reason
-        );
+    //     // Send notification
+    //     notificationServiceClient.sendWarrantyRejectedNotification(
+    //             request.getCustomerId(),
+    //             request.getId(),
+    //             "Your warranty request has been rejected. Reason: " + reason
+    //     );
         
-        return mapToWarrantyRequestDto(updatedRequest);
-    }
+    //     return mapToWarrantyRequestDto(updatedRequest);
+    // }
     
     /**
      * Approve warranty request
