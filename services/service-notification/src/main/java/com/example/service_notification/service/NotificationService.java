@@ -61,12 +61,7 @@ public class NotificationService {
         notification.setSubject(template.getSubject());
 
         // Process content with message from request
-        String content = "";
-        if(requestDto.getType().equals(NotificationType.WARRANTY_CREATE) == false)
-        {
-            content = template.getContentTemplate().replace("{{message}}", requestDto.getMessage());
 
-        }
         notification.setContent(content);
         notification.setStatus(NotificationStatus.PENDING);
         notification.setCreatedAt(LocalDateTime.now());

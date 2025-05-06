@@ -16,9 +16,6 @@
 	<modules>
 		<module>discovery-server</module>
 		<module>services</module>
-		<module>api-gateway</module>
-
-
 	</modules>
 	<name>mid-project-031343691</name>
 	<description>Demo project for Spring Boot</description>

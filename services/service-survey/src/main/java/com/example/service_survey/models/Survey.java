@@ -1,4 +1,4 @@
-package com.example.service_warranty.models;
+package com.example.service_survey.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,33 +7,32 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "warranty_claims")
+@Table(name = "surveys")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WarrantyClaim {
+public class Survey {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "warranty_id", nullable = false)
-    private Long warrantyId;
+    @Column(name = "survey_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private SurveyType surveyType;
     
-    @Column(name = "repair_id", nullable = false)
-    private Long repairId;
+    @Column(name = "title", nullable = false)
+    private String title;
     
-    @Column(name = "claim_date", nullable = false)
-    private LocalDateTime claimDate;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
     
-    @Column(name = "status")
-    private String status;
-    
-    @Column(name = "notes")
-    private String notes;
+    @Column(name = "is_active")
+    private Boolean isActive;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -41,15 +40,15 @@ public class WarrantyClaim {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
+    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SurveyQuestion> questions;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        if (claimDate == null) {
-            claimDate = LocalDateTime.now();
-        }
-        if (status == null) {
-            status = "REGISTERED";
+        if (isActive == null) {
+            isActive = true;
         }
     }
     
