@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RepairPartDto {
-    private Long id;
+    private Integer id;
     private String partName;
     private String partNumber;
     private Integer quantity;

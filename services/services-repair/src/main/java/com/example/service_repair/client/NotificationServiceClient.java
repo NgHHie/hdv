@@ -17,7 +17,7 @@ public class NotificationServiceClient {
     @Value("${service.notification.url}")
     private String notificationServiceUrl;
     
-    public void sendRepairRequestCreatedNotification(Long customerId, Long repairId) {
+    public void sendRepairRequestCreatedNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/repair-created";
         log.info("Sending repair created notification to customer: {}", customerId);
         
@@ -34,7 +34,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendProductReceivedNotification(Long customerId, Long repairId) {
+    public void sendProductReceivedNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/product-received";
         log.info("Sending product received notification to customer: {}", customerId);
         
@@ -51,7 +51,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendRepairDiagnosisStartedNotification(Long customerId, Long repairId) {
+    public void sendRepairDiagnosisStartedNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/diagnosis-started";
         log.info("Sending diagnosis started notification to customer: {}", customerId);
         
@@ -68,7 +68,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendRepairApprovalRequiredNotification(Long customerId, Long repairId, Double cost) {
+    public void sendRepairApprovalRequiredNotification(Integer customerId, Integer repairId, Double cost) {
         String url = notificationServiceUrl + "/api/v1/notifications/approval-required";
         log.info("Sending approval required notification to customer: {}", customerId);
         
@@ -87,7 +87,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendRepairInProgressNotification(Long customerId, Long repairId) {
+    public void sendRepairInProgressNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/repair-progress";
         log.info("Sending repair in progress notification to customer: {}", customerId);
         
@@ -104,7 +104,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendRepairCompletedNotification(Long customerId, Long repairId) {
+    public void sendRepairCompletedNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/repair-completed";
         log.info("Sending repair completed notification to customer: {}", customerId);
         
@@ -121,7 +121,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendProductShippingNotification(Long customerId, Long repairId) {
+    public void sendProductShippingNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/product-shipping";
         log.info("Sending product shipping notification to customer: {}", customerId);
         
@@ -138,7 +138,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendProductDeliveredNotification(Long customerId, Long repairId) {
+    public void sendProductDeliveredNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/product-delivered";
         log.info("Sending product delivered notification to customer: {}", customerId);
         
@@ -155,7 +155,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendRepairRequestRejectedNotification(Long customerId, Long repairId, String reason) {
+    public void sendRepairRequestRejectedNotification(Integer customerId, Integer repairId, String reason) {
         String url = notificationServiceUrl + "/api/v1/notifications/repair-rejected";
         log.info("Sending repair rejected notification to customer: {}", customerId);
         
@@ -172,7 +172,7 @@ public class NotificationServiceClient {
         }
     }
     
-    public void sendRepairRequestCancelledNotification(Long customerId, Long repairId) {
+    public void sendRepairRequestCancelledNotification(Integer customerId, Integer repairId) {
         String url = notificationServiceUrl + "/api/v1/notifications/repair-cancelled";
         log.info("Sending repair cancelled notification to customer: {}", customerId);
         
@@ -192,17 +192,17 @@ public class NotificationServiceClient {
 
 // Request model for notifications
 class NotificationRequest {
-    private Long customerId;
-    private Long repairId;
+    private Integer customerId;
+    private Integer repairId;
     private String type;
     private String message;
     
     // Getters and setters
-    public Long getCustomerId() { return customerId; }
-    public void setCustomerId(Long customerId) { this.customerId = customerId; }
+    public Integer getCustomerId() { return customerId; }
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
     
-    public Long getRepairId() { return repairId; }
-    public void setRepairId(Long repairId) { this.repairId = repairId; }
+    public Integer getRepairId() { return repairId; }
+    public void setRepairId(Integer repairId) { this.repairId = repairId; }
     
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }

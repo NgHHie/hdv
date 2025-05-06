@@ -15,12 +15,12 @@ import java.util.List;
 public class SubmitSurveyResponseRequest {
     
     @NotNull(message = "Survey ID is required")
-    private Long surveyId;
+    private Integer surveyId;
     
     @NotNull(message = "Customer ID is required")
-    private Long customerId;
+    private Integer customerId;
     
-    private Long relatedEntityId;
+    private Integer relatedEntityId;
     
     private String relatedEntityType;
     
@@ -34,11 +34,11 @@ public class SubmitSurveyResponseRequest {
     public static class QuestionAnswerRequest {
         
         @NotNull(message = "Question ID is required")
-        private Long questionId;
+        private Integer questionId;
         
         private String textResponse;
         
-        private Long selectedOptionId;
+        private Integer selectedOptionId;
         
         private Integer ratingValue;
         

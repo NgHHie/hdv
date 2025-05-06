@@ -22,7 +22,7 @@ public class ProductServiceClient {
     /**
      * Check if a product exists
      */
-    public boolean checkProductExists(Long productId) {
+    public boolean checkProductExists(Integer productId) {
         String url = productServiceUrl + "/api/v1/products/" + productId;
         log.info("Checking if product exists: {}", productId);
         
@@ -38,7 +38,7 @@ public class ProductServiceClient {
     /**
      * Get product details
      */
-    public ProductResponse getProductDetails(Long productId) {
+    public ProductResponse getProductDetails(Integer productId) {
         String url = productServiceUrl + "/api/v1/products/" + productId;
         log.info("Getting product details: {}", productId);
         
@@ -53,15 +53,15 @@ public class ProductServiceClient {
     
     // Response model for product details
     public static class ProductResponse {
-        private Long id;
+        private Integer id;
         private String name;
         private String description;
         private String category;
         private LocalDate warrantyExpiration;
         
         // Getters and setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
         
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }

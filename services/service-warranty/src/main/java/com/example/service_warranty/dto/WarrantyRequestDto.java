@@ -14,10 +14,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyRequestDto {
-    private Long id;
-    private Long customerId;
+    private Integer id;
+    private Integer customerId;
     private String customerName;
-    private Long productId;
+    private Integer productId;
     private String productName;
     private String serialNumber;
     private String issueDescription;
@@ -26,5 +26,5 @@ public class WarrantyRequestDto {
     private LocalDateTime submissionDate;
     private LocalDate expirationDate;
     private String validationNotes;
-    private Long repairId;
+    private Integer repairId;
 }

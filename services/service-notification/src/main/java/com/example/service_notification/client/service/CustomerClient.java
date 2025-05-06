@@ -17,7 +17,7 @@ public class CustomerClient {
     private String customerServiceUrl;
 
 
-    public CustomerResponse getCustomer(Long customerID) {
+    public CustomerResponse getCustomer(Integer customerID) {
         String url = "api/v1/customers/" + customerID;
         log.info("Getting product details: {}", customerID);
 

@@ -20,6 +20,7 @@ public class PurchaseItemDTO {
     private Integer productId;
     private Integer quantity;
     private BigDecimal unitPrice;
+    
 
 
 

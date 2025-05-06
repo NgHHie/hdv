@@ -55,7 +55,7 @@ public class WarrantyService {
     /**
      * Get warranty by ID
      */
-    public WarrantyDto getWarrantyById(Long id) {
+    public WarrantyDto getWarrantyById(Integer id) {
         log.info("Getting warranty with id: {}", id);
         
         Warranty warranty = warrantyRepository.findById(id)
@@ -67,7 +67,7 @@ public class WarrantyService {
     /**
      * Get warranties by customer ID
      */
-    public List<WarrantyDto> getWarrantiesByCustomerId(Long customerId) {
+    public List<WarrantyDto> getWarrantiesByCustomerId(Integer customerId) {
         log.info("Getting warranties for customer: {}", customerId);
         
         List<Warranty> warranties = warrantyRepository.findByCustomerId(customerId);
@@ -79,7 +79,7 @@ public class WarrantyService {
     /**
      * Get warranties by product ID
      */
-    public List<WarrantyDto> getWarrantiesByProductId(Long productId) {
+    public List<WarrantyDto> getWarrantiesByProductId(Integer productId) {
         log.info("Getting warranties for product: {}", productId);
         
         List<Warranty> warranties = warrantyRepository.findByProductId(productId);
@@ -91,7 +91,7 @@ public class WarrantyService {
     /**
      * Check warranty status for a product and customer
      */
-    public WarrantyStatusResponse checkWarrantyStatus(Long productId, Long customerId) {
+    public WarrantyStatusResponse checkWarrantyStatus(Integer productId, Integer customerId) {
         log.info("Checking warranty status for product: {}, customer: {}", productId, customerId);
         
         Optional<Warranty> warrantyOpt = warrantyRepository.findByProductIdAndCustomerId(productId, customerId);
@@ -162,7 +162,7 @@ public class WarrantyService {
     /**
      * Get warranty claims by warranty ID
      */
-    public List<WarrantyClaimDto> getWarrantyClaimsByWarrantyId(Long warrantyId) {
+    public List<WarrantyClaimDto> getWarrantyClaimsByWarrantyId(Integer warrantyId) {
         log.info("Getting warranty claims for warranty: {}", warrantyId);
         
         List<WarrantyClaim> claims = warrantyClaimRepository.findByWarrantyId(warrantyId);
@@ -174,7 +174,7 @@ public class WarrantyService {
     /**
      * Get warranty claims by repair ID
      */
-    public List<WarrantyClaimDto> getWarrantyClaimsByRepairId(Long repairId) {
+    public List<WarrantyClaimDto> getWarrantyClaimsByRepairId(Integer repairId) {
         log.info("Getting warranty claims for repair: {}", repairId);
         
         List<WarrantyClaim> claims = warrantyClaimRepository.findByRepairId(repairId);
@@ -187,7 +187,7 @@ public class WarrantyService {
      * Update warranty claim status
      */
     @Transactional
-    public WarrantyClaimDto updateWarrantyClaimStatus(Long id, String status, String notes) {
+    public WarrantyClaimDto updateWarrantyClaimStatus(Integer id, String status, String notes) {
         log.info("Updating warranty claim status to {} for claim: {}", status, id);
         
         WarrantyClaim claim = warrantyClaimRepository.findById(id)

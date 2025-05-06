@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface WarrantyValidationRepository extends JpaRepository<WarrantyValidation, Long> {
-    Optional<WarrantyValidation> findByWarrantyRequestId(Long warrantyRequestId);
+public interface WarrantyValidationRepository extends JpaRepository<WarrantyValidation, Integer> {
+    Optional<WarrantyValidation> findByWarrantyRequestId(Integer warrantyRequestId);
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface QuestionOptionRepository extends JpaRepository<QuestionOption, Long> {
-    List<QuestionOption> findByQuestionId(Long questionId);
-    List<QuestionOption> findByQuestionIdOrderByDisplayOrderAsc(Long questionId);
+public interface QuestionOptionRepository extends JpaRepository<QuestionOption, Integer> {
+    List<QuestionOption> findByQuestionId(Integer questionId);
+    List<QuestionOption> findByQuestionIdOrderByDisplayOrderAsc(Integer questionId);
 }

@@ -100,7 +100,7 @@ public class WarrantyRequestService {
                 
 
 //        public class WarrantyNotificationEvent {
-//            private Long warrantyRequestId;
+//            private Integer warrantyRequestId;
 //            private String email;
 //            private String productName;
 //
@@ -110,12 +110,15 @@ public class WarrantyRequestService {
 //        }
 
       
+        System.out.println(customer);
 
         WarrantyRequest saveWarranty = warrantyRequestRepository.save(warrantyRequest);
         WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
                 .warrantyRequestId(saveWarranty.getId())
                 .type(NotificationType.WARRANTY_CREATE)
                 .email(customer.getEmail())
+                .customerName(customer.getFirstName() + " " + customer.getLastName())
+                
                 .productName(productName)
                 .message("Warranty Request Created!")
                 .customerId(customer.getId())
@@ -127,7 +130,7 @@ public class WarrantyRequestService {
     /**
      * Get warranty request by ID
      */
-    public WarrantyRequestDto getWarrantyRequestById(Long id) {
+    public WarrantyRequestDto getWarrantyRequestById(Integer id) {
         log.info("Getting warranty request with id: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -139,7 +142,7 @@ public class WarrantyRequestService {
     /**
      * Get warranty requests by customer ID
      */
-    public List<WarrantyRequestDto> getWarrantyRequestsByCustomerId(Long customerId) {
+    public List<WarrantyRequestDto> getWarrantyRequestsByCustomerId(Integer customerId) {
         log.info("Getting warranty requests for customer: {}", customerId);
         
         List<WarrantyRequest> requests = warrantyRequestRepository.findByCustomerId(customerId);
@@ -172,7 +175,7 @@ public class WarrantyRequestService {
      * Validate warranty request
      */
     // @Transactional
-    // public WarrantyRequestDto validateWarrantyRequest(Long id, WarrantyValidationDto validationDto) {
+    // public WarrantyRequestDto validateWarrantyRequest(Integer id, WarrantyValidationDto validationDto) {
     //     log.info("Validating warranty request: {}", id);
         
     //     WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -224,7 +227,7 @@ public class WarrantyRequestService {
      * Reject warranty request
      */
     // @Transactional
-    // public WarrantyRequestDto rejectWarrantyRequest(Long id, String reason, String performedBy) {
+    // public WarrantyRequestDto rejectWarrantyRequest(Integer id, String reason, String performedBy) {
     //     log.info("Rejecting warranty request: {}", id);
         
     //     WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -264,7 +267,7 @@ public class WarrantyRequestService {
      * Approve warranty request
      */
     @Transactional
-    public WarrantyRequestDto approveWarrantyRequest(Long id, String notes, String performedBy) {
+    public WarrantyRequestDto approveWarrantyRequest(Integer id, String notes, String performedBy) {
         log.info("Approving warranty request: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -304,7 +307,7 @@ public class WarrantyRequestService {
      * Mark warranty request as received
      */
     @Transactional
-    public WarrantyRequestDto receiveWarrantyRequest(Long id, String notes, String performedBy) {
+    public WarrantyRequestDto receiveWarrantyRequest(Integer id, String notes, String performedBy) {
         log.info("Marking warranty request as received: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -343,7 +346,7 @@ public class WarrantyRequestService {
      * Forward warranty request to repair service
      */
     @Transactional
-    public WarrantyRequestDto forwardToRepair(Long id, String notes, String performedBy) {
+    public WarrantyRequestDto forwardToRepair(Integer id, String notes, String performedBy) {
         log.info("Forwarding warranty request to repair: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -354,7 +357,7 @@ public class WarrantyRequestService {
         }
         
         // Create repair request using repair service client
-        Long repairId = repairServiceClient.createRepairRequest(
+        Integer repairId = repairServiceClient.createRepairRequest(
                 request.getCustomerId(), 
                 request.getProductId(),
                 request.getId(), 

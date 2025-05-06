@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
-    List<Notification> findByCustomerId(Long customerId);
+    List<Notification> findByCustomerId(Integer customerId);
 
     List<Notification> findByType(NotificationType type);
 
     List<Notification> findByStatus(NotificationStatus status);
 
-    List<Notification> findByRelatedEntityId(Long relatedEntityId);
+    List<Notification> findByWarrantyRequestId(Integer warrantyRequestId);
 
     List<Notification> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
-    List<Notification> findByCustomerIdAndType(Long customerId, NotificationType type);
+    List<Notification> findByCustomerIdAndType(Integer customerId, NotificationType type);
 }

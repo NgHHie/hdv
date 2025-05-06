@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductResponse {
-    private Long id;
+    private Integer id;
     private String name;
     private String description;
     private BigDecimal price;

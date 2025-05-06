@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface WarrantyRepository extends JpaRepository<Warranty, Long> {
-    List<Warranty> findByCustomerId(Long customerId);
-    List<Warranty> findByProductId(Long productId);
-    Optional<Warranty> findByProductIdAndCustomerId(Long productId, Long customerId);
+public interface WarrantyRepository extends JpaRepository<Warranty, Integer> {
+    List<Warranty> findByCustomerId(Integer customerId);
+    List<Warranty> findByProductId(Integer productId);
+    Optional<Warranty> findByProductIdAndCustomerId(Integer productId, Integer customerId);
     List<Warranty> findByExpirationDateBefore(LocalDate date);
     List<Warranty> findByIsActiveTrue();
 }

@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionResponseDto {
-    private Long id;
-    private Long surveyResponseId;
-    private Long questionId;
+    private Integer id;
+    private Integer surveyResponseId;
+    private Integer questionId;
     private String questionText;
     private String textResponse;
-    private Long selectedOptionId;
+    private Integer selectedOptionId;
     private String selectedOptionText;
     private Integer ratingValue;
     private Boolean booleanResponse;

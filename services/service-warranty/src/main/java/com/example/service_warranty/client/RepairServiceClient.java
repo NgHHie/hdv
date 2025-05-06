@@ -20,7 +20,7 @@ public class RepairServiceClient {
     /**
      * Create a repair request
      */
-    public Long createRepairRequest(Long customerId, Long productId, Long warrantyId, 
+    public Integer createRepairRequest(Integer customerId, Integer productId, Integer warrantyId, 
         String issueDescription, String imageUrls) {
         String url = "/api/v1/repairs";
         log.info("Creating repair request for customer: {}, product: {}", customerId, productId);
@@ -56,21 +56,21 @@ public class RepairServiceClient {
     
     // DTO for repair request
     public static class RepairRequestDto {
-        private Long warrantyId;
-        private Long customerId;
-        private Long productId;
+        private Integer warrantyId;
+        private Integer customerId;
+        private Integer productId;
         private String issueDescription;
         private String imageUrls;
         
         // Getters and setters
-        public Long getWarrantyId() { return warrantyId; }
-        public void setWarrantyId(Long warrantyId) { this.warrantyId = warrantyId; }
+        public Integer getWarrantyId() { return warrantyId; }
+        public void setWarrantyId(Integer warrantyId) { this.warrantyId = warrantyId; }
         
-        public Long getCustomerId() { return customerId; }
-        public void setCustomerId(Long customerId) { this.customerId = customerId; }
+        public Integer getCustomerId() { return customerId; }
+        public void setCustomerId(Integer customerId) { this.customerId = customerId; }
         
-        public Long getProductId() { return productId; }
-        public void setProductId(Long productId) { this.productId = productId; }
+        public Integer getProductId() { return productId; }
+        public void setProductId(Integer productId) { this.productId = productId; }
         
         public String getIssueDescription() { return issueDescription; }
         public void setIssueDescription(String issueDescription) { this.issueDescription = issueDescription; }
@@ -81,12 +81,12 @@ public class RepairServiceClient {
     
     // DTO for repair response
     public static class RepairResponseDto {
-        private Long id;
+        private Integer id;
         private String status;
         
         // Getters and setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
         
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }

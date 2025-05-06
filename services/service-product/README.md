@@ -30,7 +30,7 @@ Microservice này quản lý thông tin về các sản phẩm điện tử, bao
 
 ```json
 {
-  "id": "Long",
+  "id": "Integer",
   "name": "String",
   "description": "String",
   "price": "BigDecimal",

@@ -62,6 +62,7 @@ public class CustomerController {
     public ResponseEntity<Customer> getCustomerById(@PathVariable Integer id) {
         log.info("REST request to get Customer by ID : {}", id);
         Customer customer = customerService.getCustomerById(id);
+        System.out.println("customer = " + customer.getFirstName() + " " + customer.getLastName() + " " + customer.getEmail());
         if (customer == null) {
             log.error("Customer not found with ID: {}", id);
             return ResponseEntity.notFound().build();

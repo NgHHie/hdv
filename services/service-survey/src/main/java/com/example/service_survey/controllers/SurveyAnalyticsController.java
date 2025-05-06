@@ -20,7 +20,7 @@ public class SurveyAnalyticsController {
     private final SurveyAnalyticsService analyticsService;
     
     @GetMapping("/{surveyId}")
-    public ResponseEntity<SurveyAnalyticsDto> getSurveyAnalytics(@PathVariable Long surveyId) {
+    public ResponseEntity<SurveyAnalyticsDto> getSurveyAnalytics(@PathVariable Integer surveyId) {
         log.info("REST request to get analytics for Survey : {}", surveyId);
         try {
             SurveyAnalyticsDto analytics = analyticsService.getSurveyAnalytics(surveyId);
@@ -32,14 +32,14 @@ public class SurveyAnalyticsController {
     }
     
     @GetMapping("/{surveyId}/response-rate")
-    public ResponseEntity<Map<String, Long>> getResponseRateOverTime(
-            @PathVariable Long surveyId,
+    public ResponseEntity<Map<String, Integer>> getResponseRateOverTime(
+            @PathVariable Integer surveyId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
         
         log.info("REST request to get response rate over time for Survey : {}", surveyId);
         try {
-            Map<String, Long> responseRate = analyticsService.getResponseRateOverTime(surveyId, startDate, endDate);
+            Map<String, Integer> responseRate = analyticsService.getResponseRateOverTime(surveyId, startDate, endDate);
             return ResponseEntity.ok(responseRate);
         } catch (Exception e) {
             log.error("Error getting response rate: {}", e.getMessage());

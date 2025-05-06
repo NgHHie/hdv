@@ -21,7 +21,7 @@ public class ProductServiceClient {
     /**
      * Get product details to check warranty information
      */
-    public ProductResponse getProductDetails(Long productId) {
+    public ProductResponse getProductDetails(Integer productId) {
         String url = "/api/v1/products/" + productId;
         log.info("Getting product details from: {}{}", productServiceUrl, url);
 
@@ -57,15 +57,15 @@ public class ProductServiceClient {
 
     // Response model for product details
     public static class ProductResponse {
-        private Long id;
+        private Integer id;
         private String name;
         private String description;
         private String category;
         private Float warrantyDuration;
 
         // Getters and setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
 
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }

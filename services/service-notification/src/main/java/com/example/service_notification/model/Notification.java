@@ -23,7 +23,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
-    private Integer relatedEntityId;    // sau cos the suwr dunjg de link toi warranty request
+    private Integer warrantyRequestId;    // sau cos the suwr dunjg de link toi warranty request
 
     private String email;
 

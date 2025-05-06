@@ -19,13 +19,13 @@ public class Warranty {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "product_id", nullable = false)
-    private Long productId;
+    private Integer productId;
     
     @Column(name = "customer_id", nullable = false)
-    private Long customerId;
+    private Integer customerId;
     
     @Column(name = "purchase_date")
     private LocalDate purchaseDate;

@@ -34,7 +34,7 @@ public class WarrantyRequestController {
    }
    
    @GetMapping("/{id}")
-   public ResponseEntity<WarrantyRequestDto> getWarrantyRequestById(@PathVariable Long id) {
+   public ResponseEntity<WarrantyRequestDto> getWarrantyRequestById(@PathVariable Integer id) {
        log.info("REST request to get Warranty Request : {}", id);
        try {
            WarrantyRequestDto request = warrantyRequestService.getWarrantyRequestById(id);
@@ -47,7 +47,7 @@ public class WarrantyRequestController {
    
    @GetMapping("/customer/{customerId}")
    public ResponseEntity<List<WarrantyRequestDto>> getWarrantyRequestsByCustomerId(
-           @PathVariable Long customerId) {
+           @PathVariable Integer customerId) {
        log.info("REST request to get Warranty Requests for customer : {}", customerId);
        List<WarrantyRequestDto> requests = warrantyRequestService.getWarrantyRequestsByCustomerId(customerId);
        return ResponseEntity.ok(requests);
@@ -63,7 +63,7 @@ public class WarrantyRequestController {
    
 //    @PostMapping("/{id}/validate")
 //    public ResponseEntity<WarrantyRequestDto> validateWarrantyRequest(
-//            @PathVariable Long id,
+//            @PathVariable Integer id,
 //            @RequestBody WarrantyValidationDto validationDto,
 //            Principal principal) {
 //        log.info("REST request to validate Warranty Request : {}", id);
@@ -85,7 +85,7 @@ public class WarrantyRequestController {
    
 //    @PostMapping("/{id}/reject")
 //    public ResponseEntity<WarrantyRequestDto> rejectWarrantyRequest(
-//            @PathVariable Long id,
+//            @PathVariable Integer id,
 //            @RequestBody Map<String, String> requestBody,
 //            Principal principal) {
 //        log.info("REST request to reject Warranty Request : {}", id);
@@ -107,7 +107,7 @@ public class WarrantyRequestController {
    
    @PostMapping("/{id}/approve")
    public ResponseEntity<WarrantyRequestDto> approveWarrantyRequest(
-           @PathVariable Long id,
+           @PathVariable Integer id,
            @RequestBody Map<String, String> requestBody,
            Principal principal) {
        log.info("REST request to approve Warranty Request : {}", id);
@@ -129,7 +129,7 @@ public class WarrantyRequestController {
    
    @PostMapping("/{id}/receive")
    public ResponseEntity<WarrantyRequestDto> receiveWarrantyRequest(
-           @PathVariable Long id,
+           @PathVariable Integer id,
            @RequestBody Map<String, String> requestBody,
            Principal principal) {
        log.info("REST request to mark Warranty Request as received : {}", id);
@@ -151,7 +151,7 @@ public class WarrantyRequestController {
    
    @PostMapping("/{id}/forward-to-repair")
    public ResponseEntity<WarrantyRequestDto> forwardToRepair(
-           @PathVariable Long id,
+           @PathVariable Integer id,
            @RequestBody Map<String, String> requestBody,
            Principal principal) {
        log.info("REST request to forward Warranty Request to repair : {}", id);

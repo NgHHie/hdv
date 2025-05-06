@@ -16,7 +16,7 @@ Base URL: `/api/v1/technicians`
 
 - **Method:** GET
 - **Endpoint:** `/api/v1/technicians/{id}`
-- **Path Variable:** `id` (Long)
+- **Path Variable:** `id` (Integer)
 
 ---
 
@@ -54,7 +54,7 @@ Base URL: `/api/v1/technicians`
 
 - **Method:** PUT
 - **Endpoint:** `/api/v1/technicians/{id}`
-- **Path Variable:** `id` (Long)
+- **Path Variable:** `id` (Integer)
 - **Request Body:** `TechnicianRequest` object in JSON format.
 
 ---
@@ -63,7 +63,7 @@ Base URL: `/api/v1/technicians`
 
 - **Method:** DELETE
 - **Endpoint:** `/api/v1/technicians/{id}`
-- **Path Variable:** `id` (Long)
+- **Path Variable:** `id` (Integer)
 
 ---
 
@@ -71,4 +71,4 @@ Base URL: `/api/v1/technicians`
 
 - **Method:** PATCH
 - **Endpoint:** `/api/v1/technicians/{id}/toggle-status`
-- **Path Variable:** `id` (Long)
+- **Path Variable:** `id` (Integer)

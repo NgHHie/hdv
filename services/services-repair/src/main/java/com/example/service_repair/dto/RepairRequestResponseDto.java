@@ -14,15 +14,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RepairRequestResponseDto {
-    private Long id;
-    private Long warrantyId;
-    private Long customerId;
-    private Long productId;
+    private Integer id;
+    private Integer warrantyId;
+    private Integer customerId;
+    private Integer productId;
     private String issueDescription;
     private String imageUrls;
     private String status;
     private String repairNotes;
-    private Long technicianId;
+    private Integer technicianId;
     private String technicianName;
     private LocalDateTime startDate;
     private LocalDateTime endDate;

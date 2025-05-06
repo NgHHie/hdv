@@ -2,7 +2,7 @@
 INSERT INTO notification_templates (type, subject, content_template, is_active) VALUES
 -- Thông báo tạo yêu cầu bảo hành
 ('WARRANTY_CREATE', 'Xác nhận yêu cầu bảo hành',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Chúng tôi xác nhận đã nhận được yêu cầu bảo hành sản phẩm {{productName}} của Quý khách.
 
@@ -16,7 +16,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo từ chối bảo hành
 ('WARRANTY_REJECT', 'Thông báo về yêu cầu bảo hành',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Chúng tôi rất tiếc phải thông báo rằng yêu cầu bảo hành của Quý khách không được chấp nhận.
 
@@ -30,7 +30,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo chấp nhận và hướng dẫn
 ('WARRANTY_APPROVED', 'Xác nhận bảo hành sản phẩm - Hướng dẫn gửi sản phẩm',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Yêu cầu bảo hành cho sản phẩm {{productName}} của Quý khách đã được chấp nhận. Sản phẩm của Quý khách hiện đang trong thời hạn bảo hành và đủ điều kiện để được bảo hành theo chính sách của chúng tôi.
 
@@ -48,7 +48,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo tiếp nhận sản phẩm
 ('PRODUCT_RECEIVED', 'Xác nhận đã nhận sản phẩm bảo hành',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Chúng tôi xác nhận đã nhận được sản phẩm {{productName}} của Quý khách để tiến hành bảo hành.
 
@@ -64,7 +64,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo bắt đầu chẩn đoán
 ('DIAGNOSIS_STARTED', 'Thông báo bắt đầu kiểm tra sản phẩm',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Chúng tôi đang tiến hành kiểm tra và chẩn đoán sản phẩm {{productName}} của Quý khách.
 
@@ -78,7 +78,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo đang sửa chữa
 ('REPAIR_IN_PROGRESS', 'Cập nhật tiến độ sửa chữa sản phẩm',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Chúng tôi đang tiến hành sửa chữa sản phẩm {{productName}} của Quý khách.
 
@@ -92,7 +92,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo hoàn tất sửa chữa
 ('REPAIR_COMPLETED', 'Thông báo hoàn tất sửa chữa sản phẩm',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Chúng tôi vui mừng thông báo sản phẩm {{productName}} của Quý khách đã được sửa chữa hoàn tất.
 
@@ -106,7 +106,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo gửi trả sản phẩm
 ('PRODUCT_SHIPPING', 'Thông báo gửi trả sản phẩm bảo hành',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Sản phẩm {{productName}} đã bảo hành của Quý khách đang được vận chuyển về địa chỉ đăng ký.
 
@@ -122,7 +122,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo đã giao sản phẩm
 ('PRODUCT_DELIVERED', 'Xác nhận đã giao sản phẩm bảo hành',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Sản phẩm {{productName}} đã bảo hành của Quý khách đã được giao thành công.
 
@@ -136,7 +136,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
 
 -- Thông báo yêu cầu đánh giá
 ('FEEDBACK_REQUEST', 'Đánh giá dịch vụ bảo hành',
- 'Kính gửi Quý khách,
+ 'Kính gửi Quý khách {{customerName}},
 
  Cảm ơn Quý khách đã sử dụng dịch vụ bảo hành của chúng tôi cho sản phẩm {{productName}}.
 

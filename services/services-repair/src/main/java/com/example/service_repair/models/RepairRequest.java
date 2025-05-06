@@ -21,11 +21,11 @@ import com.example.service_repair.constants.RepairStatus;
 public class RepairRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
-    private Long warrantyId;
-    private Long customerId;
-    private Long productId;
+    private Integer warrantyId;
+    private Integer customerId;
+    private Integer productId;
     
     @Column(columnDefinition = "TEXT")
     private String issueDescription;
@@ -39,7 +39,7 @@ public class RepairRequest {
     @Column(columnDefinition = "TEXT")
     private String repairNotes;
     
-    private Long technicianId;
+    private Integer technicianId;
     
     private LocalDateTime startDate;
     private LocalDateTime endDate;

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RepairPartRepository extends JpaRepository<RepairPart, Long> {
-    List<RepairPart> findByRepairRequestId(Long repairId);
+public interface RepairPartRepository extends JpaRepository<RepairPart, Integer> {
+    List<RepairPart> findByRepairRequestId(Integer repairId);
 }

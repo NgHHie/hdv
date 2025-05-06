@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface WarrantyRequestRepository extends JpaRepository<WarrantyRequest, Long> {
-    List<WarrantyRequest> findByCustomerId(Long customerId);
-    List<WarrantyRequest> findByProductId(Long productId);
+public interface WarrantyRequestRepository extends JpaRepository<WarrantyRequest, Integer> {
+    List<WarrantyRequest> findByCustomerId(Integer customerId);
+    List<WarrantyRequest> findByProductId(Integer productId);
     List<WarrantyRequest> findByStatus(String status);
-    List<WarrantyRequest> findByCustomerIdAndStatus(Long customerId, String status);
+    List<WarrantyRequest> findByCustomerIdAndStatus(Integer customerId, String status);
 }

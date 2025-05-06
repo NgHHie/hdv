@@ -13,6 +13,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RepairUpdateDto {
     private String repairNotes;
-    private Long technicianId;
+    private Integer technicianId;
     private BigDecimal repairCost;
 }

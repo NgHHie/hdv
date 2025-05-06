@@ -28,7 +28,7 @@ public class TechnicianController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<TechnicianResponse> getTechnicianById(@PathVariable Long id) {
+    public ResponseEntity<TechnicianResponse> getTechnicianById(@PathVariable Integer id) {
         log.info("REST request to get Technician by ID : {}", id);
         TechnicianResponse technician = technicianService.getTechnicianById(id);
         return ResponseEntity.ok(technician);
@@ -64,7 +64,7 @@ public class TechnicianController {
     
     @PutMapping("/{id}")
     public ResponseEntity<TechnicianResponse> updateTechnician(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @Valid @RequestBody TechnicianRequest technicianRequest) {
         log.info("REST request to update Technician : {}", technicianRequest);
         TechnicianResponse updatedTechnician = technicianService.updateTechnician(id, technicianRequest);
@@ -72,14 +72,14 @@ public class TechnicianController {
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTechnician(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTechnician(@PathVariable Integer id) {
         log.info("REST request to delete Technician : {}", id);
         technicianService.deleteTechnician(id);
         return ResponseEntity.noContent().build();
     }
     
     @PatchMapping("/{id}/toggle-status")
-    public ResponseEntity<TechnicianResponse> toggleTechnicianActiveStatus(@PathVariable Long id) {
+    public ResponseEntity<TechnicianResponse> toggleTechnicianActiveStatus(@PathVariable Integer id) {
         log.info("REST request to toggle active status for Technician : {}", id);
         TechnicianResponse technician = technicianService.toggleTechnicianActiveStatus(id);
         return ResponseEntity.ok(technician);
