@@ -23,7 +23,6 @@ public class PurchaseItemMapper {
         PurchaseItemDTO dto = PurchaseItemDTO.builder()
                 .id(item.getId())
                 .productId(item.getProductId())
-                .quantity(item.getQuantity())
                 .unitPrice(item.getUnitPrice())
                 .build();
         
@@ -58,7 +57,6 @@ public class PurchaseItemMapper {
         return PurchaseItem.builder()
                 .id(dto.getId())
                 .productId(dto.getProductId())
-                .quantity(dto.getQuantity())
                 .unitPrice(dto.getUnitPrice())
 
                 .build();

@@ -32,6 +32,11 @@ public class ProductController {
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
+
+    @GetMapping("/serial/{serial}")
+    public ResponseEntity<ProductResponse> getProductBySerial(@PathVariable String serial) {
+        return ResponseEntity.ok(productService.getProductBySerial(serial));
+    }
     
     @GetMapping("/category/{category}")
     public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable String category) {

@@ -1,5 +1,6 @@
 package com.example.service_notification.service;
 
+import com.example.service_notification.client.CustomerServiceClient;
 import com.example.service_notification.dto.NotificationRequestDto;
 import com.example.service_notification.dto.NotificationResponseDto;
 import com.example.service_notification.dto.mapper.NotificationMapper;
@@ -8,6 +9,9 @@ import com.example.service_notification.model.NotificationStatus;
 import com.example.service_notification.model.NotificationTemplate;
 import com.example.service_notification.repository.NotificationRepository;
 import com.example.service_notification.repository.NotificationTemplateRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationTemplateRepository templateRepository;
@@ -28,19 +33,6 @@ public class NotificationService {
     @Value("${spring.mail.username}")
     private String senderEmail;
     
-    @Autowired
-    public NotificationService(NotificationRepository notificationRepository,
-                              NotificationTemplateRepository templateRepository,
-                              JavaMailSender mailSender) {
-        this.notificationRepository = notificationRepository;
-        this.templateRepository = templateRepository;
-        this.mailSender = mailSender;
-    }
-    
-
-   
-
-
     public NotificationResponseDto sendNotification(NotificationRequestDto requestDto) {
         // Get template for the notification type
         Optional<NotificationTemplate> templateOpt = templateRepository.findByTypeAndIsActiveTrue(requestDto.getType());

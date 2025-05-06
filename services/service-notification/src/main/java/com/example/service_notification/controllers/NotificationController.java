@@ -5,6 +5,9 @@ import com.example.service_notification.dto.NotificationResponseDto;
 import com.example.service_notification.model.NotificationType;
 import com.example.service_notification.service.NotificationService;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +17,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/notifications")
+@RequiredArgsConstructor
+@Slf4j
 public class NotificationController {
 
     private final NotificationService notificationService;
-    
-    @Autowired
-    public NotificationController(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
     
     @PostMapping
     public ResponseEntity<NotificationResponseDto> sendNotification(@RequestBody NotificationRequestDto requestDto) {

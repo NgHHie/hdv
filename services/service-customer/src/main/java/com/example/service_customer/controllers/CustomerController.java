@@ -94,5 +94,9 @@ public class CustomerController {
             return purchaseService.getPurchase(purchaseId);
     }
 
+    @GetMapping("/purchase/{productId}")
+    public PurchaseDTO getPurchaseByProductId(@PathVariable Integer productId) {
+            return purchaseService.getPurchaseByProductId(productId);
+    }
 
 }

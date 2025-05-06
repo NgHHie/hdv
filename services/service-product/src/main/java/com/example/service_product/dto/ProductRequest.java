@@ -31,4 +31,5 @@ public class ProductRequest {
     private String category;
     
     private Float warrantyDuration;
+    private String serialNumber;
 }

@@ -23,7 +23,7 @@ public class WarrantyRequest {
     
     @Column(name = "customer_id", nullable = false)
     private Long customerId;
-    
+
     @Column(name = "product_id", nullable = false)
     private Long productId;
     

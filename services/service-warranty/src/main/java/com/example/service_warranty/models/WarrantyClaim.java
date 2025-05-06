@@ -32,7 +32,7 @@ public class WarrantyClaim {
     @Column(name = "status")
     private String status;
     
-    @Column(name = "notes")
+    @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
     
     @Column(name = "created_at")
@@ -47,6 +47,9 @@ public class WarrantyClaim {
         updatedAt = LocalDateTime.now();
         if (claimDate == null) {
             claimDate = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = "REGISTERED";
         }
     }
     

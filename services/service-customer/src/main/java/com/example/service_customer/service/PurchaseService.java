@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class PurchaseService {
 
     private final PurchaseRepository purchaseRepository;
-    private final PurchaseItemRepository purchaseItemRepository;
+    
 
     public List<PurchaseDTO> getPurchasesByCustomerId(Integer customerId) {
         List<Purchase> purchases = purchaseRepository.findByCustomerId(customerId);
@@ -39,5 +39,9 @@ public class PurchaseService {
           return PurchaseMapper.toDTO(purchase);
     }
 
+    public PurchaseDTO getPurchaseByProductId(Integer productId) {
+        Purchase purchase = purchaseRepository.findByProductId(productId).orElse(null);
+        return PurchaseMapper.toDTO(purchase);
+  }
 
 }
