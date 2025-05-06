@@ -3,6 +3,7 @@ package com.example.service_warranty.services;
 import com.example.service_warranty.client.ProductServiceClient;
 import com.example.service_warranty.client.RepairServiceClient;
 import com.example.service_warranty.dto.*;
+import com.example.service_warranty.event.WarrantyNotificationEvent;
 import com.example.service_warranty.exception.WarrantyRequestNotFoundException;
 import com.example.service_warranty.models.Warranty;
 import com.example.service_warranty.models.WarrantyHistory;
@@ -39,6 +40,7 @@ public class WarrantyRequestService {
     private final ProductServiceClient productServiceClient;
     private final RepairServiceClient repairServiceClient;
     private final ObjectMapper objectMapper;
+    private final KafkaProducerService kafkaProducerService;
     
     /**
      * Create a new warranty request
@@ -49,18 +51,18 @@ public class WarrantyRequestService {
         log.info("Creating new warranty request for product: {}, customer: {}", 
                 requestDto.getProductId(), requestDto.getCustomerId());
         
-        // Check if warranty exists for product and customer
+
         Optional<Warranty> warrantyOpt = warrantyRepository.findByProductIdAndCustomerId(
                 requestDto.getProductId(), requestDto.getCustomerId());
         
         LocalDate expirationDate = null;
-        
+        ProductServiceClient.ProductResponse product = null;
         if (warrantyOpt.isPresent()) {
             Warranty warranty = warrantyOpt.get();
             expirationDate = warranty.getExpirationDate();
         } else {
-            // Check product warranty period from product service
-            ProductServiceClient.ProductResponse product = 
+
+            product =
                     productServiceClient.getProductDetails(requestDto.getProductId());
             
             if (product != null) {
@@ -80,18 +82,24 @@ public class WarrantyRequestService {
                 .build();
         
         WarrantyRequest savedRequest = warrantyRequestRepository.save(warrantyRequest);
+
+
+
+        WarrantyNotificationEvent notificationEvent = WarrantyNotificationEvent.builder()
+        .warrantyRequestId(savedRequest.getId())
+        .customerId(savedRequest.getCustomerId())
+        .productName(product.getName())
+        .type(NotificationType.REPAIR_CREATED).message("Warranty Request Created")
+        .build();
+
+
+        kafkaProducerService.sendWarrantyCreatedEvent(notificationEvent);
+
+
+
+
         
-        // Create initial history entry
-        // WarrantyHistory history = WarrantyHistory.builder()
-        //         .warrantyRequestId(savedRequest.getId())
-        //         .status("PENDING")
-        //         .notes("Warranty request submitted")
-        //         .performedBy("SYSTEM")
-        //         .performedAt(LocalDateTime.now())
-        //         .build();
-        
-        // warrantyHistoryRepository.save(history);
-        
+
         return mapToWarrantyRequestDto(savedRequest);
     }
     

@@ -25,6 +25,8 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <kafka.version>3.5.1</kafka.version>
+        <spring-kafka.version>3.3.5</spring-kafka.version>
     </properties>
 
 </project>

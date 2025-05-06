@@ -1,9 +1,9 @@
-package com.example.service_notification.model;
+package com.example.service_warranty.dto;
 
 public enum NotificationType {
-    WARRANTY_CREATE,
-    WARRANTY_REJECT,
-    WARRANTY_APPROVED,
+    REPAIR_CREATED,
+    REPAIR_REJECTED,
+    REPAIR_APPROVED,
     PRODUCT_RECEIVED,
     DIAGNOSIS_STARTED,
     REPAIR_IN_PROGRESS,
