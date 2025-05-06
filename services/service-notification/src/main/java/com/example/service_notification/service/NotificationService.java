@@ -26,6 +26,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,6 +59,7 @@ public class NotificationService {
             throw new IllegalArgumentException("No active template found for notification type: " + notificationEvent.getType());
         }
 
+        Random random = new Random();
         NotificationTemplate template = templateOpt.get();
 
         
@@ -128,7 +130,52 @@ public class NotificationService {
                 contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
                 contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
                 break;
-        
+            case NotificationType.WARRANTY_REJECT:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+                break;
+
+            case NotificationType.WARRANTY_APPROVED:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                break;
+            case NotificationType.PRODUCT_RECEIVED:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                contentTemplate = contentTemplate.replace("{{warrantyRequestId}}", String.valueOf(notificationEvent.getWarrantyRequestId()));
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+            case NotificationType.DIAGNOSIS_STARTED:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+            case NotificationType.REPAIR_IN_PROGRESS:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+                break;
+            case NotificationType.REPAIR_COMPLETED:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+                break;
+            case NotificationType.PRODUCT_SHIPPING:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+                // contentTemplate = contentTemplate.replace("{{trackingNumber}}", String.valueOf(random.nextInt(100000))); // hiep nho them url de thuc hien gui survey
+                break;
+            case NotificationType.PRODUCT_DELIVERED:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+                break;
+            case NotificationType.FEEDBACK_REQUEST:
+                contentTemplate = contentTemplate.replace("{{customerName}}", notificationEvent.getCustomerName());
+                contentTemplate = contentTemplate.replace("{{productName}}", notificationEvent.getProductName());
+                contentTemplate = contentTemplate.replace("{{message}}", notificationEvent.getMessage());
+                // contentTemplate = contentTemplate.replace("{{feedbackLink}}", notificationEvent.getMessage());  // hiep nho them url de thuc hien gui survey
+
+                break;
             default:
                 break;
         }

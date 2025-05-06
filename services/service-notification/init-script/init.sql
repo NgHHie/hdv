@@ -1,6 +1,35 @@
--- Thêm các mẫu thông báo cho các loại thông báo khác nhau
+-- Create database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS service_notification;
+
+-- Switch to the database
+USE service_notification;
+
+-- Create notification_templates table
+CREATE TABLE IF NOT EXISTS notification_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(50) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    content_template TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Create notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    type VARCHAR(50) NOT NULL,
+    warranty_request_id INT,
+    email VARCHAR(255),
+    subject VARCHAR(255),
+    content TEXT,
+    status VARCHAR(20),
+    created_at DATETIME,
+    sent_at DATETIME
+);
+
+-- Insert notification templates
 INSERT INTO notification_templates (type, subject, content_template, is_active) VALUES
--- Thông báo tạo yêu cầu bảo hành
+-- Warranty creation notification
 ('WARRANTY_CREATE', 'Xác nhận yêu cầu bảo hành',
  'Kính gửi Quý khách {{customerName}},
 
@@ -14,7 +43,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Dịch vụ Khách hàng',
  TRUE),
 
--- Thông báo từ chối bảo hành
+-- Warranty rejection notification
 ('WARRANTY_REJECT', 'Thông báo về yêu cầu bảo hành',
  'Kính gửi Quý khách {{customerName}},
 
@@ -28,7 +57,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Dịch vụ Khách hàng',
  TRUE),
 
--- Thông báo chấp nhận và hướng dẫn
+-- Warranty approval notification
 ('WARRANTY_APPROVED', 'Xác nhận bảo hành sản phẩm - Hướng dẫn gửi sản phẩm',
  'Kính gửi Quý khách {{customerName}},
 
@@ -46,7 +75,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Dịch vụ Khách hàng',
  TRUE),
 
--- Thông báo tiếp nhận sản phẩm
+-- Product received notification
 ('PRODUCT_RECEIVED', 'Xác nhận đã nhận sản phẩm bảo hành',
  'Kính gửi Quý khách {{customerName}},
 
@@ -62,7 +91,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Dịch vụ Khách hàng',
  TRUE),
 
--- Thông báo bắt đầu chẩn đoán
+-- Diagnosis started notification
 ('DIAGNOSIS_STARTED', 'Thông báo bắt đầu kiểm tra sản phẩm',
  'Kính gửi Quý khách {{customerName}},
 
@@ -76,7 +105,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Kỹ thuật',
  TRUE),
 
--- Thông báo đang sửa chữa
+-- Repair in progress notification
 ('REPAIR_IN_PROGRESS', 'Cập nhật tiến độ sửa chữa sản phẩm',
  'Kính gửi Quý khách {{customerName}},
 
@@ -90,7 +119,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Kỹ thuật',
  TRUE),
 
--- Thông báo hoàn tất sửa chữa
+-- Repair completed notification
 ('REPAIR_COMPLETED', 'Thông báo hoàn tất sửa chữa sản phẩm',
  'Kính gửi Quý khách {{customerName}},
 
@@ -104,7 +133,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Dịch vụ Khách hàng',
  TRUE),
 
--- Thông báo gửi trả sản phẩm
+-- Product shipping notification
 ('PRODUCT_SHIPPING', 'Thông báo gửi trả sản phẩm bảo hành',
  'Kính gửi Quý khách {{customerName}},
 
@@ -120,7 +149,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Dịch vụ Khách hàng',
  TRUE),
 
--- Thông báo đã giao sản phẩm
+-- Product delivered notification
 ('PRODUCT_DELIVERED', 'Xác nhận đã giao sản phẩm bảo hành',
  'Kính gửi Quý khách {{customerName}},
 
@@ -134,7 +163,7 @@ INSERT INTO notification_templates (type, subject, content_template, is_active) 
  Đội ngũ Dịch vụ Khách hàng',
  TRUE),
 
--- Thông báo yêu cầu đánh giá
+-- Feedback request notification
 ('FEEDBACK_REQUEST', 'Đánh giá dịch vụ bảo hành',
  'Kính gửi Quý khách {{customerName}},
 

@@ -112,13 +112,14 @@ public class WarrantyRequestService {
       
         System.out.println(customer);
 
+
         WarrantyRequest saveWarranty = warrantyRequestRepository.save(warrantyRequest);
+
         WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
                 .warrantyRequestId(saveWarranty.getId())
                 .type(NotificationType.WARRANTY_CREATE)
                 .email(customer.getEmail())
                 .customerName(customer.getFirstName() + " " + customer.getLastName())
-                
                 .productName(productName)
                 .message("Warranty Request Created!")
                 .customerId(customer.getId())
