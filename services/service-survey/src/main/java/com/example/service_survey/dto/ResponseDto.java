@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,13 +11,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SurveyResponseDto {
-    private Integer id;
-    private Integer surveyId;
+public class ResponseDto {
+    private Long id;
+    private Long surveyId;
     private String surveyTitle;
-    private Integer customerId;
-    private Integer relatedEntityId;
-    private String relatedEntityType;
+    private Long customerId;
     private LocalDateTime createdAt;
-    private List<QuestionResponseDto> questionResponses;
+    private List<ResponseAnswerDto> answers;
 }

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 @Data
@@ -14,18 +13,14 @@ import java.util.List;
 @AllArgsConstructor
 public class SubmitSurveyResponseRequest {
     
-    @NotNull(message = "Survey ID is required")
-    private Integer surveyId;
+    @NotNull(message = "ID khảo sát là bắt buộc")
+    private Long surveyId;
     
-    @NotNull(message = "Customer ID is required")
-    private Integer customerId;
+    @NotNull(message = "ID khách hàng là bắt buộc")
+    private Long customerId;
     
-    private Integer relatedEntityId;
-    
-    private String relatedEntityType;
-    
-    @NotNull(message = "Question responses are required")
-    private List<QuestionAnswerRequest> questionResponses;
+    @NotNull(message = "Cần có câu trả lời cho khảo sát")
+    private List<QuestionAnswerRequest> answers;
     
     @Data
     @Builder
@@ -33,15 +28,9 @@ public class SubmitSurveyResponseRequest {
     @AllArgsConstructor
     public static class QuestionAnswerRequest {
         
-        @NotNull(message = "Question ID is required")
-        private Integer questionId;
+        @NotNull(message = "ID câu hỏi là bắt buộc")
+        private Long questionId;
         
-        private String textResponse;
-        
-        private Integer selectedOptionId;
-        
-        private Integer ratingValue;
-        
-        private Boolean booleanResponse;
+        private String answerText;
     }
 }

@@ -19,11 +19,7 @@ public class Survey {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-    
-    @Column(name = "survey_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private SurveyType surveyType;
+    private Long id;
     
     @Column(name = "title", nullable = false)
     private String title;
@@ -31,8 +27,8 @@ public class Survey {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
     
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Column(name = "active")
+    private Boolean active;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -41,14 +37,14 @@ public class Survey {
     private LocalDateTime updatedAt;
     
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SurveyQuestion> questions;
+    private List<Question> questions;
     
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        if (isActive == null) {
-            isActive = true;
+        if (active == null) {
+            active = true;
         }
     }
     

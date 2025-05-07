@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionOptionDto {
-    private Integer id;
-    private Integer questionId;
-    private String optionText;
-    private Integer displayOrder;
+public class ResponseAnswerDto {
+    private Long id;
+    private Long responseId;
+    private Long questionId;
+    private String questionText;
+    private String answerText;
 }

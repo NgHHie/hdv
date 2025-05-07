@@ -5,20 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "survey_questions")
+@Table(name = "questions")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SurveyQuestion {
+public class Question {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     
     @ManyToOne
     @JoinColumn(name = "survey_id", nullable = false)
@@ -27,16 +26,20 @@ public class SurveyQuestion {
     @Column(name = "question_text", nullable = false, columnDefinition = "TEXT")
     private String questionText;
     
-    @Column(name = "question_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private QuestionType questionType;
+    @Column(name = "question_order")
+    private Integer questionOrder;
     
     @Column(name = "required")
     private Boolean required;
     
-    @Column(name = "display_order")
-    private Integer displayOrder;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
     
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuestionOption> options;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (required == null) {
+            required = false;
+        }
+    }
 }
