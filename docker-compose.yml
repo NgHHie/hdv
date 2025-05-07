@@ -37,12 +37,10 @@ services:
       dockerfile: Dockerfile
       no_cache: true
     container_name: security-service
-    ports:
-      - "${SECURITY_SERVICE_PORT}:${SECURITY_SERVICE_PORT}"
     environment:
       - SERVER_PORT=${SECURITY_SERVICE_PORT}
-      - SPRING_APPLICATION_NAME=service-security
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
+      - SPRING_APPLICATION_NAME=${SECURITY_SERVICE_NAME}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
       - MYSQL_HOST=${SECURITY_DB_HOST}
       - MYSQL_PORT=${SECURITY_DB_PORT}
       - MYSQL_DATABASE=${SECURITY_DATABASE}
@@ -77,11 +75,9 @@ services:
       context: ./services/service-customer
       dockerfile: Dockerfile
     container_name: service-customer
-    ports:
-      - "${CUSTOMER_SERVICE_PORT}:${CUSTOMER_SERVICE_PORT}"
     environment:
       - SERVER_PORT=${CUSTOMER_SERVICE_PORT}
-      - SPRING_APPLICATION_NAME=service-customer
+      - SPRING_APPLICATION_NAME=${CUSTOMER_SERVICE_NAME}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
       - MYSQL_HOST=${CUSTOMER_DB_HOST}
       - MYSQL_PORT=${CUSTOMER_DB_PORT}
@@ -116,11 +112,9 @@ services:
       context: ./services/service-product
       dockerfile: Dockerfile
     container_name: service-product
-    ports:
-      - "${PRODUCT_SERVICE_PORT}:${PRODUCT_SERVICE_PORT}"
     environment:
       - SERVER_PORT=${PRODUCT_SERVICE_PORT}
-      - SPRING_APPLICATION_NAME=service-product
+      - SPRING_APPLICATION_NAME=${PRODUCT_SERVICE_NAME}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
       - MYSQL_HOST=${PRODUCT_DB_HOST}
       - MYSQL_PORT=${PRODUCT_DB_PORT}
@@ -154,11 +148,9 @@ services:
       context: ./services/service-notification
       dockerfile: Dockerfile
     container_name: service-notification
-    ports:
-      - "${NOTIFICATION_SERVICE_PORT}:${NOTIFICATION_SERVICE_PORT}"
     environment:
       - SERVER_PORT=${NOTIFICATION_SERVICE_PORT}
-      - SPRING_APPLICATION_NAME=service-notification
+      - SPRING_APPLICATION_NAME=${NOTIFICATION_SERVICE_NAME}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
       - MYSQL_HOST=${NOTIFICATION_DB_HOST}
       - MYSQL_PORT=${NOTIFICATION_DB_PORT}
@@ -203,11 +195,9 @@ services:
       context: ./services/service-technician
       dockerfile: Dockerfile
     container_name: service-technician
-    ports:
-      - "${TECHNICIAN_SERVICE_PORT}:${TECHNICIAN_SERVICE_PORT}"
     environment:
       - SERVER_PORT=${TECHNICIAN_SERVICE_PORT}
-      - SPRING_APPLICATION_NAME=service-technician
+      - SPRING_APPLICATION_NAME=${TECHNICIAN_SERVICE_NAME}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
       - MYSQL_HOST=${TECHNICIAN_DB_HOST}
       - MYSQL_PORT=${TECHNICIAN_DB_PORT}
@@ -231,19 +221,156 @@ services:
       - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     environment:
       - SERVER_PORT=${GATEWAY_PORT}
-      - SPRING_APPLICATION_NAME=gateway-service
+      - SPRING_APPLICATION_NAME=${GATEWAY_SERVICE_NAME}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
       - APP_JWT_SECRET=${JWT_SECRET}
     depends_on:
       - discovery-server
-      - service-customer
-      - service-product
-      - service-notification
-      - service-technician
-      - security-service
     networks:
       - microservices-network
 
+  # Survey Service Database
+  survey-db:
+    image: mysql:8.0
+    container_name: survey-db
+    environment:
+      - MYSQL_DATABASE=${SURVEY_DB_NAME}
+      - MYSQL_USER=${SURVEY_DB_USER}
+      - MYSQL_PASSWORD=${SURVEY_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${SURVEY_DB_PASSWORD}
+    volumes:
+      - survey-db-data:/var/lib/mysql
+      - ./services/service-survey/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - microservices-network
+
+  # Survey Service
+  service-survey:
+    build:
+      context: ./services/service-survey
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: service-survey
+    environment:
+      - SERVER_PORT=${SURVEY_SERVICE_PORT}
+      - SPRING_APPLICATION_NAME=${SURVEY_SERVICE_NAME}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
+      - MYSQL_HOST=${SURVEY_DB_HOST}
+      - MYSQL_PORT=${SURVEY_DB_PORT}
+      - MYSQL_DATABASE=${SURVEY_DATABASE}
+      - MYSQL_USERNAME=${SURVEY_DB_USER}
+      - MYSQL_PASSWORD=${SURVEY_DB_PASSWORD}
+    depends_on:
+      - discovery-server
+      - survey-db
+    networks:
+      - microservices-network
+
+  # Warranty Service
+  service-warranty:
+    build:
+      context: ./services/service-warranty
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: service-warranty
+    environment:
+      - SERVER_PORT=${WARRANTY_SERVICE_PORT}
+      - SPRING_APPLICATION_NAME=${WARRANTY_SERVICE_NAME}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
+      - SERVICE_PRODUCT_URL=http://service-product
+      - SERVICE_REPAIR_URL=http://service-repair
+      - SERVICE_NOTIFICATION_URL=http://service-notification
+      - SERVICE_CUSTOMER_URL=http://service-customer
+      - SERVICE_CONDITION_URL=http://service-condition
+      - SERVICE_TECHNICIAN_URL=http://service-technician
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:${KAFKA_PORT}
+    depends_on:
+      - discovery-server
+      - kafka
+      - service-product
+      - service-customer
+      - service-condition
+      - service-technician
+    networks:
+      - microservices-network
+  # Condition Service Database
+  condition-db:
+    image: mysql:8.0
+    container_name: condition-db
+    environment:
+      - MYSQL_DATABASE=${CONDITION_DB_NAME}
+      - MYSQL_USER=${CONDITION_DB_USER}
+      - MYSQL_PASSWORD=${CONDITION_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${CONDITION_DB_PASSWORD}
+    volumes:
+      - condition-db-data:/var/lib/mysql
+      - ./services/service-condition/init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - microservices-network
+
+  # Condition Service
+  service-condition:
+    build:
+      context: ./services/service-condition
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: service-condition
+    environment:
+      - SERVER_PORT=${CONDITION_SERVICE_PORT}
+      - SPRING_APPLICATION_NAME=${CONDITION_SERVICE_NAME}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
+      - MYSQL_HOST=${CONDITION_DB_HOST}
+      - MYSQL_PORT=${CONDITION_DB_PORT}
+      - MYSQL_DATABASE=${CONDITION_DATABASE}
+      - MYSQL_USERNAME=${CONDITION_DB_USER}
+      - MYSQL_PASSWORD=${CONDITION_DB_PASSWORD}
+    depends_on:
+      - discovery-server
+      - condition-db
+    networks:
+      - microservices-network
+
+  # Repair Service Database
+  repair-db:
+    image: mysql:8.0
+    container_name: repair-db
+    environment:
+      - MYSQL_DATABASE=${REPAIR_DB_NAME}
+      - MYSQL_USER=${REPAIR_DB_USER}
+      - MYSQL_PASSWORD=${REPAIR_DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${REPAIR_DB_PASSWORD}
+    volumes:
+      - repair-db-data:/var/lib/mysql
+    networks:
+      - microservices-network
+
+  # Repair Service
+  service-repair:
+    build:
+      context: ./services/services-repair
+      dockerfile: Dockerfile
+      no_cache: true
+    container_name: service-repair
+    environment:
+      - SERVER_PORT=${REPAIR_SERVICE_PORT}
+      - SPRING_APPLICATION_NAME=${REPAIR_SERVICE_NAME}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${DISCOVERY_SERVER_PORT}/eureka/
+      - MYSQL_HOST=${REPAIR_DB_HOST}
+      - MYSQL_PORT=${REPAIR_DB_PORT}
+      - MYSQL_DATABASE=${REPAIR_DATABASE}
+      - MYSQL_USERNAME=${REPAIR_DB_USER}
+      - MYSQL_PASSWORD=${REPAIR_DB_PASSWORD}
+      - SERVICE_NOTIFICATION_URL=http://service-notification
+      - SERVICE_WARRANTY_URL=http://service-warranty
+      - SERVICE_PRODUCT_URL=http://service-product
+    depends_on:
+      - discovery-server
+      - repair-db
+      - service-notification
+      - service-warranty
+      - service-product
+    networks:
+      - microservices-network
   kafka:
     image: apache/kafka-native
     ports:
@@ -265,13 +392,15 @@ services:
 
       # Required for a single node cluster
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
 volumes:
   security-db-data:
   customer-db-data:
   product-db-data:
   notification-db-data:
   technician-db-data:
+  condition-db-data:
+  survey-db-data:
+  repair-db-data:
 
 networks:
   microservices-network:
