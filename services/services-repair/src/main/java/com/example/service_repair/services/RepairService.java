@@ -1,7 +1,5 @@
 package com.example.service_repair.services;
 
-import com.example.service_repair.client.NotificationServiceClient;
-import com.example.service_repair.client.ProductServiceClient;
 import com.example.service_repair.client.WarrantyServiceClient;
 import com.example.service_repair.constants.RepairStatus;
 import com.example.service_repair.dto.*;
@@ -34,9 +32,7 @@ public class RepairService {
     private final TechnicianRepository technicianRepository;
     private final RepairActionRepository actionRepository;
     
-    private final NotificationServiceClient notificationServiceClient;
     private final WarrantyServiceClient warrantyServiceClient;
-    private final ProductServiceClient productServiceClient;
 
     /**
      * Create a new repair request
@@ -45,16 +41,6 @@ public class RepairService {
     public RepairRequestResponseDto createRepairRequest(RepairRequestDto repairRequestDto) {
         log.info("Creating new repair request for customer: {}, product: {}", 
             repairRequestDto.getCustomerId(), repairRequestDto.getProductId());
-        
-        // Check if product exists
-        boolean productExists = productServiceClient.checkProductExists(repairRequestDto.getProductId());
-        if (!productExists) {
-            throw new IllegalArgumentException("Product does not exist");
-        }
-        
-        // Check warranty status
-        boolean isWithinWarranty = warrantyServiceClient.checkWarrantyStatus(
-            repairRequestDto.getProductId(), repairRequestDto.getCustomerId());
             
         RepairRequest repairRequest = RepairRequest.builder()
                 .warrantyId(repairRequestDto.getWarrantyId())
@@ -65,7 +51,7 @@ public class RepairService {
                 .status(RepairStatus.SUBMITTED)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .withinWarranty(isWithinWarranty)
+                .withinWarranty(true)
                 .build();
         
         RepairRequest savedRequest = repairRequestRepository.save(repairRequest);
@@ -82,8 +68,8 @@ public class RepairService {
         statusHistoryRepository.save(initialStatus);
         
         // Send notification to customer
-        notificationServiceClient.sendRepairRequestCreatedNotification(
-            savedRequest.getCustomerId(), savedRequest.getId());
+        // notificationServiceClient.sendRepairRequestCreatedNotification(
+        //     savedRequest.getCustomerId(), savedRequest.getId());
             
         return convertToResponseDto(savedRequest);
     }
@@ -166,11 +152,11 @@ public class RepairService {
         // Send notification based on the new status
         sendStatusChangeNotification(updatedRequest);
 
-        if (updatedRequest.getStatus() == RepairStatus.COMPLETED) {
-            updateWarrantyServiceStatus(repairId, "REPAIRED");
-        } else if (updatedRequest.getStatus() == RepairStatus.DELIVERED) {
-            updateWarrantyServiceStatus(repairId, "DELIVERED");
-        }
+        // if (updatedRequest.getStatus() == RepairStatus.COMPLETED) {
+        //     updateWarrantyServiceStatus(repairId, "REPAIRED");
+        // } else if (updatedRequest.getStatus() == RepairStatus.DELIVERED) {
+        //     updateWarrantyServiceStatus(repairId, "DELIVERED");
+        // }
         
         
         return convertToResponseDto(updatedRequest);
@@ -255,8 +241,8 @@ public class RepairService {
                     "Request cancelled. Previous status: " + previousStatus);
             
             // Send cancellation notification
-            notificationServiceClient.sendRepairRequestCancelledNotification(
-                updatedRequest.getCustomerId(), updatedRequest.getId());
+            // notificationServiceClient.sendRepairRequestCancelledNotification(
+            //     updatedRequest.getCustomerId(), updatedRequest.getId());
                 
             return convertToResponseDto(updatedRequest);
         } catch (Exception e) {
@@ -419,8 +405,8 @@ public class RepairService {
                 "Request rejected. Reason: " + reason + ". Previous status: " + previousStatus);
         
         // Send rejection notification
-        notificationServiceClient.sendRepairRequestRejectedNotification(
-            updatedRequest.getCustomerId(), updatedRequest.getId(), reason);
+        // notificationServiceClient.sendRepairRequestRejectedNotification(
+        //     updatedRequest.getCustomerId(), updatedRequest.getId(), reason);
             
         return convertToResponseDto(updatedRequest);
     }
@@ -429,7 +415,7 @@ public class RepairService {
      * Process product receipt - mark as RECEIVED
      */
     @Transactional
-    public RepairRequestResponseDto processProductReceipt(Long repairId, String username) {
+    public RepairRequestResponseDto processProductReceipt(Long repairId, TechnicianDto technician, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         if (repairRequest.getStatus() != RepairStatus.SUBMITTED) {
@@ -438,6 +424,7 @@ public class RepairService {
         
         repairRequest.setStatus(RepairStatus.RECEIVED);
         repairRequest.setUpdatedAt(LocalDateTime.now());
+        repairRequest.setTechnicianId(technician.getId());
         
         RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
         
@@ -446,7 +433,7 @@ public class RepairService {
                 .repairRequest(updatedRequest)
                 .status(RepairStatus.RECEIVED)
                 .notes("Product received for repair")
-                .createdBy(username)
+                .createdBy(String.valueOf(technician.getId()))
                 .createdAt(LocalDateTime.now())
                 .build();
         
@@ -456,11 +443,9 @@ public class RepairService {
         createStateChangeAction(updatedRequest, username, 
                 "PRODUCT_RECEIPT", 
                 "Product received for repair");
-        
-        // Send product received notification
-        notificationServiceClient.sendProductReceivedNotification(
-            updatedRequest.getCustomerId(), updatedRequest.getId());
-            
+
+        warrantyServiceClient.updateWarrantyStatus(repairRequest.getWarrantyId(), "REPAIR_IN_PROGRESS", username);
+          
         return convertToResponseDto(updatedRequest);
     }
     
@@ -517,65 +502,65 @@ public class RepairService {
     /**
      * Get dashboard statistics
      */
-    public DashboardStatsDto getDashboardStats() {
-        DashboardStatsDto stats = new DashboardStatsDto();
+    // public DashboardStatsDto getDashboardStats() {
+    //     DashboardStatsDto stats = new DashboardStatsDto();
         
-        stats.setTotalRepairRequests(repairRequestRepository.count());
+    //     stats.setTotalRepairRequests(repairRequestRepository.count());
         
-        List<RepairStatus> pendingStatuses = List.of(RepairStatus.SUBMITTED, RepairStatus.RECEIVED);
-        stats.setPendingRepairRequests((long) repairRequestRepository.findByStatusIn(pendingStatuses).size());
+    //     List<RepairStatus> pendingStatuses = List.of(RepairStatus.SUBMITTED, RepairStatus.RECEIVED);
+    //     stats.setPendingRepairRequests((long) repairRequestRepository.findByStatusIn(pendingStatuses).size());
         
-        List<RepairStatus> inProgressStatuses = List.of(
-                RepairStatus.UNDER_DIAGNOSIS, RepairStatus.DIAGNOSING, 
-                RepairStatus.WAITING_APPROVAL, RepairStatus.REPAIRING,
-                RepairStatus.REPAIRED, RepairStatus.TESTING);
-        stats.setInProgressRepairRequests((long) repairRequestRepository.findByStatusIn(inProgressStatuses).size());
+    //     List<RepairStatus> inProgressStatuses = List.of(
+    //             RepairStatus.UNDER_DIAGNOSIS, RepairStatus.DIAGNOSING, 
+    //             RepairStatus.WAITING_APPROVAL, RepairStatus.REPAIRING,
+    //             RepairStatus.REPAIRED, RepairStatus.TESTING);
+    //     stats.setInProgressRepairRequests((long) repairRequestRepository.findByStatusIn(inProgressStatuses).size());
         
-        stats.setCompletedRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.DELIVERED).size());
-        stats.setCancelledRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.CANCELLED).size());
+    //     stats.setCompletedRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.DELIVERED).size());
+    //     stats.setCancelledRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.CANCELLED).size());
         
-        // Calculate average repair time for completed repairs
-        List<RepairRequest> completedRepairs = repairRequestRepository.findByStatus(RepairStatus.DELIVERED);
-        if (!completedRepairs.isEmpty()) {
-            double averageHours = completedRepairs.stream()
-                    .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
-                    .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
-                    .average()
-                    .orElse(0);
-            stats.setAverageRepairTime(averageHours);
-        } else {
-            stats.setAverageRepairTime(0.0);
-        }
+    //     // Calculate average repair time for completed repairs
+    //     List<RepairRequest> completedRepairs = repairRequestRepository.findByStatus(RepairStatus.DELIVERED);
+    //     if (!completedRepairs.isEmpty()) {
+    //         double averageHours = completedRepairs.stream()
+    //                 .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
+    //                 .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
+    //                 .average()
+    //                 .orElse(0);
+    //         stats.setAverageRepairTime(averageHours);
+    //     } else {
+    //         stats.setAverageRepairTime(0.0);
+    //     }
         
-        // Get technician performance
-        List<Technician> activeTechnicians = technicianRepository.findByIsActiveTrue();
-        List<DashboardStatsDto.TechnicianPerformanceDto> technicianPerformance = new ArrayList<>();
+    //     // Get technician performance
+    //     List<Technician> activeTechnicians = technicianRepository.findByIsActiveTrue();
+    //     List<DashboardStatsDto.TechnicianPerformanceDto> technicianPerformance = new ArrayList<>();
         
-        for (Technician technician : activeTechnicians) {
-            List<RepairRequest> technicianCompletedRepairs = repairRequestRepository.findByTechnicianId(technician.getId()).stream()
-                    .filter(repair -> repair.getStatus() == RepairStatus.DELIVERED)
-                    .collect(Collectors.toList());
+    //     for (Technician technician : activeTechnicians) {
+    //         List<RepairRequest> technicianCompletedRepairs = repairRequestRepository.findByTechnicianId(technician.getId()).stream()
+    //                 .filter(repair -> repair.getStatus() == RepairStatus.DELIVERED)
+    //                 .collect(Collectors.toList());
             
-            double techAverageHours = technicianCompletedRepairs.stream()
-                    .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
-                    .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
-                    .average()
-                    .orElse(0);
+    //         double techAverageHours = technicianCompletedRepairs.stream()
+    //                 .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
+    //                 .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
+    //                 .average()
+    //                 .orElse(0);
             
-            DashboardStatsDto.TechnicianPerformanceDto perfDto = DashboardStatsDto.TechnicianPerformanceDto.builder()
-                    .technicianId(technician.getId())
-                    .technicianName(technician.getName())
-                    .completedRepairs((long) technicianCompletedRepairs.size())
-                    .averageRepairTime(techAverageHours)
-                    .build();
+    //         DashboardStatsDto.TechnicianPerformanceDto perfDto = DashboardStatsDto.TechnicianPerformanceDto.builder()
+    //                 .technicianId(technician.getId())
+    //                 .technicianName(technician.getName())
+    //                 .completedRepairs((long) technicianCompletedRepairs.size())
+    //                 .averageRepairTime(techAverageHours)
+    //                 .build();
             
-            technicianPerformance.add(perfDto);
-        }
+    //         technicianPerformance.add(perfDto);
+    //     }
         
-        stats.setTechnicianPerformance(technicianPerformance);
+    //     stats.setTechnicianPerformance(technicianPerformance);
         
-        return stats;
-    }
+    //     return stats;
+    // }
     
     /**
      * Create state change action
@@ -700,57 +685,57 @@ public class RepairService {
         return dto;
     }
     
-    @Transactional
-    public void updateWarrantyServiceStatus(Long repairId, String status) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
+    // @Transactional
+    // public void updateWarrantyServiceStatus(Long repairId, String status) {
+    //     RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
-        if (repairRequest.getWarrantyId() != null) {
-            try {
-                // Call warranty service to update status
-                warrantyServiceClient.updateWarrantyStatus(
-                    repairRequest.getWarrantyId(), 
-                    status, 
-                    "Status updated from repair service: " + status
-                );
-            } catch (Exception e) {
-                log.error("Failed to update warranty service: {}", e.getMessage());
-                // Continue with repair process even if warranty update fails
-            }
-        }
-    }
+    //     if (repairRequest.getWarrantyId() != null) {
+    //         try {
+    //             // Call warranty service to update status
+    //             warrantyServiceClient.updateWarrantyStatus(
+    //                 repairRequest.getWarrantyId(), 
+    //                 status, 
+    //                 "Status updated from repair service: " + status
+    //             );
+    //         } catch (Exception e) {
+    //             log.error("Failed to update warranty service: {}", e.getMessage());
+    //             // Continue with repair process even if warranty update fails
+    //         }
+    //     }
+    // }
     /**
      * Send appropriate notification based on status change
      */
     private void sendStatusChangeNotification(RepairRequest repairRequest) {
-        switch (repairRequest.getStatus()) {
-            case UNDER_DIAGNOSIS:
-                notificationServiceClient.sendRepairDiagnosisStartedNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case WAITING_APPROVAL:
-                notificationServiceClient.sendRepairApprovalRequiredNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId(), 
-                    repairRequest.getRepairCost() != null ? repairRequest.getRepairCost().doubleValue() : 0.0);
-                break;
-            case REPAIRING:
-                notificationServiceClient.sendRepairInProgressNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case COMPLETED:
-                notificationServiceClient.sendRepairCompletedNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case DELIVERING:
-                notificationServiceClient.sendProductShippingNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case DELIVERED:
-                notificationServiceClient.sendProductDeliveredNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            default:
-                // No notification for other status changes
-                break;
-        }
+        // switch (repairRequest.getStatus()) {
+        //     case UNDER_DIAGNOSIS:
+        //         notificationServiceClient.sendRepairDiagnosisStartedNotification(
+        //             repairRequest.getCustomerId(), repairRequest.getId());
+        //         break;
+        //     case WAITING_APPROVAL:
+        //         notificationServiceClient.sendRepairApprovalRequiredNotification(
+        //             repairRequest.getCustomerId(), repairRequest.getId(), 
+        //             repairRequest.getRepairCost() != null ? repairRequest.getRepairCost().doubleValue() : 0.0);
+        //         break;
+        //     case REPAIRING:
+        //         notificationServiceClient.sendRepairInProgressNotification(
+        //             repairRequest.getCustomerId(), repairRequest.getId());
+        //         break;
+        //     case COMPLETED:
+        //         notificationServiceClient.sendRepairCompletedNotification(
+        //             repairRequest.getCustomerId(), repairRequest.getId());
+        //         break;
+        //     case DELIVERING:
+        //         notificationServiceClient.sendProductShippingNotification(
+        //             repairRequest.getCustomerId(), repairRequest.getId());
+        //         break;
+        //     case DELIVERED:
+        //         notificationServiceClient.sendProductDeliveredNotification(
+        //             repairRequest.getCustomerId(), repairRequest.getId());
+        //         break;
+        //     default:
+        //         // No notification for other status changes
+        //         break;
+        // }
     }
 }

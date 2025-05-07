@@ -7,6 +7,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,12 +71,13 @@ public class CustomerServiceClient {
         
         try {
             CustomerResponse customer = webClientBuilder.build()
-                    .get()
-                    .uri(customerServiceUrl + url)
-                    .retrieve()
-                    .bodyToMono(CustomerResponse.class)
-                    .block();
-            
+                .get()
+                .uri(customerServiceUrl + url)
+                .retrieve()
+                .bodyToMono(CustomerResponse.class)
+                .block();
+
+            System.out.println(customer.getFirstName());
             if (customer != null) {
                 return customer;
             }
@@ -167,6 +170,9 @@ public class CustomerServiceClient {
     public static class CustomerResponse {
         private Long id;
         private String email;
+        private String firstName;
+
+        public String getFirstName() { return firstName; }
 
         public Long getId() { return id; }
         public String getEmail() { return email; }

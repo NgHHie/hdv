@@ -76,15 +76,10 @@ public class NotificationServiceClient {
     /**
      * Send warranty approved notification
      */
-    public void sendWarrantyApprovedNotification(Long customerId, Long warrantyRequestId, String message) {
-        log.info("Sending warranty approved notification to customer: {}", customerId);
+    public void sendWarrantyApprovedNotification(NotificationRequestDto request) {
+        log.info("Sending warranty approved notification to customer: {}", request.getCustomerId());
         
         try {
-            NotificationRequest request = new NotificationRequest();
-            request.setCustomerId(customerId);
-            request.setRelatedEntityId(warrantyRequestId);
-            request.setMessage(message);
-            
             webClientBuilder.build()
                 .post()
                 .uri(notificationServiceUrl + "/api/v1/notifications/repair-approved")
@@ -98,7 +93,7 @@ public class NotificationServiceClient {
                 })
                 .subscribe();
             
-            log.info("Repair approved notification sent successfully to customer: {}", customerId);
+            log.info("Repair approved notification sent successfully to customer: {}", request.getCustomerId());
         } catch (Exception e) {
             log.error("Error sending repair approved notification: {}", e.getMessage());
         }
@@ -107,15 +102,10 @@ public class NotificationServiceClient {
     /**
      * Send product received notification
      */
-    public void sendProductReceivedNotification(Long customerId, Long warrantyRequestId, String message) {
-        log.info("Sending product received notification to customer: {}", customerId);
+    public void sendProductReceivedNotification(NotificationRequestDto request) {
+        log.info("Sending product received notification to customer: {}", request.getCustomerId());
         
-        try {
-            NotificationRequest request = new NotificationRequest();
-            request.setCustomerId(customerId);
-            request.setRelatedEntityId(warrantyRequestId);
-            request.setMessage(message);
-            
+        try {   
             webClientBuilder.build()
                 .post()
                 .uri(notificationServiceUrl + "/api/v1/notifications/product-received")
@@ -127,9 +117,9 @@ public class NotificationServiceClient {
                     log.error("Failed to send product received notification: {}", e.getMessage());
                     return Mono.empty();
                 })
-                .block();
+                .subscribe();
             
-            log.info("Product received notification sent successfully to customer: {}", customerId);
+            log.info("Product received notification sent successfully to customer: {}", request.getCustomerId());
         } catch (Exception e) {
             log.error("Error sending product received notification: {}", e.getMessage());
         }
@@ -165,6 +155,29 @@ public class NotificationServiceClient {
             log.error("Error sending repair completed notification: {}", e.getMessage());
         }
     }
+
+    public void sendRepairInProgressNotification(NotificationRequestDto request) {
+        log.info("Sending repair in progress notification to customer: {}", request.getCustomerId());
+        
+        try {   
+            webClientBuilder.build()
+                .post()
+                .uri(notificationServiceUrl + "/api/v1/notifications/repair-in-progress")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .onErrorResume(e -> {
+                    log.error("Failed to send repair in progress notification: {}", e.getMessage());
+                    return Mono.empty();
+                })
+                .block();
+            
+            log.info("Repair in progress notification sent successfully to customer: {}", request.getCustomerId());
+        } catch (Exception e) {
+            log.error("Error sending repair in progress notification: {}", e.getMessage());
+        }
+    }
     
     public static class NotificationRequest {
         private Long customerId;
@@ -185,4 +198,6 @@ public class NotificationServiceClient {
         public String getMessage() { return message; }
         public void setMessage(String message) { this.message = message; }
     }
+
+    
 }

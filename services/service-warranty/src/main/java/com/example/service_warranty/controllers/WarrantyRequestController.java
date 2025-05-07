@@ -61,27 +61,27 @@ public class WarrantyRequestController {
        return ResponseEntity.ok(requests);
    }
    
-//    @PostMapping("/{id}/validate")
-//    public ResponseEntity<WarrantyRequestDto> validateWarrantyRequest(
-//            @PathVariable Long id,
-//            @RequestBody WarrantyValidationDto validationDto,
-//            Principal principal) {
-//        log.info("REST request to validate Warranty Request : {}", id);
+   @PostMapping("/{id}/validate")
+   public ResponseEntity<WarrantyRequestDto> validateWarrantyRequest(
+           @PathVariable Long id,
+           @RequestBody WarrantyValidationDto validationDto,
+           Principal principal) {
+       log.info("REST request to validate Warranty Request : {}", id);
        
-//        String username = principal != null ? principal.getName() : "SYSTEM";
-//        validationDto.setValidatedBy(username);
+       String username = principal != null ? principal.getName() : "SYSTEM";
+       validationDto.setValidatedBy(username);
        
-//        try {
-//            WarrantyRequestDto updatedRequest = warrantyRequestService.validateWarrantyRequest(id, validationDto);
-//            return ResponseEntity.ok(updatedRequest);
-//        } catch (WarrantyRequestNotFoundException e) {
-//            log.error("Warranty Request not found: {}", e.getMessage());
-//            return ResponseEntity.notFound().build();
-//        } catch (IllegalStateException e) {
-//            log.error("Cannot validate warranty request: {}", e.getMessage());
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
+       try {
+           WarrantyRequestDto updatedRequest = warrantyRequestService.validateWarrantyRequest(id, validationDto);
+           return ResponseEntity.ok(updatedRequest);
+       } catch (WarrantyRequestNotFoundException e) {
+           log.error("Warranty Request not found: {}", e.getMessage());
+           return ResponseEntity.notFound().build();
+       } catch (IllegalStateException e) {
+           log.error("Cannot validate warranty request: {}", e.getMessage());
+           return ResponseEntity.badRequest().build();
+       }
+   }
    
 //    @PostMapping("/{id}/reject")
 //    public ResponseEntity<WarrantyRequestDto> rejectWarrantyRequest(
@@ -105,69 +105,77 @@ public class WarrantyRequestController {
 //        }
 //    }
    
-   @PostMapping("/{id}/approve")
-   public ResponseEntity<WarrantyRequestDto> approveWarrantyRequest(
-           @PathVariable Long id,
-           @RequestBody Map<String, String> requestBody,
-           Principal principal) {
-       log.info("REST request to approve Warranty Request : {}", id);
+//    @PostMapping("/{id}/approve")
+//    public ResponseEntity<WarrantyRequestDto> approveWarrantyRequest(
+//            @PathVariable Long id,
+//            @RequestBody Map<String, String> requestBody,
+//            Principal principal) {
+//        log.info("REST request to approve Warranty Request : {}", id);
        
-       String notes = requestBody.get("notes");
-       String username = principal != null ? principal.getName() : "SYSTEM";
+//        String notes = requestBody.get("notes");
+//        String username = principal != null ? principal.getName() : "SYSTEM";
        
-       try {
-           WarrantyRequestDto updatedRequest = warrantyRequestService.approveWarrantyRequest(id, notes, username);
-           return ResponseEntity.ok(updatedRequest);
-       } catch (WarrantyRequestNotFoundException e) {
-           log.error("Warranty Request not found: {}", e.getMessage());
-           return ResponseEntity.notFound().build();
-       } catch (IllegalStateException e) {
-           log.error("Cannot approve warranty request: {}", e.getMessage());
-           return ResponseEntity.badRequest().build();
-       }
-   }
+//        try {
+//            WarrantyRequestDto updatedRequest = warrantyRequestService.approveWarrantyRequest(id, notes, username);
+//            return ResponseEntity.ok(updatedRequest);
+//        } catch (WarrantyRequestNotFoundException e) {
+//            log.error("Warranty Request not found: {}", e.getMessage());
+//            return ResponseEntity.notFound().build();
+//        } catch (IllegalStateException e) {
+//            log.error("Cannot approve warranty request: {}", e.getMessage());
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
    
-   @PostMapping("/{id}/receive")
-   public ResponseEntity<WarrantyRequestDto> receiveWarrantyRequest(
-           @PathVariable Long id,
-           @RequestBody Map<String, String> requestBody,
-           Principal principal) {
-       log.info("REST request to mark Warranty Request as received : {}", id);
-       
-       String notes = requestBody.get("notes");
-       String username = principal != null ? principal.getName() : "SYSTEM";
-       
-       try {
-           WarrantyRequestDto updatedRequest = warrantyRequestService.receiveWarrantyRequest(id, notes, username);
-           return ResponseEntity.ok(updatedRequest);
-       } catch (WarrantyRequestNotFoundException e) {
-           log.error("Warranty Request not found: {}", e.getMessage());
-           return ResponseEntity.notFound().build();
-       } catch (IllegalStateException e) {
-           log.error("Cannot mark warranty request as received: {}", e.getMessage());
-           return ResponseEntity.badRequest().build();
-       }
-   }
-   
-   @PostMapping("/{id}/forward-to-repair")
-   public ResponseEntity<WarrantyRequestDto> forwardToRepair(
-           @PathVariable Long id,
-           @RequestBody Map<String, String> requestBody,
-           Principal principal) {
-       log.info("REST request to forward Warranty Request to repair : {}", id);
-       
-       String notes = requestBody.get("notes");
-       String username = principal != null ? principal.getName() : "SYSTEM";
-       
-       try {
-           WarrantyRequestDto updatedRequest = warrantyRequestService.forwardToRepair(id, notes, username);
-           return ResponseEntity.ok(updatedRequest);
-       } catch (WarrantyRequestNotFoundException e) {
-           log.error("Warranty Request not found: {}", e.getMessage());
-           return ResponseEntity.notFound().build();
-       } catch (IllegalStateException e) {
-           log.error("Cannot forward warranty request to repair: {}", e.getMessage());
-           return ResponseEntity.badRequest().build();
-       }
-   }
+    @PostMapping("/{id}/receive-and-forward")
+    public ResponseEntity<WarrantyRequestDto> receiveAndForwardToRepair(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> requestBody,
+            Principal principal) {
+        log.info("REST request to receive product and forward to repair service: {}", id);
+        
+        String notes = requestBody.get("notes");
+        String username = principal != null ? principal.getName() : "SYSTEM";
+        
+        try {
+            // First mark the warranty request as received
+            warrantyRequestService.receiveWarrantyRequest(id, notes, username);
+            
+            // Then forward it to repair service
+            WarrantyRequestDto forwardedRequest = warrantyRequestService.forwardToRepair(id, 
+                    notes != null ? notes + " (Auto-forwarded to repair)" : "Auto-forwarded to repair", 
+                    username);
+            
+            return ResponseEntity.ok(forwardedRequest);
+        } catch (WarrantyRequestNotFoundException e) {
+            log.error("Warranty Request not found: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            log.error("Process failed: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}/update-repair-status")
+    public ResponseEntity<WarrantyRequestDto> updateRepairStatus(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> requestBody,
+            Principal principal) {
+        log.info("REST request to update repair status for Warranty Request: {}", id);
+        
+        String status = requestBody.get("status");
+        String notes = requestBody.get("notes");
+        String username = principal != null ? principal.getName() : "SYSTEM";
+        
+        try {
+            WarrantyRequestDto updatedRequest = warrantyRequestService.updateRepairStatus(id, notes, username);
+            return ResponseEntity.ok(updatedRequest);
+        } catch (WarrantyRequestNotFoundException e) {
+            log.error("Warranty Request not found: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            log.error("Cannot update repair status: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

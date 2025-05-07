@@ -153,6 +153,7 @@ public class RepairController {
     @PostMapping("/{id}/receive")
     public ResponseEntity<RepairRequestResponseDto> processProductReceipt(
             @PathVariable Long id,
+            @RequestBody TechnicianDto technician,
             Principal principal) {
         
         String username = principal != null ? principal.getName() : "SYSTEM";
@@ -160,7 +161,7 @@ public class RepairController {
         log.info("Received request from {} to process product receipt for repair request {}", username, id);
         
         try {
-            RepairRequestResponseDto response = repairService.processProductReceipt(id, username);
+            RepairRequestResponseDto response = repairService.processProductReceipt(id, technician, username);
             return ResponseEntity.ok(response);
         } catch (RepairRequestNotFoundException e) {
             log.error("Repair request not found: {}", e.getMessage());
@@ -348,15 +349,5 @@ public class RepairController {
             log.error("Repair request not found: {}", e.getMessage());
             return ResponseEntity.notFound().build();
         }
-    }
-
-    /**
-     * Get dashboard statistics
-     */
-    @GetMapping("/dashboard")
-    public ResponseEntity<DashboardStatsDto> getDashboardStats() {
-        log.info("Received request to get dashboard stats");
-        DashboardStatsDto stats = repairService.getDashboardStats();
-        return ResponseEntity.ok(stats);
     }
 }

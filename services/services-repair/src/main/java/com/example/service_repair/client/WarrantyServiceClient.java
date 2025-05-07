@@ -3,17 +3,17 @@ package com.example.service_repair.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-// Client for the Warranty Service
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class WarrantyServiceClient {
     
-    private final RestTemplate restTemplate;
+    private final WebClient.Builder webClientBuilder;
     
     @Value("${service.warranty.url}")
     private String warrantyServiceUrl;
@@ -22,13 +22,19 @@ public class WarrantyServiceClient {
      * Check if a product is still under warranty for a specific customer
      */
     public boolean checkWarrantyStatus(Long productId, Long customerId) {
-        String url = warrantyServiceUrl + "/api/v1/warranty/check?productId=" + productId + "&customerId=" + customerId;
+        String url = "/api/v1/warranty/check?productId=" + productId + "&customerId=" + customerId;
         log.info("Checking warranty status for product: {}, customer: {}", productId, customerId);
         
         try {
-            ResponseEntity<WarrantyStatusResponse> response = restTemplate.getForEntity(url, WarrantyStatusResponse.class);
-            if (response.getBody() != null) {
-                return response.getBody().isValid();
+            WarrantyStatusResponse response = webClientBuilder.build()
+                .get()
+                .uri(warrantyServiceUrl + url)
+                .retrieve()
+                .bodyToMono(WarrantyStatusResponse.class)
+                .block(); // Blocking call to get synchronous behavior
+            
+            if (response != null) {
+                return response.isValid();
             }
             return false;
         } catch (Exception e) {
@@ -42,7 +48,7 @@ public class WarrantyServiceClient {
      * Register a warranty claim for a product
      */
     public boolean registerWarrantyClaim(Long productId, Long customerId, Long repairId) {
-        String url = warrantyServiceUrl + "/api/v1/warranty/claim";
+        String url = "/api/v1/warranty/claim";
         log.info("Registering warranty claim for product: {}, customer: {}", productId, customerId);
         
         WarrantyClaimRequest request = new WarrantyClaimRequest();
@@ -51,14 +57,51 @@ public class WarrantyServiceClient {
         request.setRepairId(repairId);
         
         try {
-            ResponseEntity<WarrantyClaimResponse> response = restTemplate.postForEntity(url, request, WarrantyClaimResponse.class);
-            if (response.getBody() != null) {
-                return response.getBody().isRegistered();
+            WarrantyClaimResponse response = webClientBuilder.build()
+                .post()
+                .uri(warrantyServiceUrl + url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(WarrantyClaimResponse.class)
+                .block(); // Blocking call to get synchronous behavior
+            
+            if (response != null) {
+                return response.isRegistered();
             }
             return false;
         } catch (Exception e) {
             log.error("Failed to register warranty claim: {}", e.getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * Update the status of a warranty in the warranty service
+     */
+    public void updateWarrantyStatus(Long warrantyId, String status, String notes) {
+        String url = "/api/v1/warranty/requests/" + warrantyId + "/update-repair-status";
+        log.info("Updating warranty status to {} for warranty: {}", status, warrantyId);
+        
+        try {
+            WarrantyStatusUpdateRequest request = new WarrantyStatusUpdateRequest();
+            request.setStatus(status);
+            request.setNotes(notes);
+            
+            webClientBuilder.build()
+                .put()
+                .uri(warrantyServiceUrl + url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .onErrorResume(e -> {
+                    log.error("Failed to update warranty status: {}", e.getMessage());
+                    return Mono.empty();
+                })
+                .block();
+        } catch (Exception e) {
+            log.error("Error updating warranty status: {}", e.getMessage());
         }
     }
     
@@ -101,5 +144,16 @@ public class WarrantyServiceClient {
         public String getClaimId() { return claimId; }
         public void setClaimId(String claimId) { this.claimId = claimId; }
     }
+    
+    // Request model for warranty status update
+    static class WarrantyStatusUpdateRequest {
+        private String status;
+        private String notes;
+        
+        public String getStatus() { return status; }
+        public void setStatus(String status) { this.status = status; }
+        
+        public String getNotes() { return notes; }
+        public void setNotes(String notes) { this.notes = notes; }
+    }
 }
-
