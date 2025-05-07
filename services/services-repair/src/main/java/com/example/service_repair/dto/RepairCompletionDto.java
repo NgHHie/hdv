@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RepairPartDto {
-    private Integer id;
-    private String partName;
-    private String partNumber;
-    private String description;
-    private Boolean isWarrantyReplacement;
+public class RepairCompletionDto {
+    private String completionNotes;
+    private Boolean sucessfullyRepaired;
 }

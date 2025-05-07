@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name = "repair_parts")
 @Data
@@ -25,8 +23,6 @@ public class RepairPart {
     
     private String partName;
     private String partNumber;
-    private Integer quantity;
-    
-    @Column(precision = 10, scale = 2)
-    private BigDecimal unitPrice;
+    private String description;
+    private Boolean isWarrantyReplacement;
 }

@@ -168,7 +168,7 @@ public class WarrantyRequestController {
         String username = principal != null ? principal.getName() : "SYSTEM";
         
         try {
-            WarrantyRequestDto updatedRequest = warrantyRequestService.updateRepairStatus(id, notes, username);
+            WarrantyRequestDto updatedRequest = warrantyRequestService.updateRepairStatus(id, notes, status, username);
             return ResponseEntity.ok(updatedRequest);
         } catch (WarrantyRequestNotFoundException e) {
             log.error("Warranty Request not found: {}", e.getMessage());

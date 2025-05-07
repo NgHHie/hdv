@@ -467,8 +467,7 @@ public class WarrantyRequestService {
      * Update repair status of a warranty request
      */
     @Transactional
-    public WarrantyRequestDto updateRepairStatus(Integer id, String notes, String username) {
-        String status = String.valueOf(NotificationType.REPAIR_IN_PROGRESS);
+    public WarrantyRequestDto updateRepairStatus(Integer id, String notes, String status, String username) {
         log.info("Updating repair status to {} for warranty request: {}", status, id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -500,6 +499,19 @@ public class WarrantyRequestService {
                     .customerName(customer.getFirstName() + " " + customer.getLastName())
                     .productName("")
                     .message("Your product is now being repaired.")
+                    .customerId(customer.getId())
+                    .build();
+            kafkaProducerService.sendWarrantyEvent(event);
+        } else if ("COMPLETE_REPAIR".equals(status)) {
+            CustomerServiceClient.CustomerResponse customer = customerServiceClient.getCustomerById(request.getCustomerId());
+            ProductServiceClient.ProductResponse product = productServiceClient.getProductDetails(request.getProductId());
+            WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                    .warrantyRequestId(id)
+                    .type(NotificationType.REPAIR_COMPLETED)
+                    .email(customer.getEmail())
+                    .customerName(customer.getFirstName() + " " + customer.getLastName())
+                    .productName(product.getName())
+                    .message("Your product is repaired completely. "+ notes)
                     .customerId(customer.getId())
                     .build();
             kafkaProducerService.sendWarrantyEvent(event);
