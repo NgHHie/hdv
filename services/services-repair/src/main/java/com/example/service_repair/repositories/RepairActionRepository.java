@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface RepairActionRepository extends JpaRepository<RepairAction, Long> {
-    List<RepairAction> findByRepairRequestId(Long repairId);
-    List<RepairAction> findByPerformedById(Long technicianId);
+public interface RepairActionRepository extends JpaRepository<RepairAction, Integer> {
+    List<RepairAction> findByRepairRequestId(Integer repairId);
+    List<RepairAction> findByPerformedById(Integer technicianId);
     List<RepairAction> findByPerformedAtBetween(LocalDateTime start, LocalDateTime end);
     List<RepairAction> findByActionType(String actionType);
 }

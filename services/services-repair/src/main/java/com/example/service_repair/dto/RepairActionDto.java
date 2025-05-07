@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RepairActionDto {
-    private Long id;
+    private Integer id;
     private String actionType;
     private String description;
-    private Long technicianId;
+    private Integer technicianId;
     private String technicianName;
     private LocalDateTime performedAt;
 }

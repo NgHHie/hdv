@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionOptionDto {
-    private Long id;
-    private Long questionId;
+    private Integer id;
+    private Integer questionId;
     private String optionText;
     private Integer displayOrder;
 }

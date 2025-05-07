@@ -18,10 +18,10 @@ public class WarrantyValidation {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "warranty_request_id", nullable = false)
-    private Long warrantyRequestId;
+    private Integer warrantyRequestId;
     
     @Column(name = "is_valid", nullable = false)
     private Boolean isValid;

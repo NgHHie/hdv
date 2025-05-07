@@ -12,7 +12,7 @@ public class NotificationMapper {
         responseDto.setId(notification.getId());
         responseDto.setCustomerId(notification.getCustomerId());
         responseDto.setType(notification.getType());
-        responseDto.setRelatedEntityId(notification.getRelatedEntityId());
+        responseDto.setWarrantyRequestId(notification.getWarrantyRequestId());
         responseDto.setEmail(notification.getEmail());
         responseDto.setSubject(notification.getSubject());
         responseDto.setStatus(notification.getStatus());

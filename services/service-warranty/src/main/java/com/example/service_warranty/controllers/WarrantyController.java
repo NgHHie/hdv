@@ -29,7 +29,7 @@ public class WarrantyController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<WarrantyDto> getWarrantyById(@PathVariable Long id) {
+    public ResponseEntity<WarrantyDto> getWarrantyById(@PathVariable Integer id) {
         log.info("REST request to get Warranty : {}", id);
         try {
             WarrantyDto warranty = warrantyService.getWarrantyById(id);
@@ -41,14 +41,14 @@ public class WarrantyController {
     }
     
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<WarrantyDto>> getWarrantiesByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<List<WarrantyDto>> getWarrantiesByCustomerId(@PathVariable Integer customerId) {
         log.info("REST request to get Warranties for customer : {}", customerId);
         List<WarrantyDto> warranties = warrantyService.getWarrantiesByCustomerId(customerId);
         return ResponseEntity.ok(warranties);
     }
     
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<WarrantyDto>> getWarrantiesByProductId(@PathVariable Long productId) {
+    public ResponseEntity<List<WarrantyDto>> getWarrantiesByProductId(@PathVariable Integer productId) {
         log.info("REST request to get Warranties for product : {}", productId);
         List<WarrantyDto> warranties = warrantyService.getWarrantiesByProductId(productId);
         return ResponseEntity.ok(warranties);
@@ -56,8 +56,8 @@ public class WarrantyController {
     
     @GetMapping("/check")
     public ResponseEntity<WarrantyStatusResponse> checkWarrantyStatus(
-            @RequestParam Long productId, 
-            @RequestParam Long customerId) {
+            @RequestParam Integer productId, 
+            @RequestParam Integer customerId) {
         log.info("REST request to check warranty status for product: {}, customer: {}", 
                 productId, customerId);
         WarrantyStatusResponse response = warrantyService.checkWarrantyStatus(productId, customerId);
@@ -74,7 +74,7 @@ public class WarrantyController {
     
     @GetMapping("/claims/warranty/{warrantyId}")
     public ResponseEntity<List<WarrantyClaimDto>> getWarrantyClaimsByWarrantyId(
-            @PathVariable Long warrantyId) {
+            @PathVariable Integer warrantyId) {
         log.info("REST request to get Warranty Claims for warranty : {}", warrantyId);
         List<WarrantyClaimDto> claims = warrantyService.getWarrantyClaimsByWarrantyId(warrantyId);
         return ResponseEntity.ok(claims);
@@ -82,7 +82,7 @@ public class WarrantyController {
     
     @GetMapping("/claims/repair/{repairId}")
     public ResponseEntity<List<WarrantyClaimDto>> getWarrantyClaimsByRepairId(
-            @PathVariable Long repairId) {
+            @PathVariable Integer repairId) {
         log.info("REST request to get Warranty Claims for repair : {}", repairId);
         List<WarrantyClaimDto> claims = warrantyService.getWarrantyClaimsByRepairId(repairId);
         return ResponseEntity.ok(claims);
@@ -90,7 +90,7 @@ public class WarrantyController {
     
     @PatchMapping("/claims/{id}/status")
     public ResponseEntity<WarrantyClaimDto> updateWarrantyClaimStatus(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody Map<String, String> request) {
         log.info("REST request to update Warranty Claim status : {}", id);
         try {

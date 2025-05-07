@@ -12,9 +12,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyDto {
-    private Long id;
-    private Long productId;
-    private Long customerId;
+    private Integer id;
+    private Integer productId;
+    private Integer customerId;
     private LocalDate purchaseDate;
     private LocalDate expirationDate;
     private Boolean isActive;

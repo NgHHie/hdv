@@ -54,19 +54,19 @@ public class SurveyResponseService {
         
         // Get all questions for validation
         List<SurveyQuestion> questions = questionRepository.findBySurveyId(survey.getId());
-        Map<Long, SurveyQuestion> questionMap = questions.stream()
+        Map<Integer, SurveyQuestion> questionMap = questions.stream()
                 .collect(Collectors.toMap(SurveyQuestion::getId, Function.identity()));
         
         // Get all options for validation
         List<QuestionOption> allOptions = optionRepository.findAll();
-        Map<Long, QuestionOption> optionMap = allOptions.stream()
+        Map<Integer, QuestionOption> optionMap = allOptions.stream()
                 .collect(Collectors.toMap(QuestionOption::getId, Function.identity()));
         
         // Process question responses
         List<QuestionResponse> questionResponses = new ArrayList<>();
         
         for (SubmitSurveyResponseRequest.QuestionAnswerRequest answerRequest : request.getQuestionResponses()) {
-            // Validate question exists and belongs to the survey
+            // Validate question exists and beIntegers to the survey
             SurveyQuestion question = questionMap.get(answerRequest.getQuestionId());
             if (question == null) {
                 throw new RuntimeException("Question not found with id: " + answerRequest.getQuestionId());
@@ -144,7 +144,7 @@ public class SurveyResponseService {
     /**
      * Get survey response by ID
      */
-    public SurveyResponseDto getSurveyResponseById(Long id) {
+    public SurveyResponseDto getSurveyResponseById(Integer id) {
         log.info("Getting survey response with id: {}", id);
         
         SurveyResponse response = responseRepository.findById(id)
@@ -156,7 +156,7 @@ public class SurveyResponseService {
     /**
      * Get survey responses by customer ID
      */
-    public List<SurveyResponseDto> getSurveyResponsesByCustomerId(Long customerId) {
+    public List<SurveyResponseDto> getSurveyResponsesByCustomerId(Integer customerId) {
         log.info("Getting survey responses for customer: {}", customerId);
         
         List<SurveyResponse> responses = responseRepository.findByCustomerId(customerId);
@@ -168,7 +168,7 @@ public class SurveyResponseService {
     /**
      * Get survey responses by survey ID
      */
-    public List<SurveyResponseDto> getSurveyResponsesBySurveyId(Long surveyId) {
+    public List<SurveyResponseDto> getSurveyResponsesBySurveyId(Integer surveyId) {
         log.info("Getting survey responses for survey: {}", surveyId);
         
         List<SurveyResponse> responses = responseRepository.findBySurveyId(surveyId);
@@ -180,7 +180,7 @@ public class SurveyResponseService {
     /**
      * Get survey responses by related entity
      */
-    public List<SurveyResponseDto> getSurveyResponsesByRelatedEntity(Long relatedEntityId, String relatedEntityType) {
+    public List<SurveyResponseDto> getSurveyResponsesByRelatedEntity(Integer relatedEntityId, String relatedEntityType) {
         log.info("Getting survey responses for related entity: {}, type: {}", relatedEntityId, relatedEntityType);
         
         List<SurveyResponse> responses = responseRepository.findByRelatedEntityIdAndRelatedEntityType(relatedEntityId, relatedEntityType);

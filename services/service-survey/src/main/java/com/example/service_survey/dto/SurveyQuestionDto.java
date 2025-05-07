@@ -13,8 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SurveyQuestionDto {
-    private Long id;
-    private Long surveyId;
+    private Integer id;
+    private Integer surveyId;
     private String questionText;
     private QuestionType questionType;
     private Boolean required;

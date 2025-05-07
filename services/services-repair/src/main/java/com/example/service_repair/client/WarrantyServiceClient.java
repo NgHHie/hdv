@@ -21,7 +21,7 @@ public class WarrantyServiceClient {
     /**
      * Check if a product is still under warranty for a specific customer
      */
-    public boolean checkWarrantyStatus(Long productId, Long customerId) {
+    public boolean checkWarrantyStatus(Integer productId, Integer customerId) {
         String url = "/api/v1/warranty/check?productId=" + productId + "&customerId=" + customerId;
         log.info("Checking warranty status for product: {}, customer: {}", productId, customerId);
         
@@ -47,7 +47,7 @@ public class WarrantyServiceClient {
     /**
      * Register a warranty claim for a product
      */
-    public boolean registerWarrantyClaim(Long productId, Long customerId, Long repairId) {
+    public boolean registerWarrantyClaim(Integer productId, Integer customerId, Integer repairId) {
         String url = "/api/v1/warranty/claim";
         log.info("Registering warranty claim for product: {}, customer: {}", productId, customerId);
         
@@ -79,7 +79,7 @@ public class WarrantyServiceClient {
     /**
      * Update the status of a warranty in the warranty service
      */
-    public void updateWarrantyStatus(Long warrantyId, String status, String notes) {
+    public void updateWarrantyStatus(Integer warrantyId, String status, String notes) {
         String url = "/api/v1/warranty/requests/" + warrantyId + "/update-repair-status";
         log.info("Updating warranty status to {} for warranty: {}", status, warrantyId);
         
@@ -119,18 +119,18 @@ public class WarrantyServiceClient {
     
     // Request model for warranty claim
     static class WarrantyClaimRequest {
-        private Long productId;
-        private Long customerId;
-        private Long repairId;
+        private Integer productId;
+        private Integer customerId;
+        private Integer repairId;
         
-        public Long getProductId() { return productId; }
-        public void setProductId(Long productId) { this.productId = productId; }
+        public Integer getProductId() { return productId; }
+        public void setProductId(Integer productId) { this.productId = productId; }
         
-        public Long getCustomerId() { return customerId; }
-        public void setCustomerId(Long customerId) { this.customerId = customerId; }
+        public Integer getCustomerId() { return customerId; }
+        public void setCustomerId(Integer customerId) { this.customerId = customerId; }
         
-        public Long getRepairId() { return repairId; }
-        public void setRepairId(Long repairId) { this.repairId = repairId; }
+        public Integer getRepairId() { return repairId; }
+        public void setRepairId(Integer repairId) { this.repairId = repairId; }
     }
     
     // Response model for warranty claim registration

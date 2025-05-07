@@ -25,7 +25,7 @@ public class SurveyAnalyticsService {
     /**
      * Get survey analytics data
      */
-    public SurveyAnalyticsDto getSurveyAnalytics(Long surveyId) {
+    public SurveyAnalyticsDto getSurveyAnalytics(Integer surveyId) {
         log.info("Getting survey analytics for survey: {}", surveyId);
         
         // Check if survey exists
@@ -59,7 +59,7 @@ public class SurveyAnalyticsService {
         return SurveyAnalyticsDto.builder()
                 .surveyId(surveyId)
                 .surveyTitle(survey.getTitle())
-                .totalResponses((long) responses.size())
+                .totalResponses((Integer) responses.size())
                 .questionAnalytics(questionAnalyticsList)
                 .completionRate(calculateCompletionRate(questions, responses))
                 .responsesByDate(calculateResponsesByDate(responses))
@@ -71,10 +71,10 @@ public class SurveyAnalyticsService {
      */
     private SurveyAnalyticsDto.QuestionAnalytics calculateQuestionAnalytics(SurveyQuestion question, List<SurveyResponse> responses) {
         List<SurveyAnalyticsDto.OptionAnalytics> optionAnalyticsList = new ArrayList<>();
-        Long totalAnswers = 0L;
+        Integer totalAnswers = 0L;
         Double averageRating = null;
-        Map<String, Long> textResponseFrequency = null;
-        Map<Boolean, Long> booleanResponseFrequency = null;
+        Map<String, Integer> textResponseFrequency = null;
+        Map<Boolean, Integer> booleanResponseFrequency = null;
         
         // Get all question responses for this question
         List<QuestionResponse> questionResponses = new ArrayList<>();
@@ -89,13 +89,13 @@ public class SurveyAnalyticsService {
             }
         }
         
-        totalAnswers = (long) questionResponses.size();
+        totalAnswers = (Integer) questionResponses.size();
         
         switch (question.getQuestionType()) {
             case SINGLE_CHOICE:
             case MULTIPLE_CHOICE:
                 // Calculate option frequency
-                Map<Long, Long> optionFrequency = questionResponses.stream()
+                Map<Integer, Integer> optionFrequency = questionResponses.stream()
                         .filter(qr -> qr.getSelectedOption() != null)
                         .collect(Collectors.groupingBy(
                                 qr -> qr.getSelectedOption().getId(),
@@ -105,7 +105,7 @@ public class SurveyAnalyticsService {
                 // Create option analytics
                 if (question.getOptions() != null) {
                     for (QuestionOption option : question.getOptions()) {
-                        long count = optionFrequency.getOrDefault(option.getId(), 0L);
+                        Integer count = optionFrequency.getOrDefault(option.getId(), 0L);
                         double percentage = totalAnswers > 0 ? (count * 100.0) / totalAnswers : 0.0;
                         
                         SurveyAnalyticsDto.OptionAnalytics optionAnalytics = SurveyAnalyticsDto.OptionAnalytics.builder()
@@ -147,7 +147,7 @@ public class SurveyAnalyticsService {
                     if (questionResponse.getTextResponse() != null && !questionResponse.getTextResponse().isEmpty()) {
                         String[] words = questionResponse.getTextResponse().toLowerCase().split("\\s+");
                         for (String word : words) {
-                            if (word.length() > 3) { // Only count words longer than 3 characters
+                            if (word.length() > 3) { // Only count words Integerer than 3 characters
                                 textResponseFrequency.put(word, textResponseFrequency.getOrDefault(word, 0L) + 1);
                             }
                         }
@@ -156,7 +156,7 @@ public class SurveyAnalyticsService {
                 
                 // Sort by frequency and take top 10
                 textResponseFrequency = textResponseFrequency.entrySet().stream()
-                        .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                         .limit(10)
                         .collect(Collectors.toMap(
                                 Map.Entry::getKey,
@@ -183,7 +183,7 @@ public class SurveyAnalyticsService {
      * Calculate completion rate
      */
     private Double calculateCompletionRate(List<SurveyQuestion> questions, List<SurveyResponse> responses) {
-        long requiredQuestionsCount = questions.stream()
+        Integer requiredQuestionsCount = questions.stream()
                 .filter(q -> Boolean.TRUE.equals(q.getRequired()))
                 .count();
         
@@ -191,8 +191,8 @@ public class SurveyAnalyticsService {
             return 100.0; // No required questions
         }
         
-        long totalRequiredAnswers = requiredQuestionsCount * responses.size();
-        long answeredRequiredQuestions = 0;
+        Integer totalRequiredAnswers = requiredQuestionsCount * responses.size();
+        Integer answeredRequiredQuestions = 0;
         
         for (SurveyResponse response : responses) {
             if (response.getQuestionResponses() != null) {
@@ -217,7 +217,7 @@ public class SurveyAnalyticsService {
     /**
      * Calculate responses by date
      */
-    private Map<String, Long> calculateResponsesByDate(List<SurveyResponse> responses) {
+    private Map<String, Integer> calculateResponsesByDate(List<SurveyResponse> responses) {
         return responses.stream()
                 .collect(Collectors.groupingBy(
                         response -> response.getCreatedAt().toLocalDate().toString(),
@@ -236,7 +236,7 @@ public class SurveyAnalyticsService {
     /**
      * Get response rate over time for a survey
      */
-    public Map<String, Long> getResponseRateOverTime(Long surveyId, LocalDateTime startDate, LocalDateTime endDate) {
+    public Map<String, Integer> getResponseRateOverTime(Integer surveyId, LocalDateTime startDate, LocalDateTime endDate) {
         log.info("Getting response rate over time for survey: {}", surveyId);
         
         // Check if survey exists

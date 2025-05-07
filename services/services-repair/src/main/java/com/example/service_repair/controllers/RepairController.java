@@ -38,7 +38,7 @@ public class RepairController {
      * Get a repair request by ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<RepairRequestResponseDto> getRepairRequestById(@PathVariable Long id) {
+    public ResponseEntity<RepairRequestResponseDto> getRepairRequestById(@PathVariable Integer id) {
         log.info("Received request to get repair request with ID: {}", id);
         try {
             RepairRequestResponseDto response = repairService.getRepairRequestById(id);
@@ -53,7 +53,7 @@ public class RepairController {
      * Get all repair requests for a customer
      */
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<RepairRequestResponseDto>> getRepairRequestsByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<List<RepairRequestResponseDto>> getRepairRequestsByCustomerId(@PathVariable Integer customerId) {
         log.info("Received request to get repair requests for customer: {}", customerId);
         List<RepairRequestResponseDto> responses = repairService.getRepairRequestsByCustomerId(customerId);
         return ResponseEntity.ok(responses);
@@ -74,7 +74,7 @@ public class RepairController {
      */
     @PostMapping("/{id}/next")
     public ResponseEntity<RepairRequestResponseDto> moveToNextState(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody(required = false) Map<String, String> notes,
             Principal principal) {
         
@@ -100,7 +100,7 @@ public class RepairController {
      */
     @PostMapping("/{id}/previous")
     public ResponseEntity<RepairRequestResponseDto> moveToPreviousState(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody(required = false) Map<String, String> notes,
             Principal principal) {
         
@@ -126,7 +126,7 @@ public class RepairController {
      */
     @PostMapping("/{id}/cancel")
     public ResponseEntity<RepairRequestResponseDto> cancelRepairRequest(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody(required = false) Map<String, String> notes,
             Principal principal) {
         
@@ -152,7 +152,7 @@ public class RepairController {
      */
     @PostMapping("/{id}/receive")
     public ResponseEntity<RepairRequestResponseDto> processProductReceipt(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody TechnicianDto technician,
             Principal principal) {
         
@@ -177,7 +177,7 @@ public class RepairController {
      */
     @PatchMapping("/{id}/notes")
     public ResponseEntity<RepairRequestResponseDto> updateRepairNotes(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody Map<String, String> requestBody,
             Principal principal) {
         
@@ -200,8 +200,8 @@ public class RepairController {
      */
     @PostMapping("/{id}/technician/{technicianId}")
     public ResponseEntity<RepairRequestResponseDto> assignTechnician(
-            @PathVariable Long id,
-            @PathVariable Long technicianId,
+            @PathVariable Integer id,
+            @PathVariable Integer technicianId,
             Principal principal) {
         
         String username = principal != null ? principal.getName() : "SYSTEM";
@@ -226,7 +226,7 @@ public class RepairController {
      */
     @PostMapping("/{id}/parts")
     public ResponseEntity<RepairPartDto> addRepairPart(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody RepairPartDto partDto,
             Principal principal) {
         
@@ -251,8 +251,8 @@ public class RepairController {
      */
     @DeleteMapping("/{id}/parts/{partId}")
     public ResponseEntity<Void> removeRepairPart(
-            @PathVariable Long id,
-            @PathVariable Long partId,
+            @PathVariable Integer id,
+            @PathVariable Integer partId,
             Principal principal) {
         
         String username = principal != null ? principal.getName() : "SYSTEM";
@@ -277,7 +277,7 @@ public class RepairController {
      */
     @PostMapping("/{id}/actions")
     public ResponseEntity<RepairActionDto> addRepairAction(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody RepairActionDto actionDto,
             Principal principal) {
         
@@ -302,7 +302,7 @@ public class RepairController {
      */
     @PatchMapping("/{id}/cost")
     public ResponseEntity<RepairRequestResponseDto> updateRepairCost(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody Map<String, String> requestBody,
             Principal principal) {
         
@@ -333,7 +333,7 @@ public class RepairController {
      */
     @PostMapping("/{id}/reject")
     public ResponseEntity<RepairRequestResponseDto> rejectRepairRequest(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody Map<String, String> requestBody,
             Principal principal) {
         

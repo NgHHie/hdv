@@ -128,7 +128,7 @@ public class NotificationServiceClient {
     /**
      * Send repair completed notification
      */
-    public void sendRepairCompletedNotification(Long customerId, Long warrantyRequestId, String message) {
+    public void sendRepairCompletedNotification(Integer customerId, Integer warrantyRequestId, String message) {
         log.info("Sending repair completed notification to customer: {}", customerId);
         
         try {
@@ -180,17 +180,17 @@ public class NotificationServiceClient {
     }
     
     public static class NotificationRequest {
-        private Long customerId;
-        private Long relatedEntityId;
+        private Integer customerId;
+        private Integer relatedEntityId;
         private String email;
         private String message;
         
         // Getters and setters
-        public Long getCustomerId() { return customerId; }
-        public void setCustomerId(Long customerId) { this.customerId = customerId; }
+        public Integer getCustomerId() { return customerId; }
+        public void setCustomerId(Integer customerId) { this.customerId = customerId; }
         
-        public Long getRelatedEntityId() { return relatedEntityId; }
-        public void setRelatedEntityId(Long relatedEntityId) { this.relatedEntityId = relatedEntityId; }
+        public Integer getRelatedEntityId() { return relatedEntityId; }
+        public void setRelatedEntityId(Integer relatedEntityId) { this.relatedEntityId = relatedEntityId; }
         
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }

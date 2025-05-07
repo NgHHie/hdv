@@ -18,10 +18,10 @@ public class WarrantyHistory {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "warranty_request_id", nullable = false)
-    private Long warrantyRequestId;
+    private Integer warrantyRequestId;
     
     @Column(name = "status", nullable = false)
     private String status;

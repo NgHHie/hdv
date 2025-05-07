@@ -38,7 +38,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
     
-    public ProductResponse getProductById(Long id) {
+    public ProductResponse getProductById(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return mapToProductResponse(product);
@@ -56,7 +56,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
     
-    public ProductResponse updateProduct(Long id, ProductRequest productRequest) {
+    public ProductResponse updateProduct(Integer id, ProductRequest productRequest) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         
@@ -71,7 +71,7 @@ public class ProductService {
         return mapToProductResponse(updatedProduct);
     }
     
-    public void deleteProduct(Long id) {
+    public void deleteProduct(Integer id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         productRepository.delete(product);

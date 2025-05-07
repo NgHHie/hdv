@@ -42,7 +42,7 @@ public class TechnicianService {
         return mapToTechnicianResponse(savedTechnician);
     }
     
-    public TechnicianResponse getTechnicianById(Long id) {
+    public TechnicianResponse getTechnicianById(Integer id) {
         log.info("Getting technician with id: {}", id);
         
         Technician technician = technicianRepository.findById(id)
@@ -85,7 +85,7 @@ public class TechnicianService {
     }
     
     @Transactional
-    public TechnicianResponse updateTechnician(Long id, TechnicianRequest technicianRequest) {
+    public TechnicianResponse updateTechnician(Integer id, TechnicianRequest technicianRequest) {
         log.info("Updating technician with id: {}", id);
         
         Technician technician = technicianRepository.findById(id)
@@ -112,7 +112,7 @@ public class TechnicianService {
     }
     
     @Transactional
-    public void deleteTechnician(Long id) {
+    public void deleteTechnician(Integer id) {
         log.info("Deleting technician with id: {}", id);
         
         if (!technicianRepository.existsById(id)) {
@@ -123,7 +123,7 @@ public class TechnicianService {
     }
     
     @Transactional
-    public TechnicianResponse toggleTechnicianActiveStatus(Long id) {
+    public TechnicianResponse toggleTechnicianActiveStatus(Integer id) {
         log.info("Toggling active status for technician with id: {}", id);
         
         Technician technician = technicianRepository.findById(id)

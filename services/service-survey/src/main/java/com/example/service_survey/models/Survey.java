@@ -19,7 +19,7 @@ public class Survey {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "survey_type", nullable = false)
     @Enumerated(EnumType.STRING)

@@ -19,13 +19,13 @@ public class WarrantyRequest {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "customer_id", nullable = false)
-    private Long customerId;
+    private Integer customerId;
 
     @Column(name = "product_id", nullable = false)
-    private Long productId;
+    private Integer productId;
     
     @Column(name = "serial_number")
     private String serialNumber;
@@ -49,7 +49,7 @@ public class WarrantyRequest {
     private String validationNotes;
     
     @Column(name = "repair_id")
-    private Long repairId;
+    private Integer repairId;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;

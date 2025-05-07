@@ -13,11 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SurveyResponseDto {
-    private Long id;
-    private Long surveyId;
+    private Integer id;
+    private Integer surveyId;
     private String surveyTitle;
-    private Long customerId;
-    private Long relatedEntityId;
+    private Integer customerId;
+    private Integer relatedEntityId;
     private String relatedEntityType;
     private LocalDateTime createdAt;
     private List<QuestionResponseDto> questionResponses;

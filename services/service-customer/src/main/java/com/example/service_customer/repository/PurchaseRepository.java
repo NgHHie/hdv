@@ -10,10 +10,11 @@ import org.springframework.data.repository.query.Param;
 import com.example.service_customer.model.Purchase;
 
 public interface PurchaseRepository  extends JpaRepository<Purchase, Integer> {
-   
+    
     List<Purchase> findByCustomerId(Integer customerId);
 
     @Query("SELECT p FROM Purchase p JOIN p.items i WHERE i.productId = :productId")
     Optional<Purchase> findByProductId(@Param("productId") Integer productId);
+
 
 }

@@ -116,7 +116,7 @@ public class SurveyService {
     /**
      * Get survey by ID
      */
-    public SurveyDto getSurveyById(Long id) {
+    public SurveyDto getSurveyById(Integer id) {
         log.info("Getting survey with id: {}", id);
         
         Survey survey = surveyRepository.findById(id)
@@ -153,7 +153,7 @@ public class SurveyService {
      * Update survey status (activate/deactivate)
      */
     @Transactional
-    public SurveyDto updateSurveyStatus(Long id, Boolean isActive) {
+    public SurveyDto updateSurveyStatus(Integer id, Boolean isActive) {
         log.info("Updating survey status for id {}: isActive={}", id, isActive);
         
         Survey survey = surveyRepository.findById(id)
@@ -169,7 +169,7 @@ public class SurveyService {
      * Delete a survey
      */
     @Transactional
-    public void deleteSurvey(Long id) {
+    public void deleteSurvey(Integer id) {
         log.info("Deleting survey with id: {}", id);
         
         if (!surveyRepository.existsById(id)) {

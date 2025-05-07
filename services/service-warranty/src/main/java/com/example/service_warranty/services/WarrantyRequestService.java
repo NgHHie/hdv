@@ -6,11 +6,14 @@ import com.example.service_warranty.client.CustomerServiceClient.CustomerRespons
 import com.example.service_warranty.client.CustomerServiceClient;
 import com.example.service_warranty.client.NotificationServiceClient;
 import com.example.service_warranty.dto.*;
+import com.example.service_warranty.event.WarrantyNotificationEvent;
 import com.example.service_warranty.exception.WarrantyRequestNotFoundException;
 import com.example.service_warranty.models.*;
 import com.example.service_warranty.repositories.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +38,8 @@ public class WarrantyRequestService {
     private final NotificationServiceClient notificationServiceClient;
     private final CustomerServiceClient customerServiceClient;
     private final ObjectMapper objectMapper;
-    
+    private final KafkaProducerService kafkaProducerService;
+
     /**
      * Create a new warranty request
      */
@@ -91,7 +95,7 @@ public class WarrantyRequestService {
                 .imageUrls(imageUrlsJson)
                 .submissionDate(LocalDateTime.now())
                 .build();
-        
+
         // Set status based on warranty check
         if (isWithinWarranty) {
             warrantyRequest.setStatus("PENDING");
@@ -111,14 +115,16 @@ public class WarrantyRequestService {
             warrantyHistoryRepository.save(history);
             
             // Send confirmation notification
-            NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                    .warrantyResponseId(savedRequest.getId())
-                    .customerId(customer.getId())
-                    .email(customer.getEmail())
+            WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                    .warrantyRequestId(savedRequest.getId())
                     .type(NotificationType.WARRANTY_RECEIVED)
+                    .email(customer.getEmail())
+                    .customerName(customer.getFirstName() + " " + customer.getLastName())
+                    .productName(productName)
                     .message("Your warranty request for " + productName + " has been received and is being processed.")
+                    .customerId(customer.getId())
                     .build();
-            notificationServiceClient.sendRepairCreatedNotification(notificationRequestDto);
+            kafkaProducerService.sendWarrantyEvent(event);
             
             return mapToWarrantyRequestDto(savedRequest);
         } else {
@@ -139,25 +145,25 @@ public class WarrantyRequestService {
                     .build();
             
             warrantyHistoryRepository.save(history);
-            
-            NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                    .warrantyResponseId(savedRequest.getId())
-                    .customerId(customer.getId())
-                    .email(customer.getEmail())
+
+            WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                    .warrantyRequestId(savedRequest.getId())
                     .type(NotificationType.WARRANTY_REJECTED)
-                    .message("Your warranty request for " + productName + " has been rejected because the product is out of warranty period.")
+                    .email(customer.getEmail())
+                    .customerName(customer.getFirstName() + " " + customer.getLastName())
+                    .productName(productName)
+                    .message("Warranty Request Have Been Rejected! Product is out of warranty period")
+                    .customerId(customer.getId())
                     .build();
-            // Send rejection notification
-            notificationServiceClient.sendWarrantyRejectedNotification(notificationRequestDto);
-            
-            return mapToWarrantyRequestDto(savedRequest);
+            kafkaProducerService.sendWarrantyEvent(event);
+            return mapToWarrantyRequestDto(warrantyRequest);
         }
     }
     
     /**
      * Get warranty request by ID
      */
-    public WarrantyRequestDto getWarrantyRequestById(Long id) {
+    public WarrantyRequestDto getWarrantyRequestById(Integer id) {
         log.info("Getting warranty request with id: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -169,7 +175,7 @@ public class WarrantyRequestService {
     /**
      * Get warranty requests by customer ID
      */
-    public List<WarrantyRequestDto> getWarrantyRequestsByCustomerId(Long customerId) {
+    public List<WarrantyRequestDto> getWarrantyRequestsByCustomerId(Integer customerId) {
         log.info("Getting warranty requests for customer: {}", customerId);
         
         List<WarrantyRequest> requests = warrantyRequestRepository.findByCustomerId(customerId);
@@ -202,7 +208,7 @@ public class WarrantyRequestService {
      * Validate warranty request
      */
     @Transactional
-    public WarrantyRequestDto validateWarrantyRequest(Long id, WarrantyValidationDto validationDto) {
+    public WarrantyRequestDto validateWarrantyRequest(Integer id, WarrantyValidationDto validationDto) {
         log.info("Validating warranty request: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -233,25 +239,27 @@ public class WarrantyRequestService {
         
         // Send notification to customer
         if (validationDto.getIsValid()) {
-            NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                    .warrantyResponseId(id)
-                    .customerId(customer.getId())
-                    .email(customer.getEmail())
+            WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                    .warrantyRequestId(id)
                     .type(NotificationType.WARRANTY_APPROVED)
-                    .message("Your warranty request has been approved. Please send your product to our service center.")
-                    .build();
-                    
-            notificationServiceClient.sendWarrantyApprovedNotification(notificationRequestDto);
-        } else {
-            NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                    .warrantyResponseId(id)
-                    .customerId(customer.getId())
                     .email(customer.getEmail())
-                    .type(NotificationType.WARRANTY_REJECTED)
-                    .message("Your warranty request has been rejected. Reason: " + validationDto.getValidationReason())
+                    .customerName(customer.getFirstName() + " " + customer.getLastName())
+                    .productName("")
+                    .message("Your warranty request has been approved. Please send your product to our service center.")
+                    .customerId(customer.getId())
                     .build();
-
-            notificationServiceClient.sendWarrantyRejectedNotification(notificationRequestDto);
+            kafkaProducerService.sendWarrantyEvent(event);
+        } else {
+            WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                    .warrantyRequestId(id)
+                    .type(NotificationType.WARRANTY_REJECTED)
+                    .email(customer.getEmail())
+                    .customerName(customer.getFirstName() + " " + customer.getLastName())
+                    .productName("")
+                    .message("Your warranty request has been rejected. Reason: " + validationDto.getValidationReason())
+                    .customerId(customer.getId())
+                    .build();
+            kafkaProducerService.sendWarrantyEvent(event);
         }
         
         return mapToWarrantyRequestDto(updatedRequest);
@@ -261,7 +269,7 @@ public class WarrantyRequestService {
      * Reject warranty request
      */
     // @Transactional
-    // public WarrantyRequestDto rejectWarrantyRequest(Long id, String reason, String performedBy) {
+    // public WarrantyRequestDto rejectWarrantyRequest(Integer id, String reason, String performedBy) {
     //     log.info("Rejecting warranty request: {}", id);
         
     //     WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -301,7 +309,7 @@ public class WarrantyRequestService {
      * Approve warranty request
      */
     // @Transactional
-    // public WarrantyRequestDto approveWarrantyRequest(Long id, String notes, String performedBy) {
+    // public WarrantyRequestDto approveWarrantyRequest(Integer id, String notes, String performedBy) {
     //     log.info("Approving warranty request: {}", id);
         
     //     WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -341,7 +349,7 @@ public class WarrantyRequestService {
      * Mark warranty request as received
      */
     @Transactional
-    public WarrantyRequestDto receiveWarrantyRequest(Long id, String notes, String performedBy) {
+    public WarrantyRequestDto receiveWarrantyRequest(Integer id, String notes, String performedBy) {
         log.info("Marking warranty request as received: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
@@ -352,14 +360,14 @@ public class WarrantyRequestService {
             throw new IllegalStateException("Cannot mark as received warranty request with status: " + request.getStatus());
         }
         
-        request.setStatus("RECEIVED");
+        request.setStatus("PRODUCT_RECEIVED");
         
         WarrantyRequest updatedRequest = warrantyRequestRepository.save(request);
         
         // Add history entry
         WarrantyHistory history = WarrantyHistory.builder()
                 .warrantyRequestId(id)
-                .status("RECEIVED")
+                .status("PRODUCT_RECEIVED")
                 .notes(notes)
                 .performedBy(performedBy)
                 .performedAt(LocalDateTime.now())
@@ -368,15 +376,16 @@ public class WarrantyRequestService {
         warrantyHistoryRepository.save(history);
         
         // Send notification
-        NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                    .warrantyResponseId(id)
-                    .customerId(customer.getId())
-                    .email(customer.getEmail())
+        WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                    .warrantyRequestId(id)
                     .type(NotificationType.PRODUCT_RECEIVED)
+                    .email(customer.getEmail())
+                    .customerName(customer.getFirstName() + " " + customer.getLastName())
+                    .productName("")
                     .message("We have received your product and will begin the repair process soon.")
+                    .customerId(customer.getId())
                     .build();
-
-        notificationServiceClient.sendProductReceivedNotification(notificationRequestDto);
+        kafkaProducerService.sendWarrantyEvent(event);
         
         return mapToWarrantyRequestDto(updatedRequest);
     }
@@ -385,18 +394,18 @@ public class WarrantyRequestService {
      * Forward warranty request to repair service
      */
     @Transactional
-    public WarrantyRequestDto forwardToRepair(Long id, String notes, String performedBy) {
+    public WarrantyRequestDto forwardToRepair(Integer id, String notes, String performedBy) {
         log.info("Forwarding warranty request to repair: {}", id);
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
                 .orElseThrow(() -> new WarrantyRequestNotFoundException("Warranty request not found with id: " + id));
         
-        if (!"RECEIVED".equals(request.getStatus())) {
+        if (!"PRODUCT_RECEIVED".equals(request.getStatus())) {
             throw new IllegalStateException("Cannot forward to repair warranty request with status: " + request.getStatus());
         }
         
         // Create repair request using repair service client
-        Long repairId = repairServiceClient.createRepairRequest(
+        Integer repairId = repairServiceClient.createRepairRequest(
                 request.getCustomerId(), 
                 request.getProductId(),
                 request.getId(), 
@@ -458,7 +467,7 @@ public class WarrantyRequestService {
      * Update repair status of a warranty request
      */
     @Transactional
-    public WarrantyRequestDto updateRepairStatus(Long id, String notes, String username) {
+    public WarrantyRequestDto updateRepairStatus(Integer id, String notes, String username) {
         String status = String.valueOf(NotificationType.REPAIR_IN_PROGRESS);
         log.info("Updating repair status to {} for warranty request: {}", status, id);
         
@@ -484,14 +493,16 @@ public class WarrantyRequestService {
         
         if ("REPAIR_IN_PROGRESS".equals(status)) {
             CustomerServiceClient.CustomerResponse customer = customerServiceClient.getCustomerById(request.getCustomerId());
-            NotificationRequestDto notificationRequestDto = NotificationRequestDto.builder()
-                    .warrantyResponseId(id)
-                    .customerId(customer.getId())
-                    .email(customer.getEmail())
+            WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                    .warrantyRequestId(id)
                     .type(NotificationType.REPAIR_IN_PROGRESS)
+                    .email(customer.getEmail())
+                    .customerName(customer.getFirstName() + " " + customer.getLastName())
+                    .productName("")
                     .message("Your product is now being repaired.")
+                    .customerId(customer.getId())
                     .build();
-            notificationServiceClient.sendRepairInProgressNotification(notificationRequestDto);
+            kafkaProducerService.sendWarrantyEvent(event);
         }
         
         return mapToWarrantyRequestDto(updatedRequest);

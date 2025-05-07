@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SurveyDto {
-    private Long id;
+    private Integer id;
     private SurveyType surveyType;
     private String title;
     private String description;

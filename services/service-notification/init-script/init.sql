@@ -1,157 +1,182 @@
--- Thêm các mẫu thông báo cho các loại thông báo khác nhau
-INSERT INTO notification_templates (type, subject, content_template, is_active) VALUES 
--- Thông báo tạo yêu cầu bảo hành
-('REPAIR_CREATED', 'Xác nhận yêu cầu bảo hành', 
-'Kính gửi Quý khách,
+-- Create database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS service_notification;
 
-Chúng tôi xác nhận đã nhận được yêu cầu bảo hành sản phẩm của Quý khách. 
+-- Switch to the database
+USE service_notification;
 
-{{message}}
+-- Create notification_templates table
+CREATE TABLE IF NOT EXISTS notification_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(50) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    content_template TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE
+);
 
-Mã yêu cầu bảo hành của Quý khách là: {{repairId}}. Quý khách có thể sử dụng mã này để theo dõi tiến độ xử lý.
+-- Create notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT,
+    type VARCHAR(50) NOT NULL,
+    warranty_request_id INT,
+    email VARCHAR(255),
+    subject VARCHAR(255),
+    content TEXT,
+    status VARCHAR(20),
+    created_at DATETIME,
+    sent_at DATETIME
+);
 
-Chúng tôi sẽ kiểm tra điều kiện bảo hành và thông báo cho Quý khách trong thời gian sớm nhất.
+-- Insert notification templates
+INSERT INTO notification_templates (type, subject, content_template, is_active) VALUES
+-- Warranty creation notification
+('WARRANTY_CREATE', 'Xác nhận yêu cầu bảo hành',
+ 'Kính gửi Quý khách {{customerName}},
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE),
+ Chúng tôi xác nhận đã nhận được yêu cầu bảo hành sản phẩm {{productName}} của Quý khách.
 
--- Thông báo từ chối bảo hành
-('REPAIR_REJECTED', 'Thông báo về yêu cầu bảo hành', 
-'Kính gửi Quý khách,
+ Mã yêu cầu bảo hành của Quý khách là: {{warrantyRequestId}}. Quý khách có thể sử dụng mã này để theo dõi tiến độ xử lý.
 
-Chúng tôi rất tiếc phải thông báo rằng yêu cầu bảo hành của Quý khách không được chấp nhận.
+ Chúng tôi sẽ kiểm tra điều kiện bảo hành và thông báo cho Quý khách trong thời gian sớm nhất.
 
-{{message}}
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE),
 
-Nếu Quý khách có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua số điện thoại: 1900-xxxx.
+-- Warranty rejection notification
+('WARRANTY_REJECT', 'Thông báo về yêu cầu bảo hành',
+ 'Kính gửi Quý khách {{customerName}},
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE),
+ Chúng tôi rất tiếc phải thông báo rằng yêu cầu bảo hành của Quý khách không được chấp nhận.
 
--- Thông báo chấp nhận và hướng dẫn
-('REPAIR_APPROVED', 'Xác nhận bảo hành sản phẩm - Hướng dẫn gửi sản phẩm', 
-'Kính gửi Quý khách,
+ Lý do: {{message}}
 
-Yêu cầu bảo hành của Quý khách đã được chấp nhận. Sản phẩm của Quý khách hiện đang trong thời hạn bảo hành và đủ điều kiện để được bảo hành theo chính sách của chúng tôi.
+ Nếu Quý khách có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi qua số điện thoại: 1900-xxxx.
 
-{{message}}
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE),
 
-Quý khách vui lòng gửi sản phẩm về địa chỉ trung tâm bảo hành của chúng tôi:
+-- Warranty approval notification
+('WARRANTY_APPROVED', 'Xác nhận bảo hành sản phẩm - Hướng dẫn gửi sản phẩm',
+ 'Kính gửi Quý khách {{customerName}},
 
-Trung tâm Bảo hành
-Địa chỉ: 123 Đường Nguyễn Văn A, Quận B, TP.C
-Điện thoại: (024) xxxxx
+ Yêu cầu bảo hành cho sản phẩm {{productName}} của Quý khách đã được chấp nhận. Sản phẩm của Quý khách hiện đang trong thời hạn bảo hành và đủ điều kiện để được bảo hành theo chính sách của chúng tôi.
 
-Vui lòng đóng gói sản phẩm cẩn thận và đính kèm một bản sao của hóa đơn mua hàng (nếu có).
+ Quý khách vui lòng gửi sản phẩm về địa chỉ trung tâm bảo hành của chúng tôi:
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE),
+ Trung tâm Bảo hành
+ Địa chỉ: 123 Đường Nguyễn Văn A, Quận B, TP.C
+ Điện thoại: (024) xxxxx
 
--- Thông báo tiếp nhận sản phẩm
-('PRODUCT_RECEIVED', 'Xác nhận đã nhận sản phẩm bảo hành', 
-'Kính gửi Quý khách,
+ Vui lòng đóng gói sản phẩm cẩn thận và đính kèm một bản sao của hóa đơn mua hàng (nếu có).
 
-Chúng tôi xác nhận đã nhận được sản phẩm của Quý khách để tiến hành bảo hành.
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE),
 
-{{message}}
+-- Product received notification
+('PRODUCT_RECEIVED', 'Xác nhận đã nhận sản phẩm bảo hành',
+ 'Kính gửi Quý khách {{customerName}},
 
-Mã theo dõi bảo hành của Quý khách là: {{repairId}}. Chúng tôi sẽ tiến hành kiểm tra sản phẩm và thông báo cho Quý khách về tiến độ sửa chữa.
+ Chúng tôi xác nhận đã nhận được sản phẩm {{productName}} của Quý khách để tiến hành bảo hành.
 
-Quý khách có thể kiểm tra trạng thái bảo hành thông qua trang web của chúng tôi hoặc gọi đến số hotline: 1900-xxxx.
+ Tình trạng nhận: {{message}}
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE),
+ Mã theo dõi bảo hành của Quý khách là: {{warrantyRequestId}}. Chúng tôi sẽ tiến hành kiểm tra sản phẩm và thông báo cho Quý khách về tiến độ sửa chữa.
 
--- Thông báo bắt đầu chẩn đoán
-('DIAGNOSIS_STARTED', 'Thông báo bắt đầu kiểm tra sản phẩm', 
-'Kính gửi Quý khách,
+ Quý khách có thể kiểm tra trạng thái bảo hành thông qua trang web của chúng tôi hoặc gọi đến số hotline: 1900-xxxx.
 
-Chúng tôi đang tiến hành kiểm tra và chẩn đoán sản phẩm của Quý khách.
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE),
 
-{{message}}
+-- Diagnosis started notification
+('DIAGNOSIS_STARTED', 'Thông báo bắt đầu kiểm tra sản phẩm',
+ 'Kính gửi Quý khách {{customerName}},
 
-Quá trình chẩn đoán có thể mất từ 1-3 ngày làm việc, tùy thuộc vào tình trạng của sản phẩm. Chúng tôi sẽ thông báo cho Quý khách kết quả kiểm tra và các bước tiếp theo.
+ Chúng tôi đang tiến hành kiểm tra và chẩn đoán sản phẩm {{productName}} của Quý khách.
 
-Trân trọng,
-Đội ngũ Kỹ thuật', 
-TRUE),
+ Kết quả kiểm tra ban đầu: {{message}}
 
--- Thông báo đang sửa chữa
-('REPAIR_IN_PROGRESS', 'Cập nhật tiến độ sửa chữa sản phẩm', 
-'Kính gửi Quý khách,
+ Quá trình chẩn đoán có thể mất từ 1-3 ngày làm việc, tùy thuộc vào tình trạng của sản phẩm. Chúng tôi sẽ thông báo cho Quý khách kết quả kiểm tra và các bước tiếp theo.
 
-Chúng tôi đang tiến hành sửa chữa sản phẩm của Quý khách.
+ Trân trọng,
+ Đội ngũ Kỹ thuật',
+ TRUE),
 
-{{message}}
+-- Repair in progress notification
+('REPAIR_IN_PROGRESS', 'Cập nhật tiến độ sửa chữa sản phẩm',
+ 'Kính gửi Quý khách {{customerName}},
 
-Dự kiến quá trình sửa chữa sẽ hoàn tất trong vòng 3-5 ngày làm việc. Chúng tôi sẽ thông báo cho Quý khách khi sản phẩm đã được sửa chữa xong.
+ Chúng tôi đang tiến hành sửa chữa sản phẩm {{productName}} của Quý khách.
 
-Trân trọng,
-Đội ngũ Kỹ thuật', 
-TRUE),
+ Thông tin cập nhật: {{message}}
 
--- Thông báo hoàn tất sửa chữa
-('REPAIR_COMPLETED', 'Thông báo hoàn tất sửa chữa sản phẩm', 
-'Kính gửi Quý khách,
+ Dự kiến quá trình sửa chữa sẽ hoàn tất trong vòng 3-5 ngày làm việc. Chúng tôi sẽ thông báo cho Quý khách khi sản phẩm đã được sửa chữa xong.
 
-Chúng tôi vui mừng thông báo sản phẩm của Quý khách đã được sửa chữa hoàn tất.
+ Trân trọng,
+ Đội ngũ Kỹ thuật',
+ TRUE),
 
-{{message}}
+-- Repair completed notification
+('REPAIR_COMPLETED', 'Thông báo hoàn tất sửa chữa sản phẩm',
+ 'Kính gửi Quý khách {{customerName}},
 
-Sản phẩm của Quý khách đã được kiểm tra chất lượng và hoạt động tốt. Chúng tôi đang chuẩn bị gửi trả sản phẩm cho Quý khách.
+ Chúng tôi vui mừng thông báo sản phẩm {{productName}} của Quý khách đã được sửa chữa hoàn tất.
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE),
+ Chi tiết sửa chữa: {{message}}
 
--- Thông báo gửi trả sản phẩm
-('PRODUCT_SHIPPING', 'Thông báo gửi trả sản phẩm bảo hành', 
-'Kính gửi Quý khách,
+ Sản phẩm của Quý khách đã được kiểm tra chất lượng và hoạt động tốt. Chúng tôi đang chuẩn bị gửi trả sản phẩm cho Quý khách.
 
-Sản phẩm đã bảo hành của Quý khách đang được vận chuyển về địa chỉ đăng ký.
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE),
 
-{{message}}
+-- Product shipping notification
+('PRODUCT_SHIPPING', 'Thông báo gửi trả sản phẩm bảo hành',
+ 'Kính gửi Quý khách {{customerName}},
 
-Mã vận đơn: {{trackingNumber}}
+ Sản phẩm {{productName}} đã bảo hành của Quý khách đang được vận chuyển về địa chỉ đăng ký.
 
-Dự kiến sản phẩm sẽ được giao đến Quý khách trong vòng 2-3 ngày làm việc. Quý khách có thể theo dõi trạng thái vận chuyển thông qua mã vận đơn ở trên.
+ Thông tin vận chuyển: {{message}}
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE),
+ Mã vận đơn: {{trackingNumber}}
 
--- Thông báo đã giao sản phẩm
-('PRODUCT_DELIVERED', 'Xác nhận đã giao sản phẩm bảo hành', 
-'Kính gửi Quý khách,
+ Dự kiến sản phẩm sẽ được giao đến Quý khách trong vòng 2-3 ngày làm việc. Quý khách có thể theo dõi trạng thái vận chuyển thông qua mã vận đơn ở trên.
 
-Sản phẩm đã bảo hành của Quý khách đã được giao thành công.
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE),
 
-{{message}}
+-- Product delivered notification
+('PRODUCT_DELIVERED', 'Xác nhận đã giao sản phẩm bảo hành',
+ 'Kính gửi Quý khách {{customerName}},
 
-Quý khách vui lòng kiểm tra sản phẩm và cho chúng tôi biết nếu có bất kỳ vấn đề nào. Chúng tôi rất mong nhận được phản hồi về chất lượng dịch vụ bảo hành từ Quý khách.
+ Sản phẩm {{productName}} đã bảo hành của Quý khách đã được giao thành công.
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE),
+ Thông tin bảo hành: {{message}}
 
--- Thông báo yêu cầu đánh giá
-('FEEDBACK_REQUEST', 'Đánh giá dịch vụ bảo hành', 
-'Kính gửi Quý khách,
+ Quý khách vui lòng kiểm tra sản phẩm và cho chúng tôi biết nếu có bất kỳ vấn đề nào. Chúng tôi rất mong nhận được phản hồi về chất lượng dịch vụ bảo hành từ Quý khách.
 
-Cảm ơn Quý khách đã sử dụng dịch vụ bảo hành của chúng tôi.
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE),
 
-{{message}}
+-- Feedback request notification
+('FEEDBACK_REQUEST', 'Đánh giá dịch vụ bảo hành',
+ 'Kính gửi Quý khách {{customerName}},
 
-Quý khách vui lòng dành vài phút để đánh giá chất lượng dịch vụ bằng cách nhấn vào đường link dưới đây:
+ Cảm ơn Quý khách đã sử dụng dịch vụ bảo hành của chúng tôi cho sản phẩm {{productName}}.
 
-{{feedbackLink}}
+ {{message}}
 
-Ý kiến của Quý khách sẽ giúp chúng tôi cải thiện chất lượng dịch vụ tốt hơn trong tương lai.
+ Quý khách vui lòng dành vài phút để đánh giá chất lượng dịch vụ bằng cách nhấn vào đường link dưới đây:
 
-Trân trọng,
-Đội ngũ Dịch vụ Khách hàng', 
-TRUE);
+ {{feedbackLink}}
+
+ Ý kiến của Quý khách sẽ giúp chúng tôi cải thiện chất lượng dịch vụ tốt hơn trong tương lai.
+
+ Trân trọng,
+ Đội ngũ Dịch vụ Khách hàng',
+ TRUE);

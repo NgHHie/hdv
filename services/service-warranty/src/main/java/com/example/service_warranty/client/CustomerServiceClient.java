@@ -27,7 +27,7 @@ public class CustomerServiceClient {
     /**
      * Get purchase date for a specific customer and product
      */
-    public LocalDate getPurchaseDate(Long productId) {
+    public LocalDate getPurchaseDate(Integer productId) {
         String url = "/api/v1/customers" + "/purchase/" + productId;
         log.info("Getting purchase history from: {}{}", customerServiceUrl, url);
         
@@ -65,7 +65,7 @@ public class CustomerServiceClient {
         }
     }
 
-    public CustomerResponse getCustomerById(Long customerId) {
+    public CustomerResponse getCustomerById(Integer customerId) {
         String url = "/api/v1/customers/" + customerId;
         log.info("Getting customer from: {}{}", customerServiceUrl, url);
         
@@ -168,13 +168,26 @@ public class CustomerServiceClient {
     }
 
     public static class CustomerResponse {
-        private Long id;
+        private Integer id;
         private String email;
         private String firstName;
+        private String lastName;
+        public String getFirstName()
+        {
+            return firstName;
+        }
+        public String getLastName() { return lastName; }
 
-        public String getFirstName() { return firstName; }
-
-        public Long getId() { return id; }
+        public Integer getId() { return id; }
         public String getEmail() { return email; }
+
+        public String toString() {
+            return "CustomerResponse{" +
+                    "id=" + id +
+                    ", email='" + email + '\'' +
+                    ", firstName='" + firstName + '\'' +
+                    ", lastName='" + lastName + '\'' +
+                    '}';
+        }
     }
 }

@@ -77,7 +77,7 @@ public class RepairService {
     /**
      * Get repair request by ID
      */
-    public RepairRequestResponseDto getRepairRequestById(Long id) {
+    public RepairRequestResponseDto getRepairRequestById(Integer id) {
         RepairRequest repairRequest = repairRequestRepository.findById(id)
                 .orElseThrow(() -> new RepairRequestNotFoundException("Repair request not found with id: " + id));
         
@@ -87,7 +87,7 @@ public class RepairService {
     /**
      * Get all repair requests for a customer
      */
-    public List<RepairRequestResponseDto> getRepairRequestsByCustomerId(Long customerId) {
+    public List<RepairRequestResponseDto> getRepairRequestsByCustomerId(Integer customerId) {
         List<RepairRequest> requests = repairRequestRepository.findByCustomerId(customerId);
         return requests.stream()
                 .map(this::convertToResponseDto)
@@ -108,7 +108,7 @@ public class RepairService {
      * Update repair status to next state
      */
     @Transactional
-    public RepairRequestResponseDto moveToNextState(Long repairId, String notes, String username) {
+    public RepairRequestResponseDto moveToNextState(Integer repairId, String notes, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         RepairContext context = new RepairContext(repairRequest);
         
@@ -166,7 +166,7 @@ public class RepairService {
      * Update repair status to previous state
      */
     @Transactional
-    public RepairRequestResponseDto moveToPreviousState(Long repairId, String notes, String username) {
+    public RepairRequestResponseDto moveToPreviousState(Integer repairId, String notes, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         RepairContext context = new RepairContext(repairRequest);
         
@@ -207,7 +207,7 @@ public class RepairService {
      * Cancel a repair request
      */
     @Transactional
-    public RepairRequestResponseDto cancelRepairRequest(Long repairId, String notes, String username) {
+    public RepairRequestResponseDto cancelRepairRequest(Integer repairId, String notes, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         RepairContext context = new RepairContext(repairRequest);
         
@@ -255,7 +255,7 @@ public class RepairService {
      * Update repair notes
      */
     @Transactional
-    public RepairRequestResponseDto updateRepairNotes(Long repairId, String notes, String username) {
+    public RepairRequestResponseDto updateRepairNotes(Integer repairId, String notes, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         repairRequest.setRepairNotes(notes);
         repairRequest.setUpdatedAt(LocalDateTime.now());
@@ -274,7 +274,7 @@ public class RepairService {
      * Assign technician to repair request
      */
     @Transactional
-    public RepairRequestResponseDto assignTechnician(Long repairId, Long technicianId, String username) {
+    public RepairRequestResponseDto assignTechnician(Integer repairId, Integer technicianId, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         Technician technician = technicianRepository.findById(technicianId)
@@ -297,7 +297,7 @@ public class RepairService {
      * Add part to repair
      */
     @Transactional
-    public RepairPartDto addRepairPart(Long repairId, RepairPartDto partDto, String username) {
+    public RepairPartDto addRepairPart(Integer repairId, RepairPartDto partDto, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         RepairPart part = RepairPart.builder()
@@ -325,14 +325,14 @@ public class RepairService {
      * Remove part from repair
      */
     @Transactional
-    public void removeRepairPart(Long repairId, Long partId, String username) {
+    public void removeRepairPart(Integer repairId, Integer partId, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         RepairPart part = partRepository.findById(partId)
                 .orElseThrow(() -> new IllegalArgumentException("Part not found with id: " + partId));
         
         if (!part.getRepairRequest().getId().equals(repairId)) {
-            throw new IllegalArgumentException("Part does not belong to this repair request");
+            throw new IllegalArgumentException("Part does not beInteger to this repair request");
         }
         
         // Create repair action for removing part
@@ -350,7 +350,7 @@ public class RepairService {
      * Add repair action
      */
     @Transactional
-    public RepairActionDto addRepairAction(Long repairId, RepairActionDto actionDto, String username) {
+    public RepairActionDto addRepairAction(Integer repairId, RepairActionDto actionDto, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         Optional<Technician> technician = Optional.empty();
@@ -375,7 +375,7 @@ public class RepairService {
      * Reject a repair request (e.g., if warranty verification fails)
      */
     @Transactional
-    public RepairRequestResponseDto rejectRepairRequest(Long repairId, String reason, String username) {
+    public RepairRequestResponseDto rejectRepairRequest(Integer repairId, String reason, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         RepairStatus previousStatus = repairRequest.getStatus();
         
@@ -415,7 +415,7 @@ public class RepairService {
      * Process product receipt - mark as RECEIVED
      */
     @Transactional
-    public RepairRequestResponseDto processProductReceipt(Long repairId, TechnicianDto technician, String username) {
+    public RepairRequestResponseDto processProductReceipt(Integer repairId, TechnicianDto technician, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         if (repairRequest.getStatus() != RepairStatus.SUBMITTED) {
@@ -453,7 +453,7 @@ public class RepairService {
      * Update repair cost
      */
     @Transactional
-    public RepairRequestResponseDto updateRepairCost(Long repairId, BigDecimal manualCost, String username) {
+    public RepairRequestResponseDto updateRepairCost(Integer repairId, BigDecimal manualCost, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         if (manualCost != null) {
@@ -478,7 +478,7 @@ public class RepairService {
     /**
      * Calculate and update repair cost based on parts
      */
-    private void updateRepairCost(Long repairId) {
+    private void updateRepairCost(Integer repairId) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         // Skip if it's under warranty
@@ -508,23 +508,23 @@ public class RepairService {
     //     stats.setTotalRepairRequests(repairRequestRepository.count());
         
     //     List<RepairStatus> pendingStatuses = List.of(RepairStatus.SUBMITTED, RepairStatus.RECEIVED);
-    //     stats.setPendingRepairRequests((long) repairRequestRepository.findByStatusIn(pendingStatuses).size());
+    //     stats.setPendingRepairRequests((Integer) repairRequestRepository.findByStatusIn(pendingStatuses).size());
         
     //     List<RepairStatus> inProgressStatuses = List.of(
     //             RepairStatus.UNDER_DIAGNOSIS, RepairStatus.DIAGNOSING, 
     //             RepairStatus.WAITING_APPROVAL, RepairStatus.REPAIRING,
     //             RepairStatus.REPAIRED, RepairStatus.TESTING);
-    //     stats.setInProgressRepairRequests((long) repairRequestRepository.findByStatusIn(inProgressStatuses).size());
+    //     stats.setInProgressRepairRequests((Integer) repairRequestRepository.findByStatusIn(inProgressStatuses).size());
         
-    //     stats.setCompletedRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.DELIVERED).size());
-    //     stats.setCancelledRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.CANCELLED).size());
+    //     stats.setCompletedRepairRequests((Integer) repairRequestRepository.findByStatus(RepairStatus.DELIVERED).size());
+    //     stats.setCancelledRepairRequests((Integer) repairRequestRepository.findByStatus(RepairStatus.CANCELLED).size());
         
     //     // Calculate average repair time for completed repairs
     //     List<RepairRequest> completedRepairs = repairRequestRepository.findByStatus(RepairStatus.DELIVERED);
     //     if (!completedRepairs.isEmpty()) {
     //         double averageHours = completedRepairs.stream()
     //                 .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
-    //                 .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
+    //                 .mapToInteger(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
     //                 .average()
     //                 .orElse(0);
     //         stats.setAverageRepairTime(averageHours);
@@ -543,14 +543,14 @@ public class RepairService {
             
     //         double techAverageHours = technicianCompletedRepairs.stream()
     //                 .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
-    //                 .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
+    //                 .mapToInteger(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
     //                 .average()
     //                 .orElse(0);
             
     //         DashboardStatsDto.TechnicianPerformanceDto perfDto = DashboardStatsDto.TechnicianPerformanceDto.builder()
     //                 .technicianId(technician.getId())
     //                 .technicianName(technician.getName())
-    //                 .completedRepairs((long) technicianCompletedRepairs.size())
+    //                 .completedRepairs((Integer) technicianCompletedRepairs.size())
     //                 .averageRepairTime(techAverageHours)
     //                 .build();
             
@@ -583,7 +583,7 @@ public class RepairService {
     /**
      * Helper method to get entity by ID
      */
-    private RepairRequest getRepairRequestEntityById(Long id) {
+    private RepairRequest getRepairRequestEntityById(Integer id) {
         return repairRequestRepository.findById(id)
                 .orElseThrow(() -> new RepairRequestNotFoundException("Repair request not found with id: " + id));
     }
@@ -686,7 +686,7 @@ public class RepairService {
     }
     
     // @Transactional
-    // public void updateWarrantyServiceStatus(Long repairId, String status) {
+    // public void updateWarrantyServiceStatus(Integer repairId, String status) {
     //     RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
     //     if (repairRequest.getWarrantyId() != null) {

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findBySerialNumber(String serial);
     List<Product> findByCategory(String category);
     List<Product> findByNameContainingIgnoreCase(String name);

@@ -18,13 +18,13 @@ public class WarrantyClaim {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @Column(name = "warranty_id", nullable = false)
-    private Long warrantyId;
+    private Integer warrantyId;
     
     @Column(name = "repair_id", nullable = false)
-    private Long repairId;
+    private Integer repairId;
     
     @Column(name = "claim_date", nullable = false)
     private LocalDateTime claimDate;
@@ -32,7 +32,7 @@ public class WarrantyClaim {
     @Column(name = "status")
     private String status;
     
-    @Column(name = "notes", columnDefinition = "TEXT")
+    @Column(name = "notes")
     private String notes;
     
     @Column(name = "created_at")

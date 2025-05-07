@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @Entity
@@ -26,13 +25,15 @@ public class PurchaseItem {
     @JoinColumn(name = "purchase_id", nullable = false)
     private Purchase purchase;
     
-    @Column(name = "product_id", nullable = false, unique = true)
+    @Column(name = "product_id", nullable = false)
     private Integer productId;
-
-    @Column(name = "product_name", nullable = false)
-    private String productName;
+    
+    @Column(nullable = false)
+    private Integer quantity;
     
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
-
+    
+    
+    
 }

@@ -8,10 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PurchaseItemRepository extends JpaRepository<PurchaseItem, Integer> {
     List<PurchaseItem> findByPurchaseId(Integer purchaseId);
-    Optional<PurchaseItem> findByProductId(Integer productId);
+    List<PurchaseItem> findByProductId(Integer productId);
 }

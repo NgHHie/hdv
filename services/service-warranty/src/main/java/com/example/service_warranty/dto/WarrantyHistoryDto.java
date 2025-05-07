@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyHistoryDto {
-    private Long id;
-    private Long warrantyRequestId;
+    private Integer id;
+    private Integer warrantyRequestId;
     private String status;
     private String notes;
     private String performedBy;
