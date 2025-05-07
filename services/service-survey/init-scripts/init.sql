@@ -1,57 +1,67 @@
+-- Tạo database nếu chưa tồn tại
 CREATE DATABASE IF NOT EXISTS service_survey;
 
 USE service_survey;
 
--- Create users table
-CREATE USER IF NOT EXISTS 'survey_user'@'%' IDENTIFIED BY 'survey_pass';
-GRANT ALL PRIVILEGES ON service_survey.* TO 'survey_user'@'%';
-FLUSH PRIVILEGES;
+-- Tạo bảng surveys (khảo sát)
+CREATE TABLE IF NOT EXISTS surveys (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    active BOOLEAN DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
--- Create example surveys
-INSERT INTO surveys (survey_type, title, description, is_active, created_at, updated_at) VALUES
-('REPAIR_FEEDBACK', 'Repair Service Feedback', 'Help us improve our repair service by sharing your experience', true, NOW(), NOW()),
-('WARRANTY_FEEDBACK', 'Warranty Service Feedback', 'Share your thoughts about our warranty service', true, NOW(), NOW()),
-('CUSTOMER_SATISFACTION', 'Customer Satisfaction Survey', 'We value your feedback about our overall service', true, NOW(), NOW());
+-- Tạo bảng questions (câu hỏi)
+CREATE TABLE IF NOT EXISTS questions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    survey_id BIGINT NOT NULL,
+    question_text TEXT NOT NULL,
+    question_order INT NOT NULL,
+    required BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
+);
 
--- Create example questions for Repair Service Feedback
-INSERT INTO survey_questions (survey_id, question_text, question_type, required, display_order) VALUES
-(1, 'How would you rate the overall quality of our repair service?', 'RATING', true, 1),
-(1, 'Was your product repaired within the expected timeframe?', 'YES_NO', true, 2),
-(1, 'How satisfied are you with the communication during the repair process?', 'RATING', true, 3),
-(1, 'How would you rate the professionalism of our technician?', 'RATING', true, 4),
-(1, 'Did the repair resolve your issue completely?', 'YES_NO', true, 5),
-(1, 'What aspects of our repair service could be improved?', 'TEXTAREA', false, 6),
-(1, 'How likely are you to recommend our repair service to others?', 'RATING', true, 7);
+-- Tạo bảng responses (phản hồi khảo sát)
+CREATE TABLE IF NOT EXISTS responses (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    survey_id BIGINT NOT NULL,
+    customer_id BIGINT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (survey_id) REFERENCES surveys(id) ON DELETE CASCADE
+);
 
--- Create example questions for Warranty Service Feedback
-INSERT INTO survey_questions (survey_id, question_text, question_type, required, display_order) VALUES
-(2, 'How would you rate the warranty claim process?', 'RATING', true, 1),
-(2, 'Was your warranty claim handled efficiently?', 'YES_NO', true, 2),
-(2, 'How satisfied are you with the time taken to process your warranty claim?', 'RATING', true, 3),
-(2, 'Did you receive clear information about the warranty process?', 'YES_NO', true, 4),
-(2, 'What could we improve about our warranty service?', 'TEXTAREA', false, 5),
-(2, 'How likely are you to purchase extended warranty for future products?', 'RATING', false, 6);
+-- Tạo bảng response_answers (câu trả lời cho phản hồi)
+CREATE TABLE IF NOT EXISTS response_answers (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    response_id BIGINT NOT NULL,
+    question_id BIGINT NOT NULL,
+    answer_text TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (response_id) REFERENCES responses(id) ON DELETE CASCADE,
+    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+);
 
--- Create example questions for Customer Satisfaction Survey
-INSERT INTO survey_questions (survey_id, question_text, question_type, required, display_order) VALUES
-(3, 'How satisfied are you with our products?', 'RATING', true, 1),
-(3, 'How would you rate our customer service?', 'RATING', true, 2),
-(3, 'What is the primary reason you chose our products?', 'SINGLE_CHOICE', true, 3),
-(3, 'Which of the following features are important to you?', 'MULTIPLE_CHOICE', false, 4),
-(3, 'How likely are you to purchase from us again?', 'RATING', true, 5),
-(3, 'Would you recommend our products to friends or colleagues?', 'YES_NO', true, 6),
-(3, 'Do you have any suggestions for improvement?', 'TEXTAREA', false, 7);
+-- Tạo một số dữ liệu mẫu
+INSERT INTO surveys (title, description, active) VALUES
+('Khảo sát phản hồi dịch vụ sửa chữa', 'Giúp chúng tôi cải thiện dịch vụ sửa chữa bằng cách chia sẻ trải nghiệm của bạn', true),
+('Khảo sát mức độ hài lòng của khách hàng', 'Chúng tôi đánh giá cao phản hồi của bạn về dịch vụ tổng thể của chúng tôi', true);
 
--- Create options for single/multiple choice questions
-INSERT INTO question_options (question_id, option_text, display_order) VALUES
-(10, 'Quality', 1),
-(10, 'Price', 2),
-(10, 'Brand reputation', 3),
-(10, 'Customer service', 4),
-(10, 'Warranty', 5),
-(11, 'Durability', 1),
-(11, 'Performance', 2),
-(11, 'Design', 3),
-(11, 'Ease of use', 4),
-(11, 'Price', 5),
-(11, 'Warranty coverage', 6);
+-- Tạo câu hỏi mẫu cho khảo sát phản hồi dịch vụ sửa chữa
+INSERT INTO questions (survey_id, question_text, question_order, required) VALUES
+(1, 'Bạn đánh giá chất lượng dịch vụ sửa chữa của chúng tôi như thế nào?', 1, true),
+(1, 'Sản phẩm của bạn có được sửa chữa trong thời gian dự kiến không?', 2, true),
+(1, 'Bạn hài lòng với cách giao tiếp trong quá trình sửa chữa như thế nào?', 3, true),
+(1, 'Bạn đánh giá tính chuyên nghiệp của kỹ thuật viên của chúng tôi như thế nào?', 4, true),
+(1, 'Việc sửa chữa có giải quyết vấn đề của bạn hoàn toàn không?', 5, true),
+(1, 'Khía cạnh nào của dịch vụ sửa chữa của chúng tôi có thể được cải thiện?', 6, false);
+
+-- Tạo câu hỏi mẫu cho khảo sát mức độ hài lòng của khách hàng
+INSERT INTO questions (survey_id, question_text, question_order, required) VALUES
+(2, 'Bạn hài lòng với sản phẩm của chúng tôi đến mức nào?', 1, true),
+(2, 'Bạn đánh giá dịch vụ khách hàng của chúng tôi như thế nào?', 2, true),
+(2, 'Lý do chính bạn chọn sản phẩm của chúng tôi là gì?', 3, true),
+(2, 'Bạn có khả năng sẽ mua lại từ chúng tôi không?', 4, true),
+(2, 'Bạn có đề xuất cải tiến nào không?', 5, false);
