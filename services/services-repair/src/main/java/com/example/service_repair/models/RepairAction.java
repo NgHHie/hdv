@@ -29,9 +29,7 @@ public class RepairAction {
     @Column(columnDefinition = "TEXT")
     private String description;
     
-    @ManyToOne
-    @JoinColumn(name = "performed_by")
-    private Technician performedBy;
+    private Integer performedBy;
     
     private LocalDateTime performedAt;
 }

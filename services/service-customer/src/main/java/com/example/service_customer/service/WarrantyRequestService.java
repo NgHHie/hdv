@@ -8,6 +8,7 @@ import com.example.service_customer.model.WarrantyRequest;
 import com.example.service_customer.repository.CustomerRepository;
 import com.example.service_customer.repository.WarrantyHistoryRepository;
 import com.example.service_customer.repository.WarrantyRequestRepository;
+import com.example.service_customer.util.UpdateStatusWarranty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class WarrantyRequestService {
                 .imageUrls(imageUrlsJson)
                 .status(requestDto.getStatus())
                 .submissionDate(LocalDateTime.now())
+                .expirationDate(requestDto.getExpirationDate())
                 .build();
         
         WarrantyRequest savedRequest = warrantyRequestRepository.save(warrantyRequest);
@@ -56,7 +58,7 @@ public class WarrantyRequestService {
         // Create initial history entry
         WarrantyHistory history = WarrantyHistory.builder()
                 .warrantyRequest(savedRequest)
-                .status("PENDING")
+                .status(requestDto.getStatus())
                 .notes("Warranty request submitted")
                 .performedBy("SYSTEM")
                 .performedAt(LocalDateTime.now())
@@ -108,8 +110,9 @@ public class WarrantyRequestService {
         
         WarrantyRequest request = warrantyRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Warranty request not found with id: " + id));
-        
-        request.setStatus(status);
+        Boolean allowUpdateStatus = UpdateStatusWarranty.updateStatus(request.getStatus(), status);
+        if(allowUpdateStatus) request.setStatus(status);
+        else throw new IllegalArgumentException("Khong duoc update status");
         if (notes != null && !notes.isEmpty()) {
             request.setValidationNotes(notes);
         }

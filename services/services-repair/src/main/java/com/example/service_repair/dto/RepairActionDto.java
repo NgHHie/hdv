@@ -16,6 +16,5 @@ public class RepairActionDto {
     private String actionType;
     private String description;
     private Integer technicianId;
-    private String technicianName;
     private LocalDateTime performedAt;
 }

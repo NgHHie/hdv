@@ -57,14 +57,14 @@ public class WarrantyConditionService {
         log.info("Validating warranty request: {}", validationDTO.getWarrantyRequestId());
         
         List<WarrantyConditionResult> results = new ArrayList<>();
-        
+        Boolean validation = true;
         // Process individual condition results
         if (validationDTO.getConditionResults() != null) {
             System.out.println("hiep dep trai");
             for (WarrantyValidationDTO.ConditionResultDTO resultDTO : validationDTO.getConditionResults()) {
                 WarrantyCondition condition = conditionRepository.findById(resultDTO.getConditionId())
                         .orElseThrow(() -> new RuntimeException("Warranty condition not found with id: " + resultDTO.getConditionId()));
-                
+                if(resultDTO.getPassed() == false) validation = false;
                 WarrantyConditionResult result = WarrantyConditionResult.builder()
                         .warrantyRequestId(validationDTO.getWarrantyRequestId())
                         .condition(condition)
@@ -82,7 +82,7 @@ public class WarrantyConditionService {
         resultRepository.saveAll(results);
         
         // Return validation result
-        return validationDTO.getIsValid();
+        return validation;
     }
     
     public List<WarrantyConditionResultDTO> getResultsByWarrantyRequestId(Integer warrantyRequestId) {

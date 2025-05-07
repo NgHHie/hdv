@@ -27,19 +27,16 @@ public class ConditionServiceClient {
     /**
      * Validate warranty request against warranty conditions
      */
-    public Boolean validateWarrantyConditions(WarrantyValidationDto validationDto, ProductResponse product) {
+    public Boolean validateWarrantyConditions(WarrantyValidationDto validationDto) {
         String url = "/api/v1/conditions/validate";
         log.info("Sending validation request to condition service for warranty request: {}", 
                 validationDto.getWarrantyRequestId());
-        ValidationDTO request = new ValidationDTO();
-        request.setWarrantyValidationDto(validationDto);
-        request.setProduct(product);
         try {
             return webClientBuilder.build()
                     .post()
                     .uri(conditionServiceUrl + url)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(request)
+                    .bodyValue(validationDto)
                     .retrieve()
                     .bodyToMono(Boolean.class)
                     .block();
@@ -88,11 +85,5 @@ public class ConditionServiceClient {
         
         public Boolean getIsActive() { return isActive; }
         public void setIsActive(Boolean isActive) { this.isActive = isActive; }
-    }
-
-    @Data
-    public static class ValidationDTO {
-        WarrantyValidationDto warrantyValidationDto;
-        ProductResponse product;
     }
 }

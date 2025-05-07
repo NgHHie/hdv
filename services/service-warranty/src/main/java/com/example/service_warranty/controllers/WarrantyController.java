@@ -39,6 +39,7 @@ public class WarrantyController {
        
        String username = principal != null ? principal.getName() : "SYSTEM";
        validationDto.setValidatedBy(username);
+       validationDto.setWarrantyRequestId(id);
        
        try {
            WarrantyRequestDto updatedRequest = warrantyService.completeValidationAndForward(id, validationDto);
