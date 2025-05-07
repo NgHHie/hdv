@@ -69,7 +69,7 @@ public class WarrantyController {
        }
    }
 
-   @PutMapping("/requests/{id}/repair-status")
+   @PutMapping("/requests/{id}/update-repair-status")
    public ResponseEntity<WarrantyRequestDto> updateRepairStatus(
            @PathVariable Integer id,
            @RequestBody Map<String, String> requestBody,

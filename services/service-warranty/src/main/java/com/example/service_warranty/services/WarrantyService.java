@@ -203,14 +203,14 @@ public class WarrantyService {
         
         // Send notifications based on status
         CustomerServiceClient.CustomerResponse customer = customerServiceClient.getCustomerById(updatedRequest.getCustomerId());
-        
+        ProductServiceClient.ProductResponse product = productServiceClient.getProductDetailsBySerial(updatedRequest.getSerialNumber());
         if ("REPAIR_IN_PROGRESS".equals(status)) {
             WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
                     .warrantyRequestId(id)
                     .type(NotificationType.REPAIR_IN_PROGRESS)
                     .email(customer.getEmail())
                     .customerName(customer.getFirstName() + " " + customer.getLastName())
-                    .productName(updatedRequest.getProductName())
+                    .productName(product.getName())
                     .message("Your product is now being repaired.")
                     .customerId(customer.getId())
                     .build();
@@ -221,7 +221,7 @@ public class WarrantyService {
                     .type(NotificationType.REPAIR_COMPLETED)
                     .email(customer.getEmail())
                     .customerName(customer.getFirstName() + " " + customer.getLastName())
-                    .productName(updatedRequest.getProductName())
+                    .productName(product.getName())
                     .message("Your product has been repaired. " + notes)
                     .customerId(customer.getId())
                     .build();
