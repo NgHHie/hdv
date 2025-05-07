@@ -95,57 +95,6 @@ public class RepairController {
     }
 
     /**
-     * Assign technician to repair
-     */
-    @PostMapping("/{id}/technician/{technicianId}")
-    public ResponseEntity<RepairRequestResponseDto> assignTechnician(
-            @PathVariable Integer id,
-            @PathVariable Integer technicianId,
-            Principal principal) {
-        
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to assign technician {} to repair request {}", 
-                username, technicianId, id);
-        
-        try {
-            RepairRequestResponseDto response = repairService.assignTechnician(id, technicianId, username);
-            return ResponseEntity.ok(response);
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (TechnicianNotFoundException e) {
-            log.error("Technician not found: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
-    /**
-     * Add repair action
-     */
-    @PostMapping("/{id}/actions")
-    public ResponseEntity<RepairActionDto> addRepairAction(
-            @PathVariable Integer id,
-            @RequestBody RepairActionDto actionDto,
-            Principal principal) {
-        
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to add action to repair request {}", username, id);
-        
-        try {
-            RepairActionDto response = repairService.addRepairAction(id, actionDto, username);
-            return ResponseEntity.ok(response);
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid action data: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
-    /**
      * Start diagnostic process
      */
     @PostMapping("/{id}/start-diagnosis")

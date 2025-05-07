@@ -1,6 +1,9 @@
 package com.example.service_warranty.dto;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.cglib.core.Local;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +22,5 @@ public class WarrantyRequestCreateDto {
     private List<String> imageUrls;
     private String status;
     private String validationNotes;
+    private LocalDate expirationDate;
 }

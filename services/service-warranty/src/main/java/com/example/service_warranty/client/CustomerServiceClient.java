@@ -108,7 +108,7 @@ public class CustomerServiceClient {
         createRequest.setImageUrls(requestDto.getImageUrls());
         createRequest.setStatus(status);
         createRequest.setValidationNotes(isWithinWarranty ? null : "Product is out of warranty period");
-        System.out.println(status);
+        createRequest.setExpirationDate(requestDto.getExpirationDate());
         try {
             return webClientBuilder.build()
                     .post()

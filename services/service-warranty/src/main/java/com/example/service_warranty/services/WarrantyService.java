@@ -45,6 +45,7 @@ public class WarrantyService {
         ProductServiceClient.ProductResponse product = 
                 productServiceClient.getProductDetailsBySerial(requestDto.getSerialNumber());
         
+        LocalDate warrantyEndDate = null;
         if (product != null) {
             Float warrantyDuration = product.getWarrantyDuration();
             
@@ -57,16 +58,16 @@ public class WarrantyService {
                 int warrantyMonths = Math.round(warrantyDuration * 12);
                 
                 // Calculate if current date is within warranty period
-                LocalDate warrantyEndDate = purchaseDate.plusMonths(warrantyMonths);
+                warrantyEndDate = purchaseDate.plusMonths(warrantyMonths);
                 isWithinWarranty = !LocalDate.now().isAfter(warrantyEndDate);
             }
         }
         
         // Create the warranty request in customer service
+        requestDto.setExpirationDate(warrantyEndDate);
         WarrantyRequestDto createdRequest = customerServiceClient.createWarrantyRequest(requestDto, isWithinWarranty);
         createdRequest.setProductId(product.getId());
         createdRequest.setProductName(product.getName());
-        System.out.println("hiep: " + createdRequest.getStatus());
         
         // Get customer details
         CustomerServiceClient.CustomerResponse customer = customerServiceClient.getCustomerById(requestDto.getCustomerId());
@@ -108,19 +109,16 @@ public class WarrantyService {
     @Transactional
     public WarrantyRequestDto completeValidationAndForward(Integer id, WarrantyValidationDto validationDto) {
         log.info("Completing validation and forwarding warranty request: {}", id);
-        ProductServiceClient.ProductResponse product = productServiceClient.getProductDetailsBySerial(validationDto.getSerialNumber());
-
         // First validate with condition service
-        Boolean isValid = false;
-        if(product != null) {
-            isValid = conditionServiceClient.validateWarrantyConditions(validationDto, product);
-        }
-        
+        Boolean isValid = conditionServiceClient.validateWarrantyConditions(validationDto);
+
         // Now update the status in customer service
         String status = isValid ? "APPROVED" : "REJECTED";
         WarrantyRequestDto updatedRequest = customerServiceClient.updateWarrantyRequestStatus(
                 id, status, validationDto.getValidationReason(), validationDto.getValidatedBy());
         
+        ProductServiceClient.ProductResponse product = productServiceClient.getProductDetailsBySerial(updatedRequest.getSerialNumber());
+        log.info("tim thay product voi id: " + product.getId());
         // Get customer details for notification
         CustomerServiceClient.CustomerResponse customer = customerServiceClient.getCustomerById(updatedRequest.getCustomerId());
         
@@ -150,7 +148,8 @@ public class WarrantyService {
                     .build();
             kafkaProducerService.sendWarrantyEvent(event);
         }
-        
+        updatedRequest.setProductId(product.getId());
+        updatedRequest.setProductName(product.getName());
         return updatedRequest;
     }
 
@@ -167,14 +166,14 @@ public class WarrantyService {
         
         // Get customer information for notification
         CustomerServiceClient.CustomerResponse customer = customerServiceClient.getCustomerById(updatedRequest.getCustomerId());
-        
+        ProductServiceClient.ProductResponse product = productServiceClient.getProductDetailsBySerial(updatedRequest.getSerialNumber());
         // Send product received notification
         WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
                 .warrantyRequestId(id)
                 .type(NotificationType.PRODUCT_RECEIVED)
                 .email(customer.getEmail())
                 .customerName(customer.getFirstName() + " " + customer.getLastName())
-                .productName(updatedRequest.getProductName())
+                .productName(product.getName())
                 .message("We have received your product and will begin the repair process soon.")
                 .customerId(customer.getId())
                 .build();
@@ -183,7 +182,7 @@ public class WarrantyService {
         // Create repair request
         Integer repairId = repairServiceClient.createRepairRequest(
                 updatedRequest.getCustomerId(), 
-                updatedRequest.getProductId(),
+                product.getId(),
                 id, 
                 updatedRequest.getIssueDescription(), 
                 (updatedRequest.getImageUrls() != null && !updatedRequest.getImageUrls().isEmpty()) ? 
