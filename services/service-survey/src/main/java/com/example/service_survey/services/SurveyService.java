@@ -1,12 +1,11 @@
 package com.example.service_survey.services;
 
 import com.example.service_survey.dto.CreateSurveyRequest;
-import com.example.service_survey.dto.QuestionOptionDto;
+import com.example.service_survey.dto.QuestionDto;
 import com.example.service_survey.dto.SurveyDto;
-import com.example.service_survey.dto.SurveyQuestionDto;
-import com.example.service_survey.models.*;
-import com.example.service_survey.repositories.QuestionOptionRepository;
-import com.example.service_survey.repositories.SurveyQuestionRepository;
+import com.example.service_survey.models.Question;
+import com.example.service_survey.models.Survey;
+import com.example.service_survey.repositories.QuestionRepository;
 import com.example.service_survey.repositories.SurveyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,77 +22,53 @@ import java.util.stream.Collectors;
 public class SurveyService {
     
     private final SurveyRepository surveyRepository;
-    private final SurveyQuestionRepository questionRepository;
-    private final QuestionOptionRepository optionRepository;
+    private final QuestionRepository questionRepository;
     
     /**
-     * Create a new survey with questions and options
+     * Tạo một khảo sát mới với các câu hỏi
      */
     @Transactional
     public SurveyDto createSurvey(CreateSurveyRequest request) {
-        log.info("Creating new survey: {}", request.getTitle());
+        log.info("Đang tạo khảo sát mới: {}", request.getTitle());
         
-        // Create survey
+        // Tạo khảo sát
         Survey survey = Survey.builder()
-                .surveyType(request.getSurveyType())
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .isActive(true)
+                .active(true)
                 .build();
         
         Survey savedSurvey = surveyRepository.save(survey);
         
-        // Create questions and options
-        List<SurveyQuestion> questions = new ArrayList<>();
+        // Tạo các câu hỏi
+        List<Question> questions = new ArrayList<>();
         
         for (int i = 0; i < request.getQuestions().size(); i++) {
             CreateSurveyRequest.CreateQuestionRequest questionRequest = request.getQuestions().get(i);
             
-            // Determine question type from string
-            QuestionType questionType = QuestionType.valueOf(questionRequest.getQuestionType());
-            
-            SurveyQuestion question = SurveyQuestion.builder()
+            Question question = Question.builder()
                     .survey(savedSurvey)
                     .questionText(questionRequest.getQuestionText())
-                    .questionType(questionType)
                     .required(questionRequest.getRequired() != null ? questionRequest.getRequired() : false)
-                    .displayOrder(questionRequest.getDisplayOrder() != null ? questionRequest.getDisplayOrder() : i + 1)
+                    .questionOrder(questionRequest.getQuestionOrder() != null ? questionRequest.getQuestionOrder() : i + 1)
                     .build();
             
-            SurveyQuestion savedQuestion = questionRepository.save(question);
-            questions.add(savedQuestion);
-            
-            // Create options if needed
-            if (questionRequest.getOptions() != null && !questionRequest.getOptions().isEmpty()) {
-                List<QuestionOption> options = new ArrayList<>();
-                
-                for (int j = 0; j < questionRequest.getOptions().size(); j++) {
-                    CreateSurveyRequest.CreateOptionRequest optionRequest = questionRequest.getOptions().get(j);
-                    
-                    QuestionOption option = QuestionOption.builder()
-                            .question(savedQuestion)
-                            .optionText(optionRequest.getOptionText())
-                            .displayOrder(optionRequest.getDisplayOrder() != null ? optionRequest.getDisplayOrder() : j + 1)
-                            .build();
-                    
-                    options.add(option);
-                }
-                
-                optionRepository.saveAll(options);
-            }
+            questions.add(question);
         }
         
-        // Set questions to the survey
+        questionRepository.saveAll(questions);
+        
+        // Gán danh sách câu hỏi cho khảo sát
         savedSurvey.setQuestions(questions);
         
         return mapToSurveyDto(savedSurvey);
     }
     
     /**
-     * Get all surveys
+     * Lấy tất cả khảo sát
      */
     public List<SurveyDto> getAllSurveys() {
-        log.info("Getting all surveys");
+        log.info("Đang lấy tất cả khảo sát");
         
         List<Survey> surveys = surveyRepository.findAll();
         return surveys.stream()
@@ -102,114 +77,73 @@ public class SurveyService {
     }
     
     /**
-     * Get all active surveys
+     * Lấy tất cả khảo sát đang hoạt động
      */
     public List<SurveyDto> getActiveSurveys() {
-        log.info("Getting all active surveys");
+        log.info("Đang lấy tất cả khảo sát đang hoạt động");
         
-        List<Survey> surveys = surveyRepository.findByIsActiveTrue();
+        List<Survey> surveys = surveyRepository.findByActive(true);
         return surveys.stream()
                 .map(this::mapToSurveyDto)
                 .collect(Collectors.toList());
     }
     
     /**
-     * Get survey by ID
+     * Lấy khảo sát theo ID
      */
-    public SurveyDto getSurveyById(Integer id) {
-        log.info("Getting survey with id: {}", id);
+    public SurveyDto getSurveyById(Long id) {
+        log.info("Đang lấy khảo sát với id: {}", id);
         
         Survey survey = surveyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Survey not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khảo sát với id: " + id));
         
         return mapToSurveyDto(survey);
     }
     
     /**
-     * Get surveys by type
-     */
-    public List<SurveyDto> getSurveysByType(SurveyType surveyType) {
-        log.info("Getting surveys with type: {}", surveyType);
-        
-        List<Survey> surveys = surveyRepository.findBySurveyType(surveyType);
-        return surveys.stream()
-                .map(this::mapToSurveyDto)
-                .collect(Collectors.toList());
-    }
-    
-    /**
-     * Get active surveys by type
-     */
-    public List<SurveyDto> getActiveSurveysByType(SurveyType surveyType) {
-        log.info("Getting active surveys with type: {}", surveyType);
-        
-        List<Survey> surveys = surveyRepository.findByIsActiveTrueAndSurveyType(surveyType);
-        return surveys.stream()
-                .map(this::mapToSurveyDto)
-                .collect(Collectors.toList());
-    }
-    
-    /**
-     * Update survey status (activate/deactivate)
+     * Cập nhật trạng thái khảo sát (kích hoạt/vô hiệu hóa)
      */
     @Transactional
-    public SurveyDto updateSurveyStatus(Integer id, Boolean isActive) {
-        log.info("Updating survey status for id {}: isActive={}", id, isActive);
+    public SurveyDto updateSurveyStatus(Long id, Boolean active) {
+        log.info("Đang cập nhật trạng thái khảo sát cho id {}: active={}", id, active);
         
         Survey survey = surveyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Survey not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khảo sát với id: " + id));
         
-        survey.setIsActive(isActive);
+        survey.setActive(active);
         Survey updatedSurvey = surveyRepository.save(survey);
         
         return mapToSurveyDto(updatedSurvey);
     }
     
     /**
-     * Delete a survey
+     * Xóa một khảo sát
      */
     @Transactional
-    public void deleteSurvey(Integer id) {
-        log.info("Deleting survey with id: {}", id);
+    public void deleteSurvey(Long id) {
+        log.info("Đang xóa khảo sát với id: {}", id);
         
         if (!surveyRepository.existsById(id)) {
-            throw new RuntimeException("Survey not found with id: " + id);
+            throw new RuntimeException("Không tìm thấy khảo sát với id: " + id);
         }
         
         surveyRepository.deleteById(id);
     }
     
     /**
-     * Map entity to DTO
+     * Chuyển đổi entity thành DTO
      */
     private SurveyDto mapToSurveyDto(Survey survey) {
-        List<SurveyQuestionDto> questionDtos = new ArrayList<>();
+        List<QuestionDto> questionDtos = new ArrayList<>();
         
         if (survey.getQuestions() != null) {
-            for (SurveyQuestion question : survey.getQuestions()) {
-                List<QuestionOptionDto> optionDtos = new ArrayList<>();
-                
-                if (question.getOptions() != null) {
-                    for (QuestionOption option : question.getOptions()) {
-                        QuestionOptionDto optionDto = QuestionOptionDto.builder()
-                                .id(option.getId())
-                                .questionId(option.getQuestion().getId())
-                                .optionText(option.getOptionText())
-                                .displayOrder(option.getDisplayOrder())
-                                .build();
-                        
-                        optionDtos.add(optionDto);
-                    }
-                }
-                
-                SurveyQuestionDto questionDto = SurveyQuestionDto.builder()
+            for (Question question : survey.getQuestions()) {
+                QuestionDto questionDto = QuestionDto.builder()
                         .id(question.getId())
                         .surveyId(question.getSurvey().getId())
                         .questionText(question.getQuestionText())
-                        .questionType(question.getQuestionType())
                         .required(question.getRequired())
-                        .displayOrder(question.getDisplayOrder())
-                        .options(optionDtos)
+                        .questionOrder(question.getQuestionOrder())
                         .build();
                 
                 questionDtos.add(questionDto);
@@ -218,10 +152,9 @@ public class SurveyService {
         
         return SurveyDto.builder()
                 .id(survey.getId())
-                .surveyType(survey.getSurveyType())
                 .title(survey.getTitle())
                 .description(survey.getDescription())
-                .isActive(survey.getIsActive())
+                .active(survey.getActive())
                 .createdAt(survey.getCreatedAt())
                 .updatedAt(survey.getUpdatedAt())
                 .questions(questionDtos)
