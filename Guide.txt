@@ -31,3 +31,13 @@ svc technician: 8086
 svc survey: 8087
 svc warranty: 8089
 svc repair: 8084
+
+
+đầu tiên là ở vị trí thư mục project cha. mid-project ...
++ thực hiênj câu lệnh: docker compose up -d: docker sẽ tự động pull image về để chạy. port cho ui là 9999
++ sẽ có hai đối tượng cần lưu ý chính: + producer: định nghĩa và  tạo ra các message và gửi lên kafka. 
+					+ consumer: định nghĩa cách đối tượng nhận message 
+					+ trong svc sẽ có các cách để kafka listener các topic được đẩy lên. nhận nó và thực hiện các thao tác khác :v  		
+
+
+các đối tượng sẽ nằm trong thư mục config

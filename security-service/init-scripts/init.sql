@@ -8,6 +8,46 @@ CREATE USER IF NOT EXISTS 'security_user'@'%' IDENTIFIED BY 'security_pass';
 GRANT ALL PRIVILEGES ON service_security.* TO 'security_user'@'%';
 FLUSH PRIVILEGES;
 
+-- Create the permissions table
+CREATE TABLE permissions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    path VARCHAR(255) NOT NULL,
+    method ENUM('GET', 'POST', 'PUT', 'DELETE', 'PATCH') NOT NULL,
+    description VARCHAR(255)
+);
+
+-- Create the roles table
+CREATE TABLE roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name ENUM('ROLE_ADMIN', 'ROLE_TECHNICIAN', 'ROLE_CUSTOMER') NOT NULL,
+    description VARCHAR(100)
+);
+
+-- Create the role_permissions junction table for the many-to-many relationship
+CREATE TABLE role_permissions (
+    role_id BIGINT NOT NULL,
+    permission_id BIGINT NOT NULL,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (permission_id) REFERENCES permissions(id)
+);
+
+-- Create the users table
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    password VARCHAR(120) NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    active BOOLEAN DEFAULT TRUE,
+    role_id BIGINT,
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+
+
 -- Insert roles
 INSERT INTO roles (id, name, description) VALUES 
 (1, 'ROLE_ADMIN', 'Administrator'),
@@ -83,10 +123,3 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 -- Create an admin user
 INSERT INTO users (username, email, password, first_name, last_name, active)
 VALUES ('admin', 'admin@example.com', '$2a$10$GckdgpYUMUm5uIm5CKj8heaRQrQUCvmF9VIJd0NIgV5I9LX8MaYvW', 'System', 'Administrator', true);
-
--- Assign admin role to the admin user
-INSERT INTO roles (user_id, role_id)
-SELECT u.id, r.id
-FROM users u, roles r
-WHERE u.username = 'admin'
-AND r.name = 'ROLE_ADMIN';
