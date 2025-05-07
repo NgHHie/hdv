@@ -83,49 +83,6 @@ public class WarrantyRequestController {
        }
    }
    
-//    @PostMapping("/{id}/reject")
-//    public ResponseEntity<WarrantyRequestDto> rejectWarrantyRequest(
-//            @PathVariable Integer id,
-//            @RequestBody Map<String, String> requestBody,
-//            Principal principal) {
-//        log.info("REST request to reject Warranty Request : {}", id);
-       
-//        String reason = requestBody.get("reason");
-//        String username = principal != null ? principal.getName() : "SYSTEM";
-       
-//        try {
-//            WarrantyRequestDto updatedRequest = warrantyRequestService.rejectWarrantyRequest(id, reason, username);
-//            return ResponseEntity.ok(updatedRequest);
-//        } catch (WarrantyRequestNotFoundException e) {
-//            log.error("Warranty Request not found: {}", e.getMessage());
-//            return ResponseEntity.notFound().build();
-//        } catch (IllegalStateException e) {
-//            log.error("Cannot reject warranty request: {}", e.getMessage());
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
-   
-//    @PostMapping("/{id}/approve")
-//    public ResponseEntity<WarrantyRequestDto> approveWarrantyRequest(
-//            @PathVariable Integer id,
-//            @RequestBody Map<String, String> requestBody,
-//            Principal principal) {
-//        log.info("REST request to approve Warranty Request : {}", id);
-       
-//        String notes = requestBody.get("notes");
-//        String username = principal != null ? principal.getName() : "SYSTEM";
-       
-//        try {
-//            WarrantyRequestDto updatedRequest = warrantyRequestService.approveWarrantyRequest(id, notes, username);
-//            return ResponseEntity.ok(updatedRequest);
-//        } catch (WarrantyRequestNotFoundException e) {
-//            log.error("Warranty Request not found: {}", e.getMessage());
-//            return ResponseEntity.notFound().build();
-//        } catch (IllegalStateException e) {
-//            log.error("Cannot approve warranty request: {}", e.getMessage());
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
    
     @PostMapping("/{id}/receive-and-forward")
     public ResponseEntity<WarrantyRequestDto> receiveAndForwardToRepair(

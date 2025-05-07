@@ -32,7 +32,6 @@ public class WarrantyRequestService {
     
     private final WarrantyRequestRepository warrantyRequestRepository;
     private final WarrantyHistoryRepository warrantyHistoryRepository;
-    private final WarrantyRepository warrantyRepository;
     private final ProductServiceClient productServiceClient;
     private final RepairServiceClient repairServiceClient;
     private final NotificationServiceClient notificationServiceClient;
