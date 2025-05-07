@@ -181,6 +181,27 @@ public class CustomerServiceClient {
             return List.of();
         }
     }
+
+    public WarrantyRequestDto updateRepairId(Integer warrantyId, Integer repairId) {
+        String url = "/api/v1/customers/warranty/requests/" + warrantyId + "/repair";
+        log.info("Updating repair id for warranty id: {}", warrantyId);
+        
+        try {
+            WarrantyRequestDto request = new WarrantyRequestDto();
+            request.setRepairId(repairId);
+            return webClientBuilder.build()
+                    .put()
+                    .uri(customerServiceUrl + url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(WarrantyRequestDto.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to update warranty request repairId: {}", e.getMessage());
+            throw new RuntimeException("Failed to update warranty request status", e);
+        }
+    }
     
     // Response models
     public static class PurchaseResponse {

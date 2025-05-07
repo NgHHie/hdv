@@ -5,8 +5,12 @@ package com.example.service_warranty.services;
 import com.example.service_warranty.client.CustomerServiceClient;
 import com.example.service_warranty.client.ProductServiceClient;
 import com.example.service_warranty.client.RepairServiceClient;
+import com.example.service_warranty.client.TechnicianServiceClient;
 import com.example.service_warranty.client.ConditionServiceClient;
 import com.example.service_warranty.dto.NotificationRequestDto;
+import com.example.service_warranty.dto.RepairDto;
+import com.example.service_warranty.dto.TechnicianDto;
+import com.example.service_warranty.dto.WarrantyDetailDto;
 import com.example.service_warranty.dto.WarrantyRequestCreateDto;
 import com.example.service_warranty.dto.WarrantyRequestDto;
 import com.example.service_warranty.dto.WarrantyValidationDto;
@@ -30,7 +34,8 @@ public class WarrantyService {
     private final CustomerServiceClient customerServiceClient;
     private final ProductServiceClient productServiceClient;
     private final RepairServiceClient repairServiceClient;
-    private final ConditionServiceClient conditionServiceClient; // New client
+    private final ConditionServiceClient conditionServiceClient; 
+    private final TechnicianServiceClient technicianServiceClient;
     private final KafkaProducerService kafkaProducerService;
     
     /**
@@ -187,7 +192,9 @@ public class WarrantyService {
                 updatedRequest.getIssueDescription(), 
                 (updatedRequest.getImageUrls() != null && !updatedRequest.getImageUrls().isEmpty()) ? 
                         String.join(",", updatedRequest.getImageUrls()) : null);
-        
+        customerServiceClient.updateRepairId(id, repairId);
+        updatedRequest.setRepairId(repairId);
+
         return updatedRequest;
     }
 
@@ -227,6 +234,100 @@ public class WarrantyService {
                     .build();
             kafkaProducerService.sendWarrantyEvent(event);
         }
+        
+        return updatedRequest;
+    }
+
+    @Transactional(readOnly = true)
+    public WarrantyDetailDto getWarrantyDetailById(Integer id) {
+        log.info("Getting comprehensive warranty details for id: {}", id);
+        
+        // Get warranty request from customer service
+        WarrantyRequestDto warrantyRequest = customerServiceClient.getWarrantyRequestById(id);
+        if (warrantyRequest == null) {
+            throw new RuntimeException("Warranty request not found with id: " + id);
+        }
+        
+        // Get customer details
+        CustomerServiceClient.CustomerResponse customer = 
+                customerServiceClient.getCustomerById(warrantyRequest.getCustomerId());
+        
+        // Get product details
+        ProductServiceClient.ProductResponse product = 
+                productServiceClient.getProductDetailsBySerial(warrantyRequest.getSerialNumber());
+        
+        // Get repair details if available
+        RepairDto repairDetail = null;
+        TechnicianDto technicianDetail = null;
+        if (warrantyRequest.getRepairId() != null) {
+            repairDetail = repairServiceClient.getRepairById(warrantyRequest.getRepairId());
+            if(repairDetail.getTechnicianId() != null) {
+                technicianDetail = technicianServiceClient.getTechnicianById(repairDetail.getTechnicianId());
+            }
+        }
+        
+        // Build the comprehensive dto
+        WarrantyDetailDto detailDto = WarrantyDetailDto.builder()
+                .id(warrantyRequest.getId())
+                .status(warrantyRequest.getStatus())
+                .submissionDate(warrantyRequest.getSubmissionDate())
+                .expirationDate(warrantyRequest.getExpirationDate())
+                .issueDescription(warrantyRequest.getIssueDescription())
+                .imageUrls(warrantyRequest.getImageUrls())
+                .validationNotes(warrantyRequest.getValidationNotes())
+                .customerId(customer != null ? customer.getId() : null)
+                .customerName(customer != null ? customer.getFirstName() + " " + customer.getLastName() : null)
+                .customerEmail(customer != null ? customer.getEmail() : null)
+                .productId(product != null ? product.getId() : null)
+                .productName(product != null ? product.getName() : null)
+                .serialNumber(warrantyRequest.getSerialNumber())
+                .warrantyDuration(product != null ? product.getWarrantyDuration() : null)
+                .build();
+        
+        // Add repair information if available
+        if (repairDetail != null) {
+            detailDto.setRepairId(repairDetail.getId());
+            detailDto.setRepairStatus(repairDetail.getStatus());
+            detailDto.setRepairCreatedAt(repairDetail.getCreatedAt());
+            detailDto.setRepairEndDate(repairDetail.getEndDate());
+
+            if(technicianDetail != null) {
+                detailDto.setTechnicianId(technicianDetail.getId());
+                detailDto.setTechnicianName(technicianDetail.getName());
+            }
+        }
+        
+        return detailDto;
+    }
+
+
+    @Transactional
+    public WarrantyRequestDto confirmProductDelivery(Integer id, String notes, String performedBy) {
+        log.info("Confirming product delivery for warranty request: {}", id);
+        // Update status in customer service
+        WarrantyRequestDto updatedRequest = customerServiceClient.updateWarrantyRequestStatus(
+                id, "DELIVERED", notes, performedBy);
+        
+        // Get customer details for notification
+        CustomerServiceClient.CustomerResponse customer = 
+                customerServiceClient.getCustomerById(updatedRequest.getCustomerId());
+        
+        // Get product details
+        ProductServiceClient.ProductResponse product = 
+                productServiceClient.getProductDetailsBySerial(updatedRequest.getSerialNumber());
+        
+        // Send product delivered notification
+        WarrantyNotificationEvent event = WarrantyNotificationEvent.builder()
+                .warrantyRequestId(id)
+                .type(NotificationType.PRODUCT_DELIVERED)
+                .email(customer.getEmail())
+                .customerName(customer.getFirstName() + " " + customer.getLastName())
+                .productName(product.getName())
+                .message("Your product has been delivered to you. " + 
+                        (notes != null ? notes : "Thank you for using our warranty service."))
+                .customerId(customer.getId())
+                .build();
+        kafkaProducerService.sendWarrantyEvent(event);
         
         return updatedRequest;
     }

@@ -5,5 +5,6 @@ public enum WarrantyStatus {
     APPROVED,
     PRODUCT_RECEIVED,
     REPAIR_IN_PROGRESS,
-    COMPLETE_REPAIR
+    COMPLETE_REPAIR,
+    DELIVERED
 }

@@ -7,6 +7,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.service_warranty.dto.RepairDto;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -49,6 +51,23 @@ public class RepairServiceClient {
             return null;
         } catch (Exception e) {
             log.error("Failed to create repair request: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    public RepairDto getRepairById(Integer repairId) {
+        String url = "/api/v1/repairs/" + repairId;
+        log.info("Getting repair details by id: {}", repairId);
+        
+        try {
+            return webClientBuilder.build()
+                    .get()
+                    .uri(repairServiceUrl + url)
+                    .retrieve()
+                    .bodyToMono(RepairDto.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to get repair details: {}", e.getMessage());
             return null;
         }
     }

@@ -145,6 +145,15 @@ public class WarrantyRequestService {
         
         return dtos;
     }
+
+    public WarrantyRequestDTO updateRepairId(Integer warrantyId, Integer repairId) {
+        WarrantyRequest request = warrantyRequestRepository.findById(warrantyId).orElse(null);
+        if(request != null) {
+            request.setRepairId(repairId);
+            warrantyRequestRepository.save(request);
+        }
+        return mapToWarrantyRequestDTO(request);
+    }
     
     // Map entity to DTO
     private WarrantyRequestDTO mapToWarrantyRequestDTO(WarrantyRequest request) {
@@ -182,4 +191,6 @@ public class WarrantyRequestService {
                 .performedAt(history.getPerformedAt())
                 .build();
     }
+
+    
 }
