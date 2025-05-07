@@ -1,5 +1,4 @@
-// Updated validation DTO
-package com.example.service_warranty.dto;
+package com.example.service_condition.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,19 +10,18 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WarrantyValidationDto {
-    private String serialNumber;
+public class WarrantyValidationDTO {
     private Integer warrantyRequestId;
     private Boolean isValid;
     private String validationReason;
     private String validatedBy;
-    private List<ConditionResultDto> conditionResults;
+    private List<ConditionResultDTO> conditionResults;
 
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ConditionResultDto {
+    public static class ConditionResultDTO {
         private Integer conditionId;
         private Boolean passed;
         private String notes;

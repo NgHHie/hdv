@@ -4,9 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.example.service_warranty.dto.UpdateStatusRequestDto;
+import com.example.service_warranty.dto.WarrantyRequestCreateDto;
+import com.example.service_warranty.dto.WarrantyRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
@@ -87,6 +91,94 @@ public class CustomerServiceClient {
         } catch (Exception e) {
             log.error("Failed to get customer: {}", e.getMessage());
             return null;
+        }
+    }
+
+    public WarrantyRequestDto createWarrantyRequest(WarrantyRequestCreateDto requestDto, boolean isWithinWarranty) {
+        String url = "/api/v1/customers/warranty/requests";
+        log.info("Creating warranty request in customer service for product: {}, customer: {}", 
+                requestDto.getSerialNumber(), requestDto.getCustomerId());
+        System.out.println("warraty: " +  isWithinWarranty);
+        WarrantyRequestCreateDto createRequest = new WarrantyRequestCreateDto ();
+        String status = isWithinWarranty ? "PENDING" : "REJECTED";
+        createRequest.setCustomerId(requestDto.getCustomerId());
+        createRequest.setProductId(requestDto.getProductId());
+        createRequest.setSerialNumber(requestDto.getSerialNumber());
+        createRequest.setIssueDescription(requestDto.getIssueDescription());
+        createRequest.setImageUrls(requestDto.getImageUrls());
+        createRequest.setStatus(status);
+        createRequest.setValidationNotes(isWithinWarranty ? null : "Product is out of warranty period");
+        System.out.println(status);
+        try {
+            return webClientBuilder.build()
+                    .post()
+                    .uri(customerServiceUrl + url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(createRequest)
+                    .retrieve()
+                    .bodyToMono(WarrantyRequestDto.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to create warranty request: {}", e.getMessage());
+            throw new RuntimeException("Failed to create warranty request", e);
+        }
+    }
+
+    public WarrantyRequestDto getWarrantyRequestById(Integer id) {
+        String url = "/api/v1/customers/warranty/requests/" + id;
+        log.info("Getting warranty request with id: {}", id);
+        
+        try {
+            return webClientBuilder.build()
+                    .get()
+                    .uri(customerServiceUrl + url)
+                    .retrieve()
+                    .bodyToMono(WarrantyRequestDto.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to get warranty request: {}", e.getMessage());
+            throw new RuntimeException("Failed to get warranty request", e);
+        }
+    }
+
+    public WarrantyRequestDto updateWarrantyRequestStatus(Integer id, String status, String notes, String performedBy) {
+        String url = "/api/v1/customers/warranty/requests/" + id + "/status";
+        log.info("Updating warranty request status to {} for id: {}", status, id);
+        
+        try {
+            UpdateStatusRequestDto updateRequest = new UpdateStatusRequestDto();
+            updateRequest.setStatus(status);
+            updateRequest.setNotes(notes);
+            updateRequest.setPerformedBy(performedBy);
+            
+            return webClientBuilder.build()
+                    .put()
+                    .uri(customerServiceUrl + url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(updateRequest)
+                    .retrieve()
+                    .bodyToMono(WarrantyRequestDto.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to update warranty request status: {}", e.getMessage());
+            throw new RuntimeException("Failed to update warranty request status", e);
+        }
+    }
+
+    public List<WarrantyRequestDto> getWarrantyRequestsByCustomerId(Integer customerId) {
+        String url = "/api/v1/customers/" + customerId + "/warranty/requests";
+        log.info("Getting warranty requests for customer: {}", customerId);
+        
+        try {
+            return webClientBuilder.build()
+                    .get()
+                    .uri(customerServiceUrl + url)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<List<WarrantyRequestDto>>() {})
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to get warranty requests: {}", e.getMessage());
+            return List.of();
         }
     }
     

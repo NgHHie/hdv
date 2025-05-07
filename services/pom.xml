@@ -21,6 +21,7 @@
         <module>service-technician</module>
         <module>service-warranty</module>
         <module>service-survey</module>
+        <module>service-condition</module>
     </modules>
 
     <properties>
