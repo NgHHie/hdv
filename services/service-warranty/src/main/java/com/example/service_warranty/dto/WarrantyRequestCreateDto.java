@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyRequestCreateDto {
-    private Long customerId;
-    private Long productId;
+    private Integer customerId;
+    private Integer productId;
     private String serialNumber;
     private String issueDescription;
     private List<String> imageUrls;

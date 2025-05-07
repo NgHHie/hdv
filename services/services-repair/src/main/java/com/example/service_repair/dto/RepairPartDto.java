@@ -5,17 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RepairPartDto {
-    private Long id;
+    private Integer id;
     private String partName;
     private String partNumber;
-    private Integer quantity;
-    private BigDecimal unitPrice;
-    private BigDecimal totalPrice;
+    private String description;
+    private Boolean isWarrantyReplacement;
 }

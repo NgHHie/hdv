@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationRequestDto {
-    private Long warrantyResponseId;
-    private Long customerId;
+    private Integer warrantyResponseId;
+    private Integer customerId;
     private NotificationType type;
     private String email;
     private String message;

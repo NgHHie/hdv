@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SurveyRepository extends JpaRepository<Survey, Long> {
+public interface SurveyRepository extends JpaRepository<Survey, Integer> {
     List<Survey> findBySurveyType(SurveyType surveyType);
     List<Survey> findByIsActiveTrue();
     List<Survey> findByIsActiveTrueAndSurveyType(SurveyType surveyType);

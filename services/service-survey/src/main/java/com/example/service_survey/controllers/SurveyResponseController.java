@@ -42,7 +42,7 @@ public class SurveyResponseController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<SurveyResponseDto> getSurveyResponseById(@PathVariable Long id) {
+    public ResponseEntity<SurveyResponseDto> getSurveyResponseById(@PathVariable Integer id) {
         log.info("REST request to get Survey Response : {}", id);
         try {
             SurveyResponseDto response = responseService.getSurveyResponseById(id);
@@ -54,14 +54,14 @@ public class SurveyResponseController {
     }
     
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<SurveyResponseDto>> getSurveyResponsesByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<List<SurveyResponseDto>> getSurveyResponsesByCustomerId(@PathVariable Integer customerId) {
         log.info("REST request to get Survey Responses for customer : {}", customerId);
         List<SurveyResponseDto> responses = responseService.getSurveyResponsesByCustomerId(customerId);
         return ResponseEntity.ok(responses);
     }
     
     @GetMapping("/survey/{surveyId}")
-    public ResponseEntity<List<SurveyResponseDto>> getSurveyResponsesBySurveyId(@PathVariable Long surveyId) {
+    public ResponseEntity<List<SurveyResponseDto>> getSurveyResponsesBySurveyId(@PathVariable Integer surveyId) {
         log.info("REST request to get Survey Responses for survey : {}", surveyId);
         List<SurveyResponseDto> responses = responseService.getSurveyResponsesBySurveyId(surveyId);
         return ResponseEntity.ok(responses);
@@ -69,7 +69,7 @@ public class SurveyResponseController {
     
     @GetMapping("/related")
     public ResponseEntity<List<SurveyResponseDto>> getSurveyResponsesByRelatedEntity(
-            @RequestParam Long relatedEntityId,
+            @RequestParam Integer relatedEntityId,
             @RequestParam String relatedEntityType) {
         log.info("REST request to get Survey Responses for related entity: {}, type: {}", 
                 relatedEntityId, relatedEntityType);

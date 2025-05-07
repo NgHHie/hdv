@@ -7,6 +7,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +27,7 @@ public class CustomerServiceClient {
     /**
      * Get purchase date for a specific customer and product
      */
-    public LocalDate getPurchaseDate(Long productId) {
+    public LocalDate getPurchaseDate(Integer productId) {
         String url = "/api/v1/customers" + "/purchase/" + productId;
         log.info("Getting purchase history from: {}{}", customerServiceUrl, url);
         
@@ -63,18 +65,19 @@ public class CustomerServiceClient {
         }
     }
 
-    public CustomerResponse getCustomerById(Long customerId) {
+    public CustomerResponse getCustomerById(Integer customerId) {
         String url = "/api/v1/customers/" + customerId;
         log.info("Getting customer from: {}{}", customerServiceUrl, url);
         
         try {
             CustomerResponse customer = webClientBuilder.build()
-                    .get()
-                    .uri(customerServiceUrl + url)
-                    .retrieve()
-                    .bodyToMono(CustomerResponse.class)
-                    .block();
-            
+                .get()
+                .uri(customerServiceUrl + url)
+                .retrieve()
+                .bodyToMono(CustomerResponse.class)
+                .block();
+
+            System.out.println(customer.getFirstName());
             if (customer != null) {
                 return customer;
             }
@@ -165,10 +168,26 @@ public class CustomerServiceClient {
     }
 
     public static class CustomerResponse {
-        private Long id;
+        private Integer id;
         private String email;
+        private String firstName;
+        private String lastName;
+        public String getFirstName()
+        {
+            return firstName;
+        }
+        public String getLastName() { return lastName; }
 
-        public Long getId() { return id; }
+        public Integer getId() { return id; }
         public String getEmail() { return email; }
+
+        public String toString() {
+            return "CustomerResponse{" +
+                    "id=" + id +
+                    ", email='" + email + '\'' +
+                    ", firstName='" + firstName + '\'' +
+                    ", lastName='" + lastName + '\'' +
+                    '}';
+        }
     }
 }

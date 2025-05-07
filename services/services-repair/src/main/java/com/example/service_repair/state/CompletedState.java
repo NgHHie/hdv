@@ -5,18 +5,8 @@ import com.example.service_repair.constants.RepairStatus;
 class CompletedState implements RepairState {
     @Override
     public void next(RepairContext context) {
-        context.setCurrentState(new DeliveringState());
-    }
-
-    @Override
-    public void prev(RepairContext context) {
-        context.setCurrentState(new TestingState());
-    }
-
-    @Override
-    public void cancel(RepairContext context) {
-        // Too late to cancel at this stage
-        throw new IllegalStateException("Cannot cancel repair at this stage");
+        // Final state, cannot move forward
+        throw new IllegalStateException("Repair process already completed");
     }
 
     @Override
@@ -24,4 +14,3 @@ class CompletedState implements RepairState {
         return RepairStatus.COMPLETED;
     }
 }
-

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RepairStatusHistoryDto {
-    private Long id;
+    private Integer id;
     private String status;
     private String notes;
     private String createdBy;

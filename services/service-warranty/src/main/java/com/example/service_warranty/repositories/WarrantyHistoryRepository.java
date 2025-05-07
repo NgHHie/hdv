@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface WarrantyHistoryRepository extends JpaRepository<WarrantyHistory, Long> {
-    List<WarrantyHistory> findByWarrantyRequestIdOrderByPerformedAtDesc(Long warrantyRequestId);
+public interface WarrantyHistoryRepository extends JpaRepository<WarrantyHistory, Integer> {
+    List<WarrantyHistory> findByWarrantyRequestIdOrderByPerformedAtDesc(Integer warrantyRequestId);
 }

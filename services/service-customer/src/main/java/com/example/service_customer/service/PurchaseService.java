@@ -39,5 +39,8 @@ public class PurchaseService {
           return PurchaseMapper.toDTO(purchase);
     }
 
-
+    public PurchaseDTO getPurchaseByProductId(Integer productId) {
+        Purchase purchase = purchaseRepository.findByProductId(productId).orElse(null);
+        return PurchaseMapper.toDTO(purchase);
+    }
 }

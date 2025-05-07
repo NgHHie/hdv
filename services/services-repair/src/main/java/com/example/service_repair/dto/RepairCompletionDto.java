@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TechnicianDto {
-    private Integer id;
-    private String name;
-    private String email;
-    private String phone;
-    private String specialization;
-    private Boolean isActive;
+public class RepairCompletionDto {
+    private String completionNotes;
+    private Boolean sucessfullyRepaired;
 }

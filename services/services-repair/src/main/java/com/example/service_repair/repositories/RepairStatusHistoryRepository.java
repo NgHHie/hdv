@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RepairStatusHistoryRepository extends JpaRepository<RepairStatusHistory, Long> {
-    List<RepairStatusHistory> findByRepairRequestId(Long repairId);
-    List<RepairStatusHistory> findByRepairRequestIdOrderByCreatedAtDesc(Long repairId);
+public interface RepairStatusHistoryRepository extends JpaRepository<RepairStatusHistory, Integer> {
+    List<RepairStatusHistory> findByRepairRequestId(Integer repairId);
+    List<RepairStatusHistory> findByRepairRequestIdOrderByCreatedAtDesc(Integer repairId);
 }

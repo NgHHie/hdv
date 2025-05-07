@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class RepairAction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @ManyToOne
     @JoinColumn(name = "repair_id")

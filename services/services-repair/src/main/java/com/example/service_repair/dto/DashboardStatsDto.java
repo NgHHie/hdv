@@ -12,11 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DashboardStatsDto {
-    private Long totalRepairRequests;
-    private Long pendingRepairRequests;
-    private Long inProgressRepairRequests;
-    private Long completedRepairRequests;
-    private Long cancelledRepairRequests;
+    private Integer totalRepairRequests;
+    private Integer pendingRepairRequests;
+    private Integer inProgressRepairRequests;
+    private Integer completedRepairRequests;
+    private Integer cancelledRepairRequests;
     private Double averageRepairTime;
     private List<TechnicianPerformanceDto> technicianPerformance;
     
@@ -25,9 +25,9 @@ public class DashboardStatsDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TechnicianPerformanceDto {
-        private Long technicianId;
+        private Integer technicianId;
         private String technicianName;
-        private Long completedRepairs;
+        private Integer completedRepairs;
         private Double averageRepairTime;
     }
 }

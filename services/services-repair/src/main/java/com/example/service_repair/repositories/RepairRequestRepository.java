@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface RepairRequestRepository extends JpaRepository<RepairRequest, Long> {
-    List<RepairRequest> findByCustomerId(Long customerId);
-    List<RepairRequest> findByProductId(Long productId);
-    List<RepairRequest> findByWarrantyId(Long warrantyId);
+public interface RepairRequestRepository extends JpaRepository<RepairRequest, Integer> {
+    List<RepairRequest> findByCustomerId(Integer customerId);
+    List<RepairRequest> findByProductId(Integer productId);
+    List<RepairRequest> findByWarrantyId(Integer warrantyId);
     List<RepairRequest> findByStatus(RepairStatus status);
-    List<RepairRequest> findByCustomerIdAndStatus(Long customerId, RepairStatus status);
-    List<RepairRequest> findByTechnicianId(Long technicianId);
+    List<RepairRequest> findByCustomerIdAndStatus(Integer customerId, RepairStatus status);
+    List<RepairRequest> findByTechnicianId(Integer technicianId);
     
     @Query("SELECT r FROM RepairRequest r WHERE r.createdAt BETWEEN ?1 AND ?2")
     List<RepairRequest> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);

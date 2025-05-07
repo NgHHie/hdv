@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyClaimRequest {
-    private Long productId;
-    private Long customerId;
-    private Long repairId;
+    private Integer productId;
+    private Integer customerId;
+    private Integer repairId;
 }

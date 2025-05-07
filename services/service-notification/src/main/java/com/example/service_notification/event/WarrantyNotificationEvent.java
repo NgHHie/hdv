@@ -13,12 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyNotificationEvent {
-    private Long warrantyRequestId;
+    private Integer warrantyRequestId;
     private String email;
     private String productName;
-    private Long customerId;
+    private Integer customerId;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
     private String message;
+    private String customerName;
 }

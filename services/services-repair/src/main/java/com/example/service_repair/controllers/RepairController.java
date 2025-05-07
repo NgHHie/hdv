@@ -38,7 +38,7 @@ public class RepairController {
      * Get a repair request by ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<RepairRequestResponseDto> getRepairRequestById(@PathVariable Long id) {
+    public ResponseEntity<RepairRequestResponseDto> getRepairRequestById(@PathVariable Integer id) {
         log.info("Received request to get repair request with ID: {}", id);
         try {
             RepairRequestResponseDto response = repairService.getRepairRequestById(id);
@@ -53,7 +53,7 @@ public class RepairController {
      * Get all repair requests for a customer
      */
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<RepairRequestResponseDto>> getRepairRequestsByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<List<RepairRequestResponseDto>> getRepairRequestsByCustomerId(@PathVariable Integer customerId) {
         log.info("Received request to get repair requests for customer: {}", customerId);
         List<RepairRequestResponseDto> responses = repairService.getRepairRequestsByCustomerId(customerId);
         return ResponseEntity.ok(responses);
@@ -70,89 +70,12 @@ public class RepairController {
     }
 
     /**
-     * Move a repair request to the next state
-     */
-    @PostMapping("/{id}/next")
-    public ResponseEntity<RepairRequestResponseDto> moveToNextState(
-            @PathVariable Long id,
-            @RequestBody(required = false) Map<String, String> notes,
-            Principal principal) {
-        
-        String noteText = notes != null ? notes.get("notes") : null;
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to move repair request {} to next state", username, id);
-        
-        try {
-            RepairRequestResponseDto response = repairService.moveToNextState(id, noteText, username);
-            return ResponseEntity.ok(response);
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            log.error("Failed to move to next state: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * Move a repair request to the previous state
-     */
-    @PostMapping("/{id}/previous")
-    public ResponseEntity<RepairRequestResponseDto> moveToPreviousState(
-            @PathVariable Long id,
-            @RequestBody(required = false) Map<String, String> notes,
-            Principal principal) {
-        
-        String noteText = notes != null ? notes.get("notes") : null;
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to move repair request {} to previous state", username, id);
-        
-        try {
-            RepairRequestResponseDto response = repairService.moveToPreviousState(id, noteText, username);
-            return ResponseEntity.ok(response);
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            log.error("Failed to move to previous state: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
-     * Cancel a repair request
-     */
-    @PostMapping("/{id}/cancel")
-    public ResponseEntity<RepairRequestResponseDto> cancelRepairRequest(
-            @PathVariable Long id,
-            @RequestBody(required = false) Map<String, String> notes,
-            Principal principal) {
-        
-        String noteText = notes != null ? notes.get("notes") : null;
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to cancel repair request {}", username, id);
-        
-        try {
-            RepairRequestResponseDto response = repairService.cancelRepairRequest(id, noteText, username);
-            return ResponseEntity.ok(response);
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            log.error("Failed to cancel: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
-    /**
      * Process product receipt
      */
     @PostMapping("/{id}/receive")
     public ResponseEntity<RepairRequestResponseDto> processProductReceipt(
-            @PathVariable Long id,
+            @PathVariable Integer id,
+            @RequestBody TechnicianDto technician,
             Principal principal) {
         
         String username = principal != null ? principal.getName() : "SYSTEM";
@@ -160,7 +83,7 @@ public class RepairController {
         log.info("Received request from {} to process product receipt for repair request {}", username, id);
         
         try {
-            RepairRequestResponseDto response = repairService.processProductReceipt(id, username);
+            RepairRequestResponseDto response = repairService.processProductReceipt(id, technician, username);
             return ResponseEntity.ok(response);
         } catch (RepairRequestNotFoundException e) {
             log.error("Repair request not found: {}", e.getMessage());
@@ -172,35 +95,12 @@ public class RepairController {
     }
 
     /**
-     * Update repair notes
-     */
-    @PatchMapping("/{id}/notes")
-    public ResponseEntity<RepairRequestResponseDto> updateRepairNotes(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> requestBody,
-            Principal principal) {
-        
-        String notes = requestBody.get("notes");
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to update repair notes for repair request {}", username, id);
-        
-        try {
-            RepairRequestResponseDto response = repairService.updateRepairNotes(id, notes, username);
-            return ResponseEntity.ok(response);
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    /**
      * Assign technician to repair
      */
     @PostMapping("/{id}/technician/{technicianId}")
     public ResponseEntity<RepairRequestResponseDto> assignTechnician(
-            @PathVariable Long id,
-            @PathVariable Long technicianId,
+            @PathVariable Integer id,
+            @PathVariable Integer technicianId,
             Principal principal) {
         
         String username = principal != null ? principal.getName() : "SYSTEM";
@@ -221,62 +121,11 @@ public class RepairController {
     }
 
     /**
-     * Add part to repair
-     */
-    @PostMapping("/{id}/parts")
-    public ResponseEntity<RepairPartDto> addRepairPart(
-            @PathVariable Long id,
-            @RequestBody RepairPartDto partDto,
-            Principal principal) {
-        
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to add part to repair request {}", username, id);
-        
-        try {
-            RepairPartDto response = repairService.addRepairPart(id, partDto, username);
-            return ResponseEntity.ok(response);
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid part data: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
-    /**
-     * Remove part from repair
-     */
-    @DeleteMapping("/{id}/parts/{partId}")
-    public ResponseEntity<Void> removeRepairPart(
-            @PathVariable Long id,
-            @PathVariable Long partId,
-            Principal principal) {
-        
-        String username = principal != null ? principal.getName() : "SYSTEM";
-        
-        log.info("Received request from {} to remove part {} from repair request {}", 
-                username, partId, id);
-        
-        try {
-            repairService.removeRepairPart(id, partId, username);
-            return ResponseEntity.noContent().build();
-        } catch (RepairRequestNotFoundException e) {
-            log.error("Repair request not found: {}", e.getMessage());
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid part request: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    /**
      * Add repair action
      */
     @PostMapping("/{id}/actions")
     public ResponseEntity<RepairActionDto> addRepairAction(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @RequestBody RepairActionDto actionDto,
             Principal principal) {
         
@@ -297,66 +146,101 @@ public class RepairController {
     }
 
     /**
-     * Update repair cost
+     * Start diagnostic process
      */
-    @PatchMapping("/{id}/cost")
-    public ResponseEntity<RepairRequestResponseDto> updateRepairCost(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> requestBody,
+    @PostMapping("/{id}/start-diagnosis")
+    public ResponseEntity<RepairRequestResponseDto> startDiagnosis(
+            @PathVariable Integer id,
             Principal principal) {
-        
-        BigDecimal cost = null;
-        if (requestBody.containsKey("cost")) {
-            try {
-                cost = new BigDecimal(requestBody.get("cost"));
-            } catch (NumberFormatException e) {
-                return ResponseEntity.badRequest().body(null);
-            }
-        }
         
         String username = principal != null ? principal.getName() : "SYSTEM";
         
-        log.info("Received request from {} to update repair cost for repair request {}", username, id);
+        log.info("Received request from {} to start diagnosis for repair request {}", username, id);
         
         try {
-            RepairRequestResponseDto response = repairService.updateRepairCost(id, cost, username);
+            RepairRequestResponseDto response = repairService.startDiagnosis(id, username);
             return ResponseEntity.ok(response);
         } catch (RepairRequestNotFoundException e) {
             log.error("Repair request not found: {}", e.getMessage());
             return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            log.error("Invalid state transition: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
     /**
-     * Reject a repair request
+     * Complete diagnosis and start repair
      */
-    @PostMapping("/{id}/reject")
-    public ResponseEntity<RepairRequestResponseDto> rejectRepairRequest(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> requestBody,
+    @PostMapping("/{id}/complete-diagnosis")
+    public ResponseEntity<RepairRequestResponseDto> completeDiagnosis(
+            @PathVariable Integer id,
+            @RequestBody DiagnosisDto diagnosisDto,
             Principal principal) {
         
-        String reason = requestBody.get("reason");
         String username = principal != null ? principal.getName() : "SYSTEM";
         
-        log.info("Received request from {} to reject repair request {}", username, id);
+        log.info("Received request from {} to complete diagnosis for repair request {}", username, id);
         
         try {
-            RepairRequestResponseDto response = repairService.rejectRepairRequest(id, reason, username);
+            RepairRequestResponseDto response = repairService.completeDiagnosisAndStartRepair(id, diagnosisDto, username);
             return ResponseEntity.ok(response);
         } catch (RepairRequestNotFoundException e) {
             log.error("Repair request not found: {}", e.getMessage());
             return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            log.error("Invalid state transition: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
     /**
-     * Get dashboard statistics
+     * Add part to repair
      */
-    @GetMapping("/dashboard")
-    public ResponseEntity<DashboardStatsDto> getDashboardStats() {
-        log.info("Received request to get dashboard stats");
-        DashboardStatsDto stats = repairService.getDashboardStats();
-        return ResponseEntity.ok(stats);
+    @PostMapping("/{id}/parts")
+    public ResponseEntity<RepairPartDto> addRepairPart(
+            @PathVariable Integer id,
+            @RequestBody RepairPartDto partDto,
+            Principal principal) {
+        
+        String username = principal != null ? principal.getName() : "SYSTEM";
+        
+        log.info("Received request from {} to add part to repair request {}", username, id);
+        
+        try {
+            RepairPartDto response = repairService.addRepairPart(id, partDto, username);
+            return ResponseEntity.ok(response);
+        } catch (RepairRequestNotFoundException e) {
+            log.error("Repair request not found: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            log.error("Invalid state for adding parts: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    /**
+     * Complete repair
+     */
+    @PostMapping("/{id}/complete-repair")
+    public ResponseEntity<RepairRequestResponseDto> completeRepair(
+            @PathVariable Integer id,
+            @RequestBody RepairCompletionDto completionDto,
+            Principal principal) {
+        
+        String username = principal != null ? principal.getName() : "SYSTEM";
+        
+        log.info("Received request from {} to complete repair for repair request {}", username, id);
+        
+        try {
+            RepairRequestResponseDto response = repairService.completeRepair(id, completionDto, username);
+            return ResponseEntity.ok(response);
+        } catch (RepairRequestNotFoundException e) {
+            log.error("Repair request not found: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            log.error("Invalid state transition: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 }

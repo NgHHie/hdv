@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WarrantyClaimDto {
-    private Long id;
-    private Long warrantyId;
-    private Long repairId;
+    private Integer id;
+    private Integer warrantyId;
+    private Integer repairId;
     private LocalDateTime claimDate;
     private String status;
     private String notes;

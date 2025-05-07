@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TechnicianRepository extends JpaRepository<Technician, Long> {
+public interface TechnicianRepository extends JpaRepository<Technician, Integer> {
     Optional<Technician> findByEmail(String email);
     List<Technician> findByIsActiveTrue();
     List<Technician> findBySpecialization(String specialization);

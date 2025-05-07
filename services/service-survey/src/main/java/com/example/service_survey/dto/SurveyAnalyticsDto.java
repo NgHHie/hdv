@@ -14,11 +14,11 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SurveyAnalyticsDto {
-    private Long surveyId;
+    private Integer surveyId;
     private String surveyTitle;
-    private Long totalResponses;
+    private Integer totalResponses;
     private Double completionRate;
-    private Map<String, Long> responsesByDate;
+    private Map<String, Integer> responsesByDate;
     private List<QuestionAnalytics> questionAnalytics;
     
     @Data
@@ -26,14 +26,14 @@ public class SurveyAnalyticsDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class QuestionAnalytics {
-        private Long questionId;
+        private Integer questionId;
         private String questionText;
         private QuestionType questionType;
-        private Long totalAnswers;
+        private Integer totalAnswers;
         private List<OptionAnalytics> optionAnalytics;
         private Double averageRating;
-        private Map<String, Long> textResponseFrequency;
-        private Map<Boolean, Long> booleanResponseFrequency;
+        private Map<String, Integer> textResponseFrequency;
+        private Map<Boolean, Integer> booleanResponseFrequency;
     }
     
     @Data
@@ -41,9 +41,9 @@ public class SurveyAnalyticsDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OptionAnalytics {
-        private Long optionId;
+        private Integer optionId;
         private String optionText;
-        private Long count;
+        private Integer count;
         private Double percentage;
     }
 }

@@ -21,8 +21,7 @@ public class KafkaConsumerService {
 
 
     private final NotificationService notificationService;
-    private final CustomerClient customerClient;
-
+  
 
 
 
@@ -30,41 +29,17 @@ public class KafkaConsumerService {
     public void consumeWarrantyNotification(String messageJson) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            // Thêm module hỗ trợ ngày tháng nếu cần
+          
             objectMapper.registerModule(new JavaTimeModule());
 
             WarrantyNotificationEvent event = objectMapper.readValue(messageJson, WarrantyNotificationEvent.class);
 
-
-//            public class WarrantyNotificationCreateEvent {
-//                private Long warrantyRequestId;
-//                private Long customerId;
-//                private String productName;
-//
-//                @Enumerated(EnumType.STRING)
-//                private NotificationType type;
-//            }
-
-
-//            public class NotificationRequestDto {
-//                private Integer customerId;
-//                private NotificationType type;
-//                private Integer relatedEntityId;
-//                private String email;
-//                private String message;
-//            }
-
             log.info("Consumed warranty notification event: {}", event);
 
-            System.out.println(event);
+          
 
-            NotificationRequestDto notificationRequest = new NotificationRequestDto();
-            notificationRequest.setCustomerId(Math.toIntExact(event.getCustomerId()));
-            notificationRequest.setType(event.getType());
-            notificationRequest.setRelatedEntityId(Math.toIntExact(event.getWarrantyRequestId()));
-            notificationRequest.setEmail(event.getEmail());
-            notificationRequest.setMessage(event.getMessage());
-            notificationService.sendNotification(notificationRequest);
+            
+            notificationService.sendNotification(event);
         } catch (Exception e) {
             log.error("Error processing warranty notification: {}", e.getMessage(), e);
         }

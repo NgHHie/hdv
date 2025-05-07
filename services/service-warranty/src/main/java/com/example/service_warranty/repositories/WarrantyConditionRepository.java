@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface WarrantyConditionRepository extends JpaRepository<WarrantyCondition, Long> {
+public interface WarrantyConditionRepository extends JpaRepository<WarrantyCondition, Integer> {
     List<WarrantyCondition> findByIsActiveTrue();
 }

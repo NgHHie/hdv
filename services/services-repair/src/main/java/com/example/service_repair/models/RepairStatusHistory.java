@@ -19,7 +19,7 @@ import com.example.service_repair.constants.RepairStatus;
 public class RepairStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @ManyToOne
     @JoinColumn(name = "repair_id")

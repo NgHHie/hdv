@@ -4,6 +4,14 @@ CREATE DATABASE IF NOT EXISTS service_customer;
 USE service_customer;
 
 
+
+
+CREATE USER IF NOT EXISTS 'customer_user'@'%' IDENTIFIED BY 'customer_pass';
+GRANT ALL PRIVILEGES ON service_customer.* TO 'customer_user'@'%';
+FLUSH PRIVILEGES;
+
+
+-- Create tables if they don't exist
 CREATE TABLE IF NOT EXISTS customer (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
@@ -13,109 +21,138 @@ CREATE TABLE IF NOT EXISTS customer (
     address VARCHAR(255)
 );
 
-CREATE USER IF NOT EXISTS 'customer_user'@'%' IDENTIFIED BY 'customer_pass';
-GRANT ALL PRIVILEGES ON service_customer.* TO 'customer_user'@'%';
-FLUSH PRIVILEGES;
-
-
-INSERT INTO customer (first_name, last_name, email, phone_number, address) VALUES 
-    ('John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St'),
-    ('Jane', 'Smith', 'jane.smith@example.com', '0987654321', '456 Oak Ave'),
-    ('Michael', 'Johnson', 'michael.johnson@example.com', '5551234567', '789 Pine St');
-
-
-
--- Tạo bảng purchases nếu chưa tồn tại
 CREATE TABLE IF NOT EXISTS purchases (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT NOT NULL,
     purchase_date DATETIME NOT NULL,
     total_amount DECIMAL(10,2) NOT NULL,
     invoice_number VARCHAR(50),
     payment_method VARCHAR(50),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME,
     FOREIGN KEY (customer_id) REFERENCES customer(id)
 );
 
--- Tạo bảng purchase_items nếu chưa tồn tại
 CREATE TABLE IF NOT EXISTS purchase_items (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    purchase_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    purchase_id INT NOT NULL,
+    product_id INT NOT NULL,
     quantity INT NOT NULL,
     unit_price DECIMAL(10,2) NOT NULL,
-    warranty_expiration_date DATE,
     FOREIGN KEY (purchase_id) REFERENCES purchases(id)
 );
 
--- Insert dữ liệu mẫu vào bảng purchases
-INSERT INTO purchases (customer_id, purchase_date, total_amount, invoice_number, payment_method, created_at)
-VALUES 
-    (1, '2023-01-15 10:30:00', 48980000.00, 'INV-20230115-001', 'Credit Card', '2023-01-15 10:30:00'),
-    (1, '2023-03-20 14:45:00', 28990000.00, 'INV-20230320-002', 'Cash', '2023-03-20 14:45:00'),
-    (2, '2023-02-10 09:15:00', 54480000.00, 'INV-20230210-003', 'Bank Transfer', '2023-02-10 09:15:00'),
-    (3, '2023-04-05 16:20:00', 19990000.00, 'INV-20230405-004', 'Credit Card', '2023-04-05 16:20:00'),
-    (2, '2023-05-12 11:40:00', 63480000.00, 'INV-20230512-005', 'Mobile Payment', '2023-05-12 11:40:00'),
-    (3, '2023-06-18 13:25:00', 17990000.00, 'INV-20230618-006', 'Cash', '2023-06-18 13:25:00'),
-    (1, '2023-08-02 10:10:00', 16990000.00, 'INV-20230802-007', 'Credit Card', '2023-08-02 10:10:00'),
-    (2, '2023-09-15 15:30:00', 13990000.00, 'INV-20230915-008', 'Bank Transfer', '2023-09-15 15:30:00');
+-- Set current timestamp
+SET @current_timestamp = NOW();
 
--- Insert dữ liệu mẫu vào bảng purchase_items với tham chiếu đến các sản phẩm thực tế từ service_product
-INSERT INTO purchase_items (purchase_id, product_id, quantity, unit_price, warranty_expiration_date)
-VALUES 
-    -- Đơn hàng 1: MacBook Pro M3 và AirPods Pro 2
-    (1, 3, 1, 45990000.00, '2025-01-15'), -- MacBook Pro M3 có bảo hành 2 năm
-    (1, 13, 1, 5990000.00, '2024-01-15'), -- AirPods Pro 2 có bảo hành 1 năm
-    
-    -- Đơn hàng 2: iPhone 15 Pro
-    (2, 1, 1, 28990000.00, '2024-03-20'), -- iPhone 15 Pro có bảo hành 1 năm
-    
-    -- Đơn hàng 3: Dell XPS 15 và Sony WH-1000XM5
-    (3, 4, 1, 35990000.00, '2025-02-10'), -- Dell XPS 15 có bảo hành 2 năm
-    (3, 9, 1, 8490000.00, '2024-02-10'), -- Sony WH-1000XM5 có bảo hành 1 năm
-    (3, 18, 1, 1490000.00, NULL), -- Anker GaN Charger không tính bảo hành
-    
-    -- Đơn hàng 4: Acer Nitro Gaming
-    (4, 7, 1, 19990000.00, '2024-04-05'), -- Acer Nitro Gaming có bảo hành 1 năm
-    
-    -- Đơn hàng 5: ASUS ROG Strix, Keychron K3 và Logitech MX Master 3S
-    (5, 12, 1, 39990000.00, '2025-05-12'), -- ASUS ROG Strix có bảo hành 2 năm
-    (5, 17, 1, 2990000.00, '2024-05-12'), -- Keychron K3 có bảo hành 1 năm
-    (5, 16, 1, 2490000.00, '2025-05-12'), -- Logitech MX Master 3S có bảo hành 2 năm
-    
-    -- Đơn hàng 6: Google Pixel 8
-    (6, 11, 1, 17990000.00, '2024-06-18'), -- Google Pixel 8 có bảo hành 1 năm
-    
-    -- Đơn hàng 7: iPad Air
-    (7, 5, 1, 16990000.00, '2024-08-02'), -- iPad Air có bảo hành 1 năm
-    
-    -- Đơn hàng 8: PlayStation 5
-    (8, 20, 1, 13990000.00, '2024-09-15'); -- PlayStation 5 có bảo hành 1 năm
+-- Insert sample customers
+INSERT INTO customer (first_name, last_name, email, phone_number, address) VALUES 
+('Hoang Hiep', 'Nguyen', 'hiep2003ka@gmail.com', '+1-202-555-0123', '123 Main Street, New York, NY 10001'),
+('Tuan Dat', 'Trinh Vinh', 'trinhvinhtuandat05102003@gmail.com', '+1-303-555-0456', '456 Park Avenue, Chicago, IL 60601'),
+('Michael', 'Williams', 'michael.williams@example.com', '+1-415-555-0789', '789 Ocean Drive, San Francisco, CA 94107'),
+('Sophia', 'Brown', 'sophia.brown@example.com', '+1-617-555-0321', '321 Maple Road, Boston, MA 02108'),
+('Daniel', 'Jones', 'daniel.jones@example.com', '+1-713-555-0654', '654 Pine Street, Houston, TX 77002'),
+('Olivia', 'Garcia', 'olivia.garcia@example.com', '+1-305-555-0987', '987 Palm Boulevard, Miami, FL 33101'),
+('William', 'Martinez', 'william.martinez@example.com', '+1-206-555-0147', '147 Cedar Lane, Seattle, WA 98101'),
+('Ava', 'Rodriguez', 'ava.rodriguez@example.com', '+1-702-555-0258', '258 Desert Road, Las Vegas, NV 89101'),
+('James', 'Wilson', 'james.wilson@example.com', '+1-404-555-0369', '369 Peach Street, Atlanta, GA 30301'),
+('Isabella', 'Anderson', 'isabella.anderson@example.com', '+1-901-555-0741', '741 River Road, Memphis, TN 38103');
 
--- Tạo view để dễ dàng truy vấn các mặt hàng có bảo hành
-CREATE OR REPLACE VIEW view_purchase_items_with_warranty AS
-SELECT 
-    pi.id,
-    pi.purchase_id,
-    p.customer_id,
-    pi.product_id,
-    pi.quantity,
-    pi.unit_price,
-    pi.warranty_expiration_date,
-    CONCAT(c.first_name, ' ', c.last_name) AS customer_name,
-    p.purchase_date,
-    p.invoice_number
-FROM 
-    purchase_items pi
-JOIN 
-    purchases p ON pi.purchase_id = p.id
-JOIN 
-    customer c ON p.customer_id = c.id
-WHERE 
-    pi.warranty_expiration_date IS NOT NULL;
+-- Insert sample purchases
+INSERT INTO purchases (customer_id, purchase_date, total_amount, invoice_number, payment_method, created_at) VALUES
+-- Customer 1 purchases
+(1, DATE_SUB(@current_timestamp, INTERVAL 2 DAY), 3299.97, 'INV-2023-1001', 'Credit Card', @current_timestamp),
+(1, DATE_SUB(@current_timestamp, INTERVAL 30 DAY), 1499.99, 'INV-2023-0875', 'PayPal', @current_timestamp),
 
--- Cấp quyền cho user
+-- Customer 2 purchases
+(2, DATE_SUB(@current_timestamp, INTERVAL 5 DAY), 2399.98, 'INV-2023-0990', 'Credit Card', @current_timestamp),
+(2, DATE_SUB(@current_timestamp, INTERVAL 45 DAY), 799.99, 'INV-2023-0822', 'Debit Card', @current_timestamp),
+
+-- Customer 3 purchases
+(3, DATE_SUB(@current_timestamp, INTERVAL 7 DAY), 549.98, 'INV-2023-0972', 'Credit Card', @current_timestamp),
+(3, DATE_SUB(@current_timestamp, INTERVAL 60 DAY), 2699.99, 'INV-2023-0775', 'Bank Transfer', @current_timestamp),
+
+-- Customer 4 purchases
+(4, DATE_SUB(@current_timestamp, INTERVAL 3 DAY), 1099.98, 'INV-2023-0997', 'Credit Card', @current_timestamp),
+
+-- Customer 5 purchases
+(5, DATE_SUB(@current_timestamp, INTERVAL 10 DAY), 3499.99, 'INV-2023-0950', 'Finance Plan', @current_timestamp),
+(5, DATE_SUB(@current_timestamp, INTERVAL 75 DAY), 649.99, 'INV-2023-0722', 'PayPal', @current_timestamp),
+
+-- Customer 6 purchases
+(6, DATE_SUB(@current_timestamp, INTERVAL 15 DAY), 899.97, 'INV-2023-0925', 'Credit Card', @current_timestamp),
+
+-- Customer 7 purchases
+(7, DATE_SUB(@current_timestamp, INTERVAL 1 DAY), 4999.99, 'INV-2023-1010', 'Finance Plan', @current_timestamp),
+(7, DATE_SUB(@current_timestamp, INTERVAL 90 DAY), 1299.99, 'INV-2023-0685', 'Credit Card', @current_timestamp),
+
+-- Customer 8 purchases
+(8, DATE_SUB(@current_timestamp, INTERVAL 4 DAY), 749.99, 'INV-2023-0992', 'PayPal', @current_timestamp),
+
+-- Customer 9 purchases
+(9, DATE_SUB(@current_timestamp, INTERVAL 8 DAY), 2199.98, 'INV-2023-0965', 'Credit Card', @current_timestamp),
+(9, DATE_SUB(@current_timestamp, INTERVAL 100 DAY), 499.99, 'INV-2023-0650', 'Debit Card', @current_timestamp),
+
+-- Customer 10 purchases
+(10, DATE_SUB(@current_timestamp, INTERVAL 6 DAY), 1799.99, 'INV-2023-0980', 'Credit Card', @current_timestamp);
+
+-- Insert sample purchase items
+INSERT INTO purchase_items (purchase_id, product_id, quantity, unit_price) VALUES
+-- Items for purchase 1 (Customer 1)
+(1, 2, 1, 1199.99),  -- Samsung Galaxy S23 Ultra
+(1, 6, 1, 2499.99),  -- MacBook Pro 16" M2
+(1, 21, 1, 399.99),  -- Apple Watch Series 8
+
+-- Items for purchase 2 (Customer 1)
+(2, 9, 1, 1499.99),  -- HP Spectre x360
+
+-- Items for purchase 3 (Customer 2)
+(3, 7, 1, 1899.99),  -- Dell XPS 15
+(3, 18, 1, 499.99),  -- Sony WH-1000XM5
+
+-- Items for purchase 4 (Customer 2)
+(4, 4, 1, 799.99),   -- Xiaomi 13 Pro
+
+-- Items for purchase 5 (Customer 3)
+(5, 22, 1, 449.99),  -- Samsung Galaxy Watch 5 Pro
+(5, 32, 1, 99.99),   -- Logitech MX Master 3S
+
+-- Items for purchase 6 (Customer 3)
+(6, 31, 1, 2699.99), -- Sony Alpha a7 IV
+
+-- Items for purchase 7 (Customer 4)
+(7, 12, 1, 1099.99), -- iPad Pro 12.9"
+
+-- Items for purchase 8 (Customer 5)
+(8, 46, 1, 3499.99), -- LG C2 65" OLED TV
+
+-- Items for purchase 9 (Customer 5)
+(9, 25, 1, 649.99),  -- GoPro HERO11 Black
+
+-- Items for purchase 10 (Customer 6)
+(10, 19, 1, 299.99), -- Bose QuietComfort Earbuds II
+(10, 20, 1, 449.99), -- Sonos Beam (Gen 2)
+(10, 33, 1, 149.99), -- Anker 737 Power Bank
+
+-- Items for purchase 11 (Customer 7)
+(11, 41, 1, 4999.99), -- Sony PlayStation 5 (Special Bundle)
+
+-- Items for purchase 12 (Customer 7)
+(12, 48, 1, 1299.99), -- TCL 6-Series 75" QLED TV
+
+-- Items for purchase 13 (Customer 8)
+(13, 3, 1, 749.99),   -- OnePlus 11 (Discounted)
+
+-- Items for purchase 14 (Customer 9)
+(14, 8, 1, 1499.99),  -- Lenovo ThinkPad X1 Carbon
+(14, 17, 1, 699.99),  -- Garmin Fenix 7
+
+-- Items for purchase 15 (Customer 9)
+(15, 41, 1, 499.99),  -- Sony PlayStation 5
+
+-- Items for purchase 16 (Customer 10)
+(16, 50, 1, 1799.99); -- Hisense U8H 65" ULED TV
+
+
 GRANT SELECT, INSERT, UPDATE, DELETE ON purchases TO 'customer_user'@'%';
 GRANT SELECT, INSERT, UPDATE, DELETE ON purchase_items TO 'customer_user'@'%';
-GRANT SELECT ON view_purchase_items_with_warranty TO 'customer_user'@'%';
 FLUSH PRIVILEGES;

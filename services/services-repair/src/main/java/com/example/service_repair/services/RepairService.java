@@ -1,7 +1,5 @@
 package com.example.service_repair.services;
 
-import com.example.service_repair.client.NotificationServiceClient;
-import com.example.service_repair.client.ProductServiceClient;
 import com.example.service_repair.client.WarrantyServiceClient;
 import com.example.service_repair.constants.RepairStatus;
 import com.example.service_repair.dto.*;
@@ -34,9 +32,7 @@ public class RepairService {
     private final TechnicianRepository technicianRepository;
     private final RepairActionRepository actionRepository;
     
-    private final NotificationServiceClient notificationServiceClient;
     private final WarrantyServiceClient warrantyServiceClient;
-    private final ProductServiceClient productServiceClient;
 
     /**
      * Create a new repair request
@@ -45,16 +41,6 @@ public class RepairService {
     public RepairRequestResponseDto createRepairRequest(RepairRequestDto repairRequestDto) {
         log.info("Creating new repair request for customer: {}, product: {}", 
             repairRequestDto.getCustomerId(), repairRequestDto.getProductId());
-        
-        // Check if product exists
-        boolean productExists = productServiceClient.checkProductExists(repairRequestDto.getProductId());
-        if (!productExists) {
-            throw new IllegalArgumentException("Product does not exist");
-        }
-        
-        // Check warranty status
-        boolean isWithinWarranty = warrantyServiceClient.checkWarrantyStatus(
-            repairRequestDto.getProductId(), repairRequestDto.getCustomerId());
             
         RepairRequest repairRequest = RepairRequest.builder()
                 .warrantyId(repairRequestDto.getWarrantyId())
@@ -65,7 +51,7 @@ public class RepairService {
                 .status(RepairStatus.SUBMITTED)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .withinWarranty(isWithinWarranty)
+                .withinWarranty(true)
                 .build();
         
         RepairRequest savedRequest = repairRequestRepository.save(repairRequest);
@@ -82,8 +68,8 @@ public class RepairService {
         statusHistoryRepository.save(initialStatus);
         
         // Send notification to customer
-        notificationServiceClient.sendRepairRequestCreatedNotification(
-            savedRequest.getCustomerId(), savedRequest.getId());
+        // notificationServiceClient.sendRepairRequestCreatedNotification(
+        //     savedRequest.getCustomerId(), savedRequest.getId());
             
         return convertToResponseDto(savedRequest);
     }
@@ -91,7 +77,7 @@ public class RepairService {
     /**
      * Get repair request by ID
      */
-    public RepairRequestResponseDto getRepairRequestById(Long id) {
+    public RepairRequestResponseDto getRepairRequestById(Integer id) {
         RepairRequest repairRequest = repairRequestRepository.findById(id)
                 .orElseThrow(() -> new RepairRequestNotFoundException("Repair request not found with id: " + id));
         
@@ -101,7 +87,7 @@ public class RepairService {
     /**
      * Get all repair requests for a customer
      */
-    public List<RepairRequestResponseDto> getRepairRequestsByCustomerId(Long customerId) {
+    public List<RepairRequestResponseDto> getRepairRequestsByCustomerId(Integer customerId) {
         List<RepairRequest> requests = repairRequestRepository.findByCustomerId(customerId);
         return requests.stream()
                 .map(this::convertToResponseDto)
@@ -118,158 +104,12 @@ public class RepairService {
                 .collect(Collectors.toList());
     }
     
-    /**
-     * Update repair status to next state
-     */
-    @Transactional
-    public RepairRequestResponseDto moveToNextState(Long repairId, String notes, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        RepairContext context = new RepairContext(repairRequest);
-        
-        RepairStatus previousStatus = repairRequest.getStatus();
-        
-        // Move to next state
-        context.moveToNextState();
-        
-        // Update repair request
-        repairRequest.setStatus(context.getCurrentState().getStatus());
-        repairRequest.setUpdatedAt(LocalDateTime.now());
-        
-        // If status is now UNDER_DIAGNOSIS, set startDate
-        if (repairRequest.getStatus() == RepairStatus.UNDER_DIAGNOSIS && repairRequest.getStartDate() == null) {
-            repairRequest.setStartDate(LocalDateTime.now());
-        }
-        
-        // If status is COMPLETED, set endDate
-        if (repairRequest.getStatus() == RepairStatus.COMPLETED && repairRequest.getEndDate() == null) {
-            repairRequest.setEndDate(LocalDateTime.now());
-        }
-        
-        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
-        
-        // Create status history entry
-        RepairStatusHistory statusHistory = RepairStatusHistory.builder()
-                .repairRequest(updatedRequest)
-                .status(updatedRequest.getStatus())
-                .notes(notes)
-                .createdBy(username)
-                .createdAt(LocalDateTime.now())
-                .build();
-        
-        statusHistoryRepository.save(statusHistory);
-        
-        // Create repair action for the state change
-        createStateChangeAction(updatedRequest, username, 
-                "STATUS_CHANGE", 
-                "Status changed from " + previousStatus + " to " + updatedRequest.getStatus());
-        
-        // Send notification based on the new status
-        sendStatusChangeNotification(updatedRequest);
-
-        if (updatedRequest.getStatus() == RepairStatus.COMPLETED) {
-            updateWarrantyServiceStatus(repairId, "REPAIRED");
-        } else if (updatedRequest.getStatus() == RepairStatus.DELIVERED) {
-            updateWarrantyServiceStatus(repairId, "DELIVERED");
-        }
-        
-        
-        return convertToResponseDto(updatedRequest);
-    }
-    
-    /**
-     * Update repair status to previous state
-     */
-    @Transactional
-    public RepairRequestResponseDto moveToPreviousState(Long repairId, String notes, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        RepairContext context = new RepairContext(repairRequest);
-        
-        RepairStatus previousStatus = repairRequest.getStatus();
-        
-        // Move to previous state
-        context.moveToPreviousState();
-        
-        // Update repair request
-        repairRequest.setStatus(context.getCurrentState().getStatus());
-        repairRequest.setUpdatedAt(LocalDateTime.now());
-        
-        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
-        
-        // Create status history entry
-        RepairStatusHistory statusHistory = RepairStatusHistory.builder()
-                .repairRequest(updatedRequest)
-                .status(updatedRequest.getStatus())
-                .notes(notes)
-                .createdBy(username)
-                .createdAt(LocalDateTime.now())
-                .build();
-        
-        statusHistoryRepository.save(statusHistory);
-        
-        // Create repair action for the state change
-        createStateChangeAction(updatedRequest, username, 
-                "STATUS_REVERSAL", 
-                "Status reverted from " + previousStatus + " to " + updatedRequest.getStatus());
-        
-        // Send notification based on the new status
-        sendStatusChangeNotification(updatedRequest);
-        
-        return convertToResponseDto(updatedRequest);
-    }
-    
-    /**
-     * Cancel a repair request
-     */
-    @Transactional
-    public RepairRequestResponseDto cancelRepairRequest(Long repairId, String notes, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        RepairContext context = new RepairContext(repairRequest);
-        
-        try {
-            RepairStatus previousStatus = repairRequest.getStatus();
-            
-            // Try to cancel
-            context.cancelRepair();
-            
-            // Update repair request
-            repairRequest.setStatus(context.getCurrentState().getStatus());
-            repairRequest.setUpdatedAt(LocalDateTime.now());
-            repairRequest.setEndDate(LocalDateTime.now());
-            
-            RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
-            
-            // Create status history entry
-            RepairStatusHistory statusHistory = RepairStatusHistory.builder()
-                    .repairRequest(updatedRequest)
-                    .status(updatedRequest.getStatus())
-                    .notes(notes)
-                    .createdBy(username)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            
-            statusHistoryRepository.save(statusHistory);
-            
-            // Create repair action for the cancellation
-            createStateChangeAction(updatedRequest, username, 
-                    "CANCELLATION", 
-                    "Request cancelled. Previous status: " + previousStatus);
-            
-            // Send cancellation notification
-            notificationServiceClient.sendRepairRequestCancelledNotification(
-                updatedRequest.getCustomerId(), updatedRequest.getId());
-                
-            return convertToResponseDto(updatedRequest);
-        } catch (Exception e) {
-            log.error("Cannot cancel repair request: {}", e.getMessage());
-            throw new IllegalStateException("Cannot cancel repair request in current state: " + repairRequest.getStatus());
-        }
-    }
     
     /**
      * Update repair notes
      */
     @Transactional
-    public RepairRequestResponseDto updateRepairNotes(Long repairId, String notes, String username) {
+    public RepairRequestResponseDto updateRepairNotes(Integer repairId, String notes, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         repairRequest.setRepairNotes(notes);
         repairRequest.setUpdatedAt(LocalDateTime.now());
@@ -288,7 +128,7 @@ public class RepairService {
      * Assign technician to repair request
      */
     @Transactional
-    public RepairRequestResponseDto assignTechnician(Long repairId, Long technicianId, String username) {
+    public RepairRequestResponseDto assignTechnician(Integer repairId, Integer technicianId, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         Technician technician = technicianRepository.findById(technicianId)
@@ -308,63 +148,10 @@ public class RepairService {
     }
     
     /**
-     * Add part to repair
-     */
-    @Transactional
-    public RepairPartDto addRepairPart(Long repairId, RepairPartDto partDto, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        
-        RepairPart part = RepairPart.builder()
-                .repairRequest(repairRequest)
-                .partName(partDto.getPartName())
-                .partNumber(partDto.getPartNumber())
-                .quantity(partDto.getQuantity())
-                .unitPrice(partDto.getUnitPrice())
-                .build();
-        
-        RepairPart savedPart = partRepository.save(part);
-        
-        // Create repair action for adding part
-        createStateChangeAction(repairRequest, username, 
-                "PART_ADDED", 
-                "Added part: " + part.getPartName() + " x" + part.getQuantity());
-        
-        // Update total repair cost
-        updateRepairCost(repairId);
-        
-        return convertToPartDto(savedPart);
-    }
-    
-    /**
-     * Remove part from repair
-     */
-    @Transactional
-    public void removeRepairPart(Long repairId, Long partId, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        
-        RepairPart part = partRepository.findById(partId)
-                .orElseThrow(() -> new IllegalArgumentException("Part not found with id: " + partId));
-        
-        if (!part.getRepairRequest().getId().equals(repairId)) {
-            throw new IllegalArgumentException("Part does not belong to this repair request");
-        }
-        
-        // Create repair action for removing part
-        createStateChangeAction(repairRequest, username, 
-                "PART_REMOVED", 
-                "Removed part: " + part.getPartName() + " x" + part.getQuantity());
-        
-        partRepository.delete(part);
-        
-        // Update total repair cost
-        updateRepairCost(repairId);
-    }
-    
-    /**
      * Add repair action
      */
     @Transactional
-    public RepairActionDto addRepairAction(Long repairId, RepairActionDto actionDto, String username) {
+    public RepairActionDto addRepairAction(Integer repairId, RepairActionDto actionDto, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         Optional<Technician> technician = Optional.empty();
@@ -385,51 +172,12 @@ public class RepairService {
         return convertToActionDto(savedAction);
     }
     
-    /**
-     * Reject a repair request (e.g., if warranty verification fails)
-     */
-    @Transactional
-    public RepairRequestResponseDto rejectRepairRequest(Long repairId, String reason, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        RepairStatus previousStatus = repairRequest.getStatus();
-        
-        repairRequest.setStatus(RepairStatus.REJECTED);
-        repairRequest.setRepairNotes(repairRequest.getRepairNotes() != null ? 
-                repairRequest.getRepairNotes() + "\nRejection reason: " + reason : 
-                "Rejection reason: " + reason);
-        repairRequest.setUpdatedAt(LocalDateTime.now());
-        repairRequest.setEndDate(LocalDateTime.now());
-        
-        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
-        
-        // Create status history entry
-        RepairStatusHistory statusHistory = RepairStatusHistory.builder()
-                .repairRequest(updatedRequest)
-                .status(RepairStatus.REJECTED)
-                .notes("Request rejected. Reason: " + reason)
-                .createdBy(username)
-                .createdAt(LocalDateTime.now())
-                .build();
-        
-        statusHistoryRepository.save(statusHistory);
-        
-        // Create repair action for rejection
-        createStateChangeAction(updatedRequest, username, 
-                "REJECTION", 
-                "Request rejected. Reason: " + reason + ". Previous status: " + previousStatus);
-        
-        // Send rejection notification
-        notificationServiceClient.sendRepairRequestRejectedNotification(
-            updatedRequest.getCustomerId(), updatedRequest.getId(), reason);
-            
-        return convertToResponseDto(updatedRequest);
-    }
     
     /**
      * Process product receipt - mark as RECEIVED
      */
     @Transactional
-    public RepairRequestResponseDto processProductReceipt(Long repairId, String username) {
+    public RepairRequestResponseDto processProductReceipt(Integer repairId, TechnicianDto technician, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
         if (repairRequest.getStatus() != RepairStatus.SUBMITTED) {
@@ -438,6 +186,7 @@ public class RepairService {
         
         repairRequest.setStatus(RepairStatus.RECEIVED);
         repairRequest.setUpdatedAt(LocalDateTime.now());
+        repairRequest.setTechnicianId(technician.getId());
         
         RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
         
@@ -446,7 +195,7 @@ public class RepairService {
                 .repairRequest(updatedRequest)
                 .status(RepairStatus.RECEIVED)
                 .notes("Product received for repair")
-                .createdBy(username)
+                .createdBy(String.valueOf(technician.getId()))
                 .createdAt(LocalDateTime.now())
                 .build();
         
@@ -456,126 +205,12 @@ public class RepairService {
         createStateChangeAction(updatedRequest, username, 
                 "PRODUCT_RECEIPT", 
                 "Product received for repair");
-        
-        // Send product received notification
-        notificationServiceClient.sendProductReceivedNotification(
-            updatedRequest.getCustomerId(), updatedRequest.getId());
-            
+
+        warrantyServiceClient.updateWarrantyStatus(repairRequest.getWarrantyId(), "REPAIR_IN_PROGRESS", username);
+          
         return convertToResponseDto(updatedRequest);
     }
     
-    /**
-     * Update repair cost
-     */
-    @Transactional
-    public RepairRequestResponseDto updateRepairCost(Long repairId, BigDecimal manualCost, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        
-        if (manualCost != null) {
-            repairRequest.setRepairCost(manualCost);
-        } else {
-            // Calculate cost based on parts
-            updateRepairCost(repairId);
-            return getRepairRequestById(repairId);
-        }
-        
-        repairRequest.setUpdatedAt(LocalDateTime.now());
-        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
-        
-        // Create repair action for cost update
-        createStateChangeAction(updatedRequest, username, 
-                "COST_UPDATE", 
-                "Repair cost updated to: " + manualCost);
-        
-        return convertToResponseDto(updatedRequest);
-    }
-    
-    /**
-     * Calculate and update repair cost based on parts
-     */
-    private void updateRepairCost(Long repairId) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        
-        // Skip if it's under warranty
-        if (Boolean.TRUE.equals(repairRequest.getWithinWarranty())) {
-            repairRequest.setRepairCost(BigDecimal.ZERO);
-            repairRequestRepository.save(repairRequest);
-            return;
-        }
-        
-        List<RepairPart> parts = partRepository.findByRepairRequestId(repairId);
-        
-        BigDecimal totalCost = parts.stream()
-                .map(part -> part.getUnitPrice().multiply(BigDecimal.valueOf(part.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
-        repairRequest.setRepairCost(totalCost);
-        repairRequest.setUpdatedAt(LocalDateTime.now());
-        repairRequestRepository.save(repairRequest);
-    }
-    
-    /**
-     * Get dashboard statistics
-     */
-    public DashboardStatsDto getDashboardStats() {
-        DashboardStatsDto stats = new DashboardStatsDto();
-        
-        stats.setTotalRepairRequests(repairRequestRepository.count());
-        
-        List<RepairStatus> pendingStatuses = List.of(RepairStatus.SUBMITTED, RepairStatus.RECEIVED);
-        stats.setPendingRepairRequests((long) repairRequestRepository.findByStatusIn(pendingStatuses).size());
-        
-        List<RepairStatus> inProgressStatuses = List.of(
-                RepairStatus.UNDER_DIAGNOSIS, RepairStatus.DIAGNOSING, 
-                RepairStatus.WAITING_APPROVAL, RepairStatus.REPAIRING,
-                RepairStatus.REPAIRED, RepairStatus.TESTING);
-        stats.setInProgressRepairRequests((long) repairRequestRepository.findByStatusIn(inProgressStatuses).size());
-        
-        stats.setCompletedRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.DELIVERED).size());
-        stats.setCancelledRepairRequests((long) repairRequestRepository.findByStatus(RepairStatus.CANCELLED).size());
-        
-        // Calculate average repair time for completed repairs
-        List<RepairRequest> completedRepairs = repairRequestRepository.findByStatus(RepairStatus.DELIVERED);
-        if (!completedRepairs.isEmpty()) {
-            double averageHours = completedRepairs.stream()
-                    .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
-                    .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
-                    .average()
-                    .orElse(0);
-            stats.setAverageRepairTime(averageHours);
-        } else {
-            stats.setAverageRepairTime(0.0);
-        }
-        
-        // Get technician performance
-        List<Technician> activeTechnicians = technicianRepository.findByIsActiveTrue();
-        List<DashboardStatsDto.TechnicianPerformanceDto> technicianPerformance = new ArrayList<>();
-        
-        for (Technician technician : activeTechnicians) {
-            List<RepairRequest> technicianCompletedRepairs = repairRequestRepository.findByTechnicianId(technician.getId()).stream()
-                    .filter(repair -> repair.getStatus() == RepairStatus.DELIVERED)
-                    .collect(Collectors.toList());
-            
-            double techAverageHours = technicianCompletedRepairs.stream()
-                    .filter(repair -> repair.getStartDate() != null && repair.getEndDate() != null)
-                    .mapToLong(repair -> Duration.between(repair.getStartDate(), repair.getEndDate()).toHours())
-                    .average()
-                    .orElse(0);
-            
-            DashboardStatsDto.TechnicianPerformanceDto perfDto = DashboardStatsDto.TechnicianPerformanceDto.builder()
-                    .technicianId(technician.getId())
-                    .technicianName(technician.getName())
-                    .completedRepairs((long) technicianCompletedRepairs.size())
-                    .averageRepairTime(techAverageHours)
-                    .build();
-            
-            technicianPerformance.add(perfDto);
-        }
-        
-        stats.setTechnicianPerformance(technicianPerformance);
-        
-        return stats;
-    }
     
     /**
      * Create state change action
@@ -598,7 +233,7 @@ public class RepairService {
     /**
      * Helper method to get entity by ID
      */
-    private RepairRequest getRepairRequestEntityById(Long id) {
+    private RepairRequest getRepairRequestEntityById(Integer id) {
         return repairRequestRepository.findById(id)
                 .orElseThrow(() -> new RepairRequestNotFoundException("Repair request not found with id: " + id));
     }
@@ -666,22 +301,6 @@ public class RepairService {
     }
     
     /**
-     * Convert part entity to DTO
-     */
-    private RepairPartDto convertToPartDto(RepairPart part) {
-        BigDecimal totalPrice = part.getUnitPrice().multiply(BigDecimal.valueOf(part.getQuantity()));
-        
-        return RepairPartDto.builder()
-                .id(part.getId())
-                .partName(part.getPartName())
-                .partNumber(part.getPartNumber())
-                .quantity(part.getQuantity())
-                .unitPrice(part.getUnitPrice())
-                .totalPrice(totalPrice)
-                .build();
-    }
-    
-    /**
      * Convert action entity to DTO
      */
     private RepairActionDto convertToActionDto(RepairAction action) {
@@ -699,58 +318,165 @@ public class RepairService {
         
         return dto;
     }
-    
+
+    /**
+     * Start the diagnostic process for a repair request
+     */
     @Transactional
-    public void updateWarrantyServiceStatus(Long repairId, String status) {
+    public RepairRequestResponseDto startDiagnosis(Integer repairId, String username) {
         RepairRequest repairRequest = getRepairRequestEntityById(repairId);
         
-        if (repairRequest.getWarrantyId() != null) {
-            try {
-                // Call warranty service to update status
-                warrantyServiceClient.updateWarrantyStatus(
-                    repairRequest.getWarrantyId(), 
-                    status, 
-                    "Status updated from repair service: " + status
-                );
-            } catch (Exception e) {
-                log.error("Failed to update warranty service: {}", e.getMessage());
-                // Continue with repair process even if warranty update fails
-            }
+        if (repairRequest.getStatus() != RepairStatus.RECEIVED) {
+            throw new IllegalStateException("Repair request must be in RECEIVED state to start diagnosis");
         }
+        
+        RepairContext context = new RepairContext(repairRequest);
+        context.moveToNextState();
+        
+        repairRequest.setStatus(context.getCurrentState().getStatus());
+        repairRequest.setUpdatedAt(LocalDateTime.now());
+        
+        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
+        
+        // Create status history entry
+        RepairStatusHistory statusHistory = RepairStatusHistory.builder()
+                .repairRequest(updatedRequest)
+                .status(updatedRequest.getStatus())
+                .notes("Started diagnosis process")
+                .createdBy(username)
+                .createdAt(LocalDateTime.now())
+                .build();
+        
+        statusHistoryRepository.save(statusHistory);
+        
+        // Create repair action
+        createStateChangeAction(updatedRequest, username, 
+                "START_DIAGNOSIS", 
+                "Started diagnosis process");
+        
+        return convertToResponseDto(updatedRequest);
     }
+
     /**
-     * Send appropriate notification based on status change
+     * Complete diagnosis and start repair
      */
-    private void sendStatusChangeNotification(RepairRequest repairRequest) {
-        switch (repairRequest.getStatus()) {
-            case UNDER_DIAGNOSIS:
-                notificationServiceClient.sendRepairDiagnosisStartedNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case WAITING_APPROVAL:
-                notificationServiceClient.sendRepairApprovalRequiredNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId(), 
-                    repairRequest.getRepairCost() != null ? repairRequest.getRepairCost().doubleValue() : 0.0);
-                break;
-            case REPAIRING:
-                notificationServiceClient.sendRepairInProgressNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case COMPLETED:
-                notificationServiceClient.sendRepairCompletedNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case DELIVERING:
-                notificationServiceClient.sendProductShippingNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            case DELIVERED:
-                notificationServiceClient.sendProductDeliveredNotification(
-                    repairRequest.getCustomerId(), repairRequest.getId());
-                break;
-            default:
-                // No notification for other status changes
-                break;
+    @Transactional
+    public RepairRequestResponseDto completeDiagnosisAndStartRepair(Integer repairId, DiagnosisDto diagnosisDto, String username) {
+        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
+        
+        if (repairRequest.getStatus() != RepairStatus.DIAGNOSING) {
+            throw new IllegalStateException("Repair request must be in DIAGNOSING state to complete diagnosis");
         }
+        
+        // Update repair notes with diagnosis
+        String currentNotes = repairRequest.getRepairNotes() != null ? repairRequest.getRepairNotes() : "";
+        repairRequest.setRepairNotes(currentNotes + "\nDiagnosis results: " + diagnosisDto.getDiagnosticNotes());
+        
+        RepairContext context = new RepairContext(repairRequest);
+        context.moveToNextState();
+        
+        repairRequest.setStatus(context.getCurrentState().getStatus());
+        repairRequest.setUpdatedAt(LocalDateTime.now());
+        
+        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
+        
+        // Create status history entry
+        RepairStatusHistory statusHistory = RepairStatusHistory.builder()
+                .repairRequest(updatedRequest)
+                .status(updatedRequest.getStatus())
+                .notes("Completed diagnosis and started repair. Diagnosis: " + diagnosisDto.getDiagnosticNotes())
+                .createdBy(username)
+                .createdAt(LocalDateTime.now())
+                .build();
+        
+        statusHistoryRepository.save(statusHistory);
+        
+        // Create repair action
+        createStateChangeAction(updatedRequest, username, 
+                "COMPLETE_DIAGNOSIS", 
+                "Completed diagnosis: " + diagnosisDto.getDiagnosticNotes());
+        
+        return convertToResponseDto(updatedRequest);
+    }
+
+    /**
+     * Add part to repair
+     */
+    @Transactional
+    public RepairPartDto addRepairPart(Integer repairId, RepairPartDto partDto, String username) {
+        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
+        
+        if (repairRequest.getStatus() != RepairStatus.REPAIRING) {
+            throw new IllegalStateException("Can only add parts when repair is in REPAIRING state");
+        }
+        
+        RepairPart part = partRepository.findById(partDto.getId()).orElse(null);
+        part.setRepairRequest(repairRequest);
+        partRepository.save(part);
+        
+        // Create repair action for adding part
+        createStateChangeAction(repairRequest, username, 
+                "PART_ADDED", 
+                "Added part: " + part.getPartName());
+        
+        return convertToPartDto(part);
+    }
+
+    /**
+     * Complete repair
+     */
+    @Transactional
+    public RepairRequestResponseDto completeRepair(Integer repairId, RepairCompletionDto completionDto, String username) {
+        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
+        
+        if (repairRequest.getStatus() != RepairStatus.REPAIRING) {
+            throw new IllegalStateException("Repair request must be in REPAIRING state to complete repair");
+        }
+        
+        // Update repair notes with completion details
+        String currentNotes = repairRequest.getRepairNotes() != null ? repairRequest.getRepairNotes() : "";
+        repairRequest.setRepairNotes(currentNotes + "\nCompletion notes: " + completionDto.getCompletionNotes());
+        
+        RepairContext context = new RepairContext(repairRequest);
+        context.moveToNextState();
+        
+        repairRequest.setStatus(context.getCurrentState().getStatus());
+        repairRequest.setUpdatedAt(LocalDateTime.now());
+        repairRequest.setEndDate(LocalDateTime.now());
+        
+        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
+        
+        // Create status history entry
+        RepairStatusHistory statusHistory = RepairStatusHistory.builder()
+                .repairRequest(updatedRequest)
+                .status(updatedRequest.getStatus())
+                .notes("Repair completed. Notes: " + completionDto.getCompletionNotes())
+                .createdBy(username)
+                .createdAt(LocalDateTime.now())
+                .build();
+        
+        statusHistoryRepository.save(statusHistory);
+        
+        // Create repair action
+        createStateChangeAction(updatedRequest, username, 
+                "COMPLETE_REPAIR", 
+                "Repair completed: " + completionDto.getCompletionNotes());
+
+        warrantyServiceClient.updateWarrantyStatus(repairRequest.getWarrantyId(), "COMPLETE_REPAIR", updatedRequest.getRepairNotes());
+        
+        return convertToResponseDto(updatedRequest);
+    }
+
+    /**
+     * Convert part entity to DTO
+     */
+    private RepairPartDto convertToPartDto(RepairPart part) {
+        return RepairPartDto.builder()
+                .id(part.getId())
+                .partName(part.getPartName())
+                .partNumber(part.getPartNumber())
+                .description(part.getDescription())
+                .isWarrantyReplacement(part.getIsWarrantyReplacement())
+                .build();
     }
 }

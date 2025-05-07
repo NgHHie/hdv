@@ -15,7 +15,7 @@ public class NotificationResponseDto {
     private Integer id;
     private Integer customerId;
     private NotificationType type;
-    private Integer relatedEntityId;
+    private Integer warrantyRequestId;
     private String email;
     private String subject;
     private NotificationStatus status;

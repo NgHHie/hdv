@@ -18,7 +18,7 @@ public class WarrantyConditionResult {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     
     @ManyToOne
     @JoinColumn(name = "warranty_request_id")
