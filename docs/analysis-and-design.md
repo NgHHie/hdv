@@ -28,9 +28,10 @@ Hệ thống giải quyết vấn đề quản lý các yêu cầu bảo hành s
 | Product Service                | Entity Service  | Quản lý sản phẩm,bao gồm số serial và thời hạn bảo hành                    | Spring Boot, MySQL |
 | Technician Service             | Entity Service  | Quản lý thông tin về các kỹ thuật viên phụ trách kiểm tra                  | Spring Boot, MySQL |
 | Survey Service                 | Entity Service  | Thu thập phản hồi từ khách hàng về chất lượng dịch vụ bảo hành             | Spring Boot, MySQL |
-| Repair Service                 | Entity Service  | Theo dõi tiến độ sửa chữa sản phẩm, cập nhật trạng thái                    | Spring Boot, MySQL |
+| Repair Service                 | Micro Service   | Theo dõi tiến độ sửa chữa sản phẩm, cập nhật trạng thái                    | Spring Boot, MySQL |
 | Condition Verification Service | Micro Service   | Quản lý quá trình sửa chữa và bảo trì                                      | Spring Boot, MySQL |
 | Notification Service           | Utility Service | Gửi thông báo cho khách hàng và nhân viên                                  | Spring Boot, MySQL |
+| Security Service               | Utility Service | Xác thực và phân quyền người dùng                                          | Spring Boot, MySQL |
 
 ## 3. 🔄 Service Communication
 
