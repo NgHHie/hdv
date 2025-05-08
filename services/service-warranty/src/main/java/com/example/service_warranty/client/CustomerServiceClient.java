@@ -108,7 +108,7 @@ public class CustomerServiceClient {
         createRequest.setImageUrls(requestDto.getImageUrls());
         createRequest.setStatus(status);
         createRequest.setValidationNotes(isWithinWarranty ? null : "Product is out of warranty period");
-        System.out.println(status);
+        createRequest.setExpirationDate(requestDto.getExpirationDate());
         try {
             return webClientBuilder.build()
                     .post()
@@ -179,6 +179,27 @@ public class CustomerServiceClient {
         } catch (Exception e) {
             log.error("Failed to get warranty requests: {}", e.getMessage());
             return List.of();
+        }
+    }
+
+    public WarrantyRequestDto updateRepairId(Integer warrantyId, Integer repairId) {
+        String url = "/api/v1/customers/warranty/requests/" + warrantyId + "/repair";
+        log.info("Updating repair id for warranty id: {}", warrantyId);
+        
+        try {
+            WarrantyRequestDto request = new WarrantyRequestDto();
+            request.setRepairId(repairId);
+            return webClientBuilder.build()
+                    .put()
+                    .uri(customerServiceUrl + url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
+                    .retrieve()
+                    .bodyToMono(WarrantyRequestDto.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to update warranty request repairId: {}", e.getMessage());
+            throw new RuntimeException("Failed to update warranty request status", e);
         }
     }
     

@@ -1,5 +1,6 @@
 package com.example.service_warranty.controllers;
 
+import com.example.service_warranty.dto.WarrantyDetailDto;
 import com.example.service_warranty.dto.WarrantyRequestCreateDto;
 import com.example.service_warranty.dto.WarrantyRequestDto;
 import com.example.service_warranty.dto.WarrantyValidationDto;
@@ -39,6 +40,7 @@ public class WarrantyController {
        
        String username = principal != null ? principal.getName() : "SYSTEM";
        validationDto.setValidatedBy(username);
+       validationDto.setWarrantyRequestId(id);
        
        try {
            WarrantyRequestDto updatedRequest = warrantyService.completeValidationAndForward(id, validationDto);
@@ -68,7 +70,7 @@ public class WarrantyController {
        }
    }
 
-   @PutMapping("/requests/{id}/repair-status")
+   @PutMapping("/requests/{id}/update-repair-status")
    public ResponseEntity<WarrantyRequestDto> updateRepairStatus(
            @PathVariable Integer id,
            @RequestBody Map<String, String> requestBody,
@@ -87,4 +89,37 @@ public class WarrantyController {
            return ResponseEntity.badRequest().build();
        }
    }
+
+   @GetMapping("/requests/{id}/details")
+    public ResponseEntity<WarrantyDetailDto> getWarrantyDetails(
+            @PathVariable Integer id) {
+        log.info("REST request to get comprehensive warranty details: {}", id);
+        
+        try {
+            WarrantyDetailDto details = warrantyService.getWarrantyDetailById(id);
+            return ResponseEntity.ok(details);
+        } catch (Exception e) {
+            log.error("Error getting warranty details: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/requests/{id}/confirm-delivery")
+    public ResponseEntity<WarrantyRequestDto> confirmProductDelivery(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> requestBody,
+            Principal principal) {
+        log.info("REST request to confirm product delivery for warranty: {}", id);
+        
+        String notes = requestBody.get("notes");
+        String username = principal != null ? principal.getName() : "SYSTEM";
+        
+        try {
+            WarrantyRequestDto updatedRequest = warrantyService.confirmProductDelivery(id, notes, username);
+            return ResponseEntity.ok(updatedRequest);
+        } catch (Exception e) {
+            log.error("Failed to confirm delivery: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

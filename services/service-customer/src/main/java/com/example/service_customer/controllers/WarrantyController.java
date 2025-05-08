@@ -84,11 +84,11 @@ public class WarrantyController {
     @PutMapping("/requests/{id}/repair")
     public ResponseEntity<WarrantyRequestDTO> updateRepairId(
             @PathVariable Integer id,
-            @RequestBody Map<String, Object> requestBody) {
+            @RequestBody WarrantyRequestDTO requestBody) {
         log.info("REST request to update Repair ID for warranty request : {}", id);
         
-        Integer repairId = (Integer) requestBody.get("repairId");
-        String performedBy = (String) requestBody.get("performedBy");
+        Integer repairId = requestBody.getRepairId();
+        String performedBy = "SYSTEM";
         
         if (repairId == null) {
             return ResponseEntity.badRequest().build();
@@ -97,8 +97,7 @@ public class WarrantyController {
         try {
             WarrantyRequestDTO request = warrantyRequestService.getWarrantyRequestById(id);
             request.setRepairId(repairId);
-            WarrantyRequestDTO updatedRequest = warrantyRequestService.updateWarrantyRequestStatus(
-                    id, request.getStatus(), "Repair ID updated to: " + repairId, performedBy);
+            WarrantyRequestDTO updatedRequest = warrantyRequestService.updateRepairId(id, repairId);
             return ResponseEntity.ok(updatedRequest);
         } catch (Exception e) {
             log.error("Error updating repair ID: {}", e.getMessage());

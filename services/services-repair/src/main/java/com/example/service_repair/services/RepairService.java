@@ -29,7 +29,6 @@ public class RepairService {
     private final RepairRequestRepository repairRequestRepository;
     private final RepairStatusHistoryRepository statusHistoryRepository;
     private final RepairPartRepository partRepository;
-    private final TechnicianRepository technicianRepository;
     private final RepairActionRepository actionRepository;
     
     private final WarrantyServiceClient warrantyServiceClient;
@@ -106,74 +105,6 @@ public class RepairService {
     
     
     /**
-     * Update repair notes
-     */
-    @Transactional
-    public RepairRequestResponseDto updateRepairNotes(Integer repairId, String notes, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        repairRequest.setRepairNotes(notes);
-        repairRequest.setUpdatedAt(LocalDateTime.now());
-        
-        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
-        
-        // Create repair action for updating notes
-        createStateChangeAction(updatedRequest, username, 
-                "NOTES_UPDATE", 
-                "Repair notes updated");
-        
-        return convertToResponseDto(updatedRequest);
-    }
-    
-    /**
-     * Assign technician to repair request
-     */
-    @Transactional
-    public RepairRequestResponseDto assignTechnician(Integer repairId, Integer technicianId, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        
-        Technician technician = technicianRepository.findById(technicianId)
-                .orElseThrow(() -> new TechnicianNotFoundException("Technician not found with id: " + technicianId));
-        
-        repairRequest.setTechnicianId(technicianId);
-        repairRequest.setUpdatedAt(LocalDateTime.now());
-        
-        RepairRequest updatedRequest = repairRequestRepository.save(repairRequest);
-        
-        // Create repair action for technician assignment
-        createStateChangeAction(updatedRequest, username, 
-                "TECHNICIAN_ASSIGNMENT", 
-                "Assigned to technician: " + technician.getName());
-        
-        return convertToResponseDto(updatedRequest);
-    }
-    
-    /**
-     * Add repair action
-     */
-    @Transactional
-    public RepairActionDto addRepairAction(Integer repairId, RepairActionDto actionDto, String username) {
-        RepairRequest repairRequest = getRepairRequestEntityById(repairId);
-        
-        Optional<Technician> technician = Optional.empty();
-        if (actionDto.getTechnicianId() != null) {
-            technician = technicianRepository.findById(actionDto.getTechnicianId());
-        }
-        
-        RepairAction action = RepairAction.builder()
-                .repairRequest(repairRequest)
-                .actionType(actionDto.getActionType())
-                .description(actionDto.getDescription())
-                .performedBy(technician.orElse(null))
-                .performedAt(LocalDateTime.now())
-                .build();
-        
-        RepairAction savedAction = actionRepository.save(action);
-        
-        return convertToActionDto(savedAction);
-    }
-    
-    
-    /**
      * Process product receipt - mark as RECEIVED
      */
     @Transactional
@@ -202,7 +133,7 @@ public class RepairService {
         statusHistoryRepository.save(statusHistory);
         
         // Create repair action for product receipt
-        createStateChangeAction(updatedRequest, username, 
+        createStateChangeAction(updatedRequest, technician.getId(), 
                 "PRODUCT_RECEIPT", 
                 "Product received for repair");
 
@@ -215,15 +146,13 @@ public class RepairService {
     /**
      * Create state change action
      */
-    private void createStateChangeAction(RepairRequest repairRequest, String username, String actionType, String description) {
-        // Find technician by username if available
-        Optional<Technician> technician = technicianRepository.findByEmail(username);
+    private void createStateChangeAction(RepairRequest repairRequest, Integer technicianId, String actionType, String description) {
         
         RepairAction action = RepairAction.builder()
                 .repairRequest(repairRequest)
                 .actionType(actionType)
                 .description(description)
-                .performedBy(technician.orElse(null))
+                .performedBy(technicianId)
                 .performedAt(LocalDateTime.now())
                 .build();
         
@@ -259,12 +188,6 @@ public class RepairService {
                 .repairCost(repairRequest.getRepairCost())
                 .withinWarranty(repairRequest.getWithinWarranty())
                 .build();
-        
-        // Add technician name if technician is assigned
-        if (repairRequest.getTechnicianId() != null) {
-            technicianRepository.findById(repairRequest.getTechnicianId())
-                    .ifPresent(technician -> dto.setTechnicianName(technician.getName()));
-        }
         
         // Add status history
         List<RepairStatusHistory> statusHistory = statusHistoryRepository.findByRepairRequestIdOrderByCreatedAtDesc(repairRequest.getId());
@@ -312,8 +235,7 @@ public class RepairService {
                 .build();
         
         if (action.getPerformedBy() != null) {
-            dto.setTechnicianId(action.getPerformedBy().getId());
-            dto.setTechnicianName(action.getPerformedBy().getName());
+            dto.setTechnicianId(action.getPerformedBy());
         }
         
         return dto;
@@ -343,14 +265,14 @@ public class RepairService {
                 .repairRequest(updatedRequest)
                 .status(updatedRequest.getStatus())
                 .notes("Started diagnosis process")
-                .createdBy(username)
+                .createdBy(String.valueOf(updatedRequest.getTechnicianId()))
                 .createdAt(LocalDateTime.now())
                 .build();
         
         statusHistoryRepository.save(statusHistory);
         
         // Create repair action
-        createStateChangeAction(updatedRequest, username, 
+        createStateChangeAction(updatedRequest, updatedRequest.getTechnicianId(), 
                 "START_DIAGNOSIS", 
                 "Started diagnosis process");
         
@@ -385,14 +307,14 @@ public class RepairService {
                 .repairRequest(updatedRequest)
                 .status(updatedRequest.getStatus())
                 .notes("Completed diagnosis and started repair. Diagnosis: " + diagnosisDto.getDiagnosticNotes())
-                .createdBy(username)
+                .createdBy(String.valueOf(updatedRequest.getTechnicianId()))
                 .createdAt(LocalDateTime.now())
                 .build();
         
         statusHistoryRepository.save(statusHistory);
         
         // Create repair action
-        createStateChangeAction(updatedRequest, username, 
+        createStateChangeAction(updatedRequest, updatedRequest.getTechnicianId(), 
                 "COMPLETE_DIAGNOSIS", 
                 "Completed diagnosis: " + diagnosisDto.getDiagnosticNotes());
         
@@ -415,7 +337,7 @@ public class RepairService {
         partRepository.save(part);
         
         // Create repair action for adding part
-        createStateChangeAction(repairRequest, username, 
+        createStateChangeAction(repairRequest, repairRequest.getTechnicianId(), 
                 "PART_ADDED", 
                 "Added part: " + part.getPartName());
         
@@ -451,14 +373,14 @@ public class RepairService {
                 .repairRequest(updatedRequest)
                 .status(updatedRequest.getStatus())
                 .notes("Repair completed. Notes: " + completionDto.getCompletionNotes())
-                .createdBy(username)
+                .createdBy(String.valueOf(updatedRequest.getTechnicianId()))
                 .createdAt(LocalDateTime.now())
                 .build();
         
         statusHistoryRepository.save(statusHistory);
         
         // Create repair action
-        createStateChangeAction(updatedRequest, username, 
+        createStateChangeAction(updatedRequest, updatedRequest.getTechnicianId(), 
                 "COMPLETE_REPAIR", 
                 "Repair completed: " + completionDto.getCompletionNotes());
 
