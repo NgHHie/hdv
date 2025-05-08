@@ -164,7 +164,7 @@ services:
       - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
       - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
       - SERVICE_CUSTOMER_URL=http://service-customer:${CUSTOMER_SERVICE_PORT}
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:${KAFKA_PORT}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=localhost:${KAFKA_PORT}
       - SPRING_KAFKA_CONSUMER_GROUP_ID=notification-group
     depends_on:
       - discovery-server
@@ -283,7 +283,7 @@ services:
       - SERVICE_CUSTOMER_URL=http://service-customer
       - SERVICE_CONDITION_URL=http://service-condition
       - SERVICE_TECHNICIAN_URL=http://service-technician
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:${KAFKA_PORT}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=localhost:${KAFKA_PORT}
     depends_on:
       - discovery-server
       - kafka
@@ -339,10 +339,8 @@ services:
       - MYSQL_USER=${REPAIR_DB_USER}
       - MYSQL_PASSWORD=${REPAIR_DB_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${REPAIR_DB_PASSWORD}
-
     volumes:
       - repair-db-data:/var/lib/mysql
-      - ./services/services-repair/init-scripts:/docker-entrypoint-initdb.d
     networks:
       - microservices-network
 
@@ -394,12 +392,10 @@ services:
 
       # Required for a single node cluster
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - microservices-network
-  kafka-ui:
+ kafka-ui:
     image: kafbat/kafka-ui:main
     ports:
-      - 9999:8080
+      - 8080:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: "true"
       KAFKA_CLUSTERS_0_NAME: local
