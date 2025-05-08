@@ -8,45 +8,46 @@ CREATE USER IF NOT EXISTS 'security_user'@'%' IDENTIFIED BY 'security_pass';
 GRANT ALL PRIVILEGES ON service_security.* TO 'security_user'@'%';
 FLUSH PRIVILEGES;
 
--- Create the permissions table
-CREATE TABLE permissions (
+-- Bảng permissions
+CREATE TABLE IF NOT EXISTS permissions (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) UNIQUE NOT NULL,
     path VARCHAR(255) NOT NULL,
-    method ENUM('GET', 'POST', 'PUT', 'DELETE', 'PATCH') NOT NULL,
+    method VARCHAR(10) NOT NULL CHECK (method IN ('GET', 'POST', 'PUT', 'DELETE', 'PATCH')),
     description VARCHAR(255)
 );
 
--- Create the roles table
-CREATE TABLE roles (
+-- Bảng roles
+CREATE TABLE IF NOT EXISTS roles (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name ENUM('ROLE_ADMIN', 'ROLE_TECHNICIAN', 'ROLE_CUSTOMER') NOT NULL,
-    description VARCHAR(100)
+    name VARCHAR(20) NOT NULL,
+    description VARCHAR(100),
+    CONSTRAINT chk_role_name CHECK (name IN ('ROLE_ADMIN', 'ROLE_TECHNICIAN', 'ROLE_CUSTOMER'))
 );
 
--- Create the role_permissions junction table for the many-to-many relationship
-CREATE TABLE role_permissions (
+-- Bảng role_permissions (nhiều-nhiều giữa roles và permissions)
+CREATE TABLE IF NOT EXISTS role_permissions (
     role_id BIGINT NOT NULL,
     permission_id BIGINT NOT NULL,
     PRIMARY KEY (role_id, permission_id),
-    FOREIGN KEY (role_id) REFERENCES roles(id),
-    FOREIGN KEY (permission_id) REFERENCES permissions(id)
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
 );
 
--- Create the users table
-CREATE TABLE users (
+-- Bảng users
+CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL,
     email VARCHAR(50) NOT NULL,
     password VARCHAR(120) NOT NULL,
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
     active BOOLEAN DEFAULT TRUE,
     role_id BIGINT,
-    FOREIGN KEY (role_id) REFERENCES roles(id)
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    UNIQUE (username),
+    UNIQUE (email)
 );
-
-
 
 -- Insert roles
 INSERT INTO roles (id, name, description) VALUES 
@@ -123,3 +124,10 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 -- Create an admin user
 INSERT INTO users (username, email, password, first_name, last_name, active)
 VALUES ('admin', 'admin@example.com', '$2a$10$GckdgpYUMUm5uIm5CKj8heaRQrQUCvmF9VIJd0NIgV5I9LX8MaYvW', 'System', 'Administrator', true);
+
+-- Assign admin role to the admin user
+UPDATE users
+SET role_id = (
+    SELECT id FROM roles WHERE name = 'ROLE_ADMIN'
+)
+WHERE username = 'admin';

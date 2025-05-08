@@ -1,0 +1,199 @@
+```yaml
+openapi: 3.0.3
+info:
+  title: Condition Service API
+  description: API to manage warranty conditions and validation
+  version: 1.0.0
+servers:
+  - url: "http://localhost:8088"
+    description: Development Server
+
+tags:
+  - name: conditions
+    description: Manage warranty conditions
+  - name: validation
+    description: Validate warranty requests against conditions
+  - name: results
+    description: Manage warranty condition evaluation results
+
+paths:
+  /api/v1/conditions:
+    get:
+      summary: Get all warranty conditions
+      description: Returns a list of all warranty conditions in the system
+      tags: [conditions]
+      responses:
+        "200":
+          description: List of warranty conditions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WarrantyConditionDTO"
+    post:
+      summary: Create a new warranty condition
+      description: Creates a new warranty condition in the system
+      tags: [conditions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WarrantyConditionDTO"
+      responses:
+        "201":
+          description: Warranty condition created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyConditionDTO"
+        "400":
+          description: Invalid data
+
+  /api/v1/conditions/active:
+    get:
+      summary: Get all active warranty conditions
+      description: Returns a list of all active warranty conditions
+      tags: [conditions]
+      responses:
+        "200":
+          description: List of active warranty conditions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WarrantyConditionDTO"
+
+  /api/v1/conditions/{id}:
+    get:
+      summary: Get warranty condition by ID
+      description: Returns detailed information of a warranty condition by ID
+      tags: [conditions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Warranty condition information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyConditionDTO"
+        "404":
+          description: Warranty condition not found
+
+  /api/v1/conditions/validate:
+    post:
+      summary: Validate warranty conditions
+      description: Validates warranty request against the defined conditions
+      tags: [validation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WarrantyValidationDTO"
+      responses:
+        "200":
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: boolean
+
+  /api/v1/conditions/results/{warrantyRequestId}:
+    get:
+      summary: Get condition results by warranty request ID
+      description: Returns condition evaluation results for a specific warranty request
+      tags: [results]
+      parameters:
+        - name: warrantyRequestId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: List of condition evaluation results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WarrantyConditionResultDTO"
+
+components:
+  schemas:
+    WarrantyConditionDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+          default: true
+
+    WarrantyValidationDTO:
+      type: object
+      properties:
+        warrantyRequestId:
+          type: integer
+          format: int32
+        isValid:
+          type: boolean
+        validationReason:
+          type: string
+        validatedBy:
+          type: string
+        conditionResults:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConditionResultDTO"
+
+    ConditionResultDTO:
+      type: object
+      properties:
+        conditionId:
+          type: integer
+          format: int32
+        passed:
+          type: boolean
+        notes:
+          type: string
+
+    WarrantyConditionResultDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        warrantyRequestId:
+          type: integer
+          format: int32
+        conditionId:
+          type: integer
+          format: int32
+        conditionName:
+          type: string
+        passed:
+          type: boolean
+        notes:
+          type: string
+        evaluatedBy:
+          type: string
+        evaluatedAt:
+          type: string
+          format: date-time
+```
