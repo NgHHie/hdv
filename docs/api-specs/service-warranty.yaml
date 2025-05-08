@@ -1,0 +1,366 @@
+```yaml
+openapi: 3.0.3
+info:
+  title: Warranty Service API
+  description: API to manage warranty claims and processes
+  version: 1.0.0
+servers:
+  - url: "http://localhost:8086"
+    description: Development Server
+
+tags:
+  - name: warranty
+    description: Manage warranty requests and claims
+  - name: validation
+    description: Validate warranty requests
+
+paths:
+  /api/v1/warranty/requests:
+    post:
+      summary: Create a new warranty request
+      description: Creates a new warranty request in the system
+      tags: [warranty]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WarrantyRequestCreateDto"
+      responses:
+        "201":
+          description: Warranty request created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyRequestDto"
+        "400":
+          description: Invalid data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/warranty/requests/{id}:
+    get:
+      summary: Get warranty request by ID
+      description: Returns detailed information of a warranty request by its ID
+      tags: [warranty]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Warranty request information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyRequestDto"
+        "404":
+          description: Warranty request not found
+
+  /api/v1/warranty/requests/{id}/validate:
+    post:
+      summary: Validate a warranty request
+      description: Validates a warranty request and determines if it meets warranty conditions
+      tags: [warranty, validation]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WarrantyValidationDto"
+      responses:
+        "200":
+          description: Validation completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyRequestDto"
+        "400":
+          description: Invalid validation data
+        "404":
+          description: Warranty request not found
+
+  /api/v1/warranty/requests/{id}/receive-and-forward:
+    post:
+      summary: Receive product and forward to repair
+      description: Mark the warranty request as product received and forward it to repair service
+      tags: [warranty]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Product received and forwarded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyRequestDto"
+        "400":
+          description: Process failed
+        "404":
+          description: Warranty request not found
+
+  /api/v1/warranty/requests/{id}/repair-status:
+    put:
+      summary: Update repair status
+      description: Update the repair status of a warranty request
+      tags: [warranty]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Repair status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyRequestDto"
+        "400":
+          description: Cannot update repair status
+        "404":
+          description: Warranty request not found
+
+  /api/v1/warranty/check:
+    get:
+      summary: Check warranty status
+      description: Check if a product is still under warranty for a specific customer
+      tags: [warranty]
+      parameters:
+        - name: productId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: customerId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: Warranty status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WarrantyStatusResponse"
+
+  /api/v1/warranty/claim:
+    post:
+      summary: Register a warranty claim
+      description: Register a warranty claim for a product
+      tags: [warranty]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: integer
+                  format: int32
+                customerId:
+                  type: integer
+                  format: int32
+                repairId:
+                  type: integer
+                  format: int32
+      responses:
+        "200":
+          description: Warranty claim registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  registered:
+                    type: boolean
+                  claimId:
+                    type: string
+
+components:
+  schemas:
+    WarrantyRequestCreateDto:
+      type: object
+      properties:
+        customerId:
+          type: integer
+          format: int32
+        productId:
+          type: integer
+          format: int32
+        serialNumber:
+          type: string
+        issueDescription:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        validationNotes:
+          type: string
+
+    WarrantyRequestDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        customerId:
+          type: integer
+          format: int32
+        customerName:
+          type: string
+        productId:
+          type: integer
+          format: int32
+        productName:
+          type: string
+        serialNumber:
+          type: string
+        issueDescription:
+          type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        submissionDate:
+          type: string
+          format: date-time
+        expirationDate:
+          type: string
+          format: date
+        validationNotes:
+          type: string
+        repairId:
+          type: integer
+          format: int32
+
+    WarrantyValidationDto:
+      type: object
+      properties:
+        serialNumber:
+          type: string
+        warrantyRequestId:
+          type: integer
+          format: int32
+        isValid:
+          type: boolean
+        validationReason:
+          type: string
+        validatedBy:
+          type: string
+        conditionResults:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConditionResultDto"
+
+    ConditionResultDto:
+      type: object
+      properties:
+        conditionId:
+          type: integer
+          format: int32
+        passed:
+          type: boolean
+        notes:
+          type: string
+
+    WarrantyStatusResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        expirationDate:
+          type: string
+
+    WarrantyHistoryDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        warrantyRequestId:
+          type: integer
+          format: int32
+        status:
+          type: string
+        notes:
+          type: string
+        performedBy:
+          type: string
+        performedAt:
+          type: string
+          format: date-time
+
+    UpdateStatusRequestDto:
+      type: object
+      properties:
+        status:
+          type: string
+        notes:
+          type: string
+        performedBy:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+```

@@ -8,6 +8,47 @@ CREATE USER IF NOT EXISTS 'security_user'@'%' IDENTIFIED BY 'security_pass';
 GRANT ALL PRIVILEGES ON service_security.* TO 'security_user'@'%';
 FLUSH PRIVILEGES;
 
+-- Bảng permissions
+CREATE TABLE IF NOT EXISTS permissions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    path VARCHAR(255) NOT NULL,
+    method VARCHAR(10) NOT NULL CHECK (method IN ('GET', 'POST', 'PUT', 'DELETE', 'PATCH')),
+    description VARCHAR(255)
+);
+
+-- Bảng roles
+CREATE TABLE IF NOT EXISTS roles (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    description VARCHAR(100),
+    CONSTRAINT chk_role_name CHECK (name IN ('ROLE_ADMIN', 'ROLE_TECHNICIAN', 'ROLE_CUSTOMER'))
+);
+
+-- Bảng role_permissions (nhiều-nhiều giữa roles và permissions)
+CREATE TABLE IF NOT EXISTS role_permissions (
+    role_id BIGINT NOT NULL,
+    permission_id BIGINT NOT NULL,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE
+);
+
+-- Bảng users
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
+    password VARCHAR(120) NOT NULL,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    active BOOLEAN DEFAULT TRUE,
+    role_id BIGINT,
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    UNIQUE (username),
+    UNIQUE (email)
+);
+
 -- Insert roles
 INSERT INTO roles (id, name, description) VALUES 
 (1, 'ROLE_ADMIN', 'Administrator'),
@@ -85,8 +126,8 @@ INSERT INTO users (username, email, password, first_name, last_name, active)
 VALUES ('admin', 'admin@example.com', '$2a$10$GckdgpYUMUm5uIm5CKj8heaRQrQUCvmF9VIJd0NIgV5I9LX8MaYvW', 'System', 'Administrator', true);
 
 -- Assign admin role to the admin user
-INSERT INTO roles (user_id, role_id)
-SELECT u.id, r.id
-FROM users u, roles r
-WHERE u.username = 'admin'
-AND r.name = 'ROLE_ADMIN';
+UPDATE users
+SET role_id = (
+    SELECT id FROM roles WHERE name = 'ROLE_ADMIN'
+)
+WHERE username = 'admin';
