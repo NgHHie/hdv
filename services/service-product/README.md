@@ -14,15 +14,38 @@ Microservice này quản lý thông tin về các sản phẩm điện tử, bao
 ### Quản Lý Sản Phẩm
 
 - **Tạo Sản Phẩm Mới**: `POST /api/v1/products`
+  - Request Body: Đối tượng `ProductRequest` dạng JSON
+  - Response: Trả về đối tượng `ProductResponse` và mã trạng thái 201 (Created)
+
 - **Lấy Tất Cả Sản Phẩm**: `GET /api/v1/products`
+  - Response: Trả về danh sách các đối tượng `ProductResponse`
+
 - **Lấy Sản Phẩm Theo ID**: `GET /api/v1/products/{id}`
+  - Path Variable: `id` (Integer)
+  - Response: Trả về đối tượng `ProductResponse` nếu tìm thấy, hoặc 404 nếu không tìm thấy
+
 - **Cập Nhật Sản Phẩm**: `PUT /api/v1/products/{id}`
+  - Path Variable: `id` (Integer)
+  - Request Body: Đối tượng `ProductRequest` dạng JSON
+  - Response: Trả về đối tượng `ProductResponse` đã cập nhật
+
 - **Xóa Sản Phẩm**: `DELETE /api/v1/products/{id}`
+  - Path Variable: `id` (Integer)
+  - Response: Trả về trạng thái 204 (No Content) nếu thành công
 
 ### Tìm Kiếm và Lọc
 
-- **Tìm Sản Phẩm Theo Tên**: `GET /api/v1/products/search?keyword={keyword}`
+- **Lấy Sản Phẩm Theo Số Serial**: `GET /api/v1/products/serial/{serial}`
+  - Path Variable: `serial` (String)
+  - Response: Trả về đối tượng `ProductResponse` nếu tìm thấy, hoặc 404 nếu không tìm thấy
+
 - **Lấy Sản Phẩm Theo Danh Mục**: `GET /api/v1/products/category/{category}`
+  - Path Variable: `category` (String)
+  - Response: Trả về danh sách các đối tượng `ProductResponse` thuộc danh mục
+
+- **Tìm Sản Phẩm Theo Tên**: `GET /api/v1/products/search?keyword={keyword}`
+  - Query Parameter: `keyword` (String)
+  - Response: Trả về danh sách các đối tượng `ProductResponse` phù hợp với từ khóa
 
 ## Cấu Trúc Dữ Liệu
 
@@ -36,7 +59,8 @@ Microservice này quản lý thông tin về các sản phẩm điện tử, bao
   "price": "BigDecimal",
   "quantity": "Integer",
   "category": "String",
-  "warrantyExpiration": "LocalDate",
+  "warrantyDuration": "Float",
+  "serialNumber": "String",
   "createdAt": "LocalDateTime",
   "updatedAt": "LocalDateTime"
 }
@@ -54,13 +78,13 @@ Dịch vụ này được sử dụng bởi:
 
 Dịch vụ sử dụng MySQL để lưu trữ dữ liệu sản phẩm. Script khởi tạo cơ sở dữ liệu có sẵn trong thư mục `init-scripts`.
 
-## Xây Dựng và Chạy
+## Cài Đặt và Chạy
 
 ```bash
-# Xây dựng dịch vụ
+# Build service
 mvn clean package
 
-# Chạy dịch vụ
+# Chạy service
 java -jar target/service-product-1.0-SNAPSHOT.jar
 
 # Hoặc sử dụng Docker
@@ -70,4 +94,13 @@ docker run -p 8083:8083 service-product
 
 ## Cấu Hình
 
-Các cấu hình có thể được điều chỉnh trong file `application.properties`.
+Các cấu hình có thể được điều chỉnh trong file `application.properties`. Service này sử dụng các biến môi trường cho cấu hình:
+
+- `SERVER_PORT`: Port để chạy service
+- `SPRING_APPLICATION_NAME`: Tên ứng dụng
+- `MYSQL_HOST`: Host của MySQL
+- `MYSQL_PORT`: Port của MySQL
+- `MYSQL_DATABASE`: Tên database
+- `MYSQL_USERNAME`: Username MySQL
+- `MYSQL_PASSWORD`: Password MySQL
+- `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE`: URL của Eureka server
