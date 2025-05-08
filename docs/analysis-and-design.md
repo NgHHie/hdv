@@ -35,7 +35,7 @@ Hệ thống giải quyết vấn đề quản lý các yêu cầu bảo hành s
 | Service Condition    | Micro Service   | Quản lý điều kiện bảo hành và xác thực yêu cầu                 | Spring Boot, MySQL   |
 | Service Notification | Utility Service | Gửi thông báo cho khách hàng và nhân viên                      | Spring Boot, MySQL   |
 | API Gateway          | Infrastructure  | Định tuyến các yêu cầu API và xác thực JWT                     | Spring Cloud Gateway |
-| Service Security     | Infrastructure  | Quản lý xác thực và phân quyền                                 | Spring Boot, JWT     |
+| Service Security     | Utility Service | Quản lý xác thực và phân quyền                                 | Spring Boot, JWT     |
 | Discovery Server     | Infrastructure  | Đăng ký và khám phá dịch vụ                                    | Eureka Server        |
 
 ## 3. 🔄 Giao tiếp giữa các Dịch vụ
